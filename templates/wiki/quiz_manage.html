@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load martortags %}
+{% block title %}Quản lý trắc nghiệm - {{ article.title }} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="page-header mb-4">
+            <div>
+                <a href="{{ article.get_absolute_url }}" class="back-link mb-2">&larr; Quay lại bài viết</a>
+                <h1 class="hero-title-sm mb-0">Quản lý trắc nghiệm: {{ article.title }}</h1>
+            </div>
+            <a href="{% url 'wiki:question-create' article.pk %}" class="btn btn-primary rounded-pill px-4">Thêm câu hỏi</a>
+        </div>
+
+        {% if questions %}
+            <div class="card border-0 shadow-sm app-card stack-shell">
+                <div class="list-group list-group-flush">
+                {% for question in questions %}
+                    <div class="list-group-item p-4 bg-transparent border-bottom">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="pe-4">
+                                <h5 class="mb-2 text-primary">Câu {{ question.order }}</h5>
+                                <div class="markdown-body mb-2">{{ question.content|safe_markdown }}</div>
+                                <ul class="list-unstyled mb-0">
+                                {% for choice in question.choices.all %}
+                                    <li class="{% if choice.is_correct %}text-success fw-bold{% else %}text-secondary{% endif %}">
+                                        {% if choice.is_correct %}&check;{% else %}&bull;{% endif %} {{ choice.content }}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                                {% if question.explanation %}
+                                    <div class="mt-2 small text-muted markdown-body"><strong>Giải thích:</strong> {{ question.explanation|safe_markdown }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="stack-item__actions">
+                                <a href="{% url 'wiki:question-edit' question.pk %}" class="btn btn-sm btn-outline-secondary px-3">Sửa</a>
+                                <a href="{% url 'wiki:question-delete' question.pk %}" class="btn btn-sm btn-outline-danger px-3">Xóa</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state centered">Chưa có câu hỏi trắc nghiệm nào cho bài viết này.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

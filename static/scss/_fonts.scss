@@ -1,0 +1,14 @@
+@font-face {
+  font-family: "Lucida Grande Custom";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/Lucida-Grande.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --font-sans: "Lucida Grande Custom", "Lucida Grande", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-ui: "Lucida Grande Custom", "Lucida Grande", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Lucida Grande Custom", "Lucida Grande", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "SFMono-Regular", "Consolas", monospace;
+}

@@ -1,0 +1,231 @@
+:root {
+  --bg: #f7f7f8;
+  --panel: rgba(255, 255, 255, 0.96);
+  --panel-strong: #ffffff;
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --line: rgba(29, 29, 31, 0.08);
+  --brand: #1166cc;
+  --brand-soft: #eef5fd;
+  --accent: #111827;
+  --success: #1f7a52;
+  --danger: #b42318;
+  --shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.app-shell {
+  background: linear-gradient(180deg, #fafafb 0%, #f4f5f7 100%);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  position: relative;
+}
+
+.page-gradient {
+  background: linear-gradient(180deg, rgba(17, 102, 204, 0.03), transparent 22%);
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
+.brand-mark,
+.hero-title,
+.hero-title-sm,
+.footer-title,
+.comment-author {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.btn,
+.page-link {
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.62rem 1rem;
+  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, color 140ms ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.btn-sm {
+  font-size: 0.84rem;
+  padding: 0.48rem 0.82rem;
+}
+
+.btn-lg {
+  font-size: 1rem;
+  padding: 0.8rem 1.2rem;
+}
+
+.btn-dark {
+  background: var(--ink);
+  border-color: var(--ink);
+
+  &:hover,
+  &:focus-visible {
+    background: #2a2a2d;
+    border-color: #2a2a2d;
+  }
+}
+
+.btn-accent {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+
+  &:hover {
+    background: #2a2a2d;
+    border-color: #2a2a2d;
+    color: #fff;
+  }
+}
+
+.btn-outline-secondary,
+.btn-outline-dark,
+.btn-outline-primary,
+.btn-outline-danger,
+.btn-outline-success {
+  border-width: 1px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.btn-outline-secondary {
+  color: var(--ink);
+}
+
+.btn-outline-primary {
+  color: var(--brand);
+}
+
+.btn-soft {
+  background: var(--brand-soft);
+  border: 1px solid rgba(17, 102, 204, 0.12);
+  color: var(--brand);
+
+  &:hover,
+  &:focus-visible {
+    background: #dfedfc;
+    border-color: rgba(17, 102, 204, 0.18);
+    color: #0f57ae;
+  }
+}
+
+.app-shell.is-focus-mode {
+  .app-navbar,
+  .site-footer,
+  .page-gradient,
+  .back-to-top,
+  #comment-section,
+  #related-articles {
+    display: none !important;
+  }
+
+  main.container {
+    max-width: 860px;
+    padding-top: 2rem !important;
+  }
+}
+
+.app-card {
+  background: var(--panel);
+  border: 1px solid rgba(29, 29, 31, 0.06);
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.soft-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 249, 251, 0.96));
+}
+
+.section-eyebrow {
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-title {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.08;
+  margin: 0;
+  max-width: 14ch;
+}
+
+.hero-title-sm {
+  font-size: clamp(1.45rem, 3vw, 1.95rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hero-copy,
+.footer-subtitle {
+  color: var(--muted);
+  font-size: 1rem;
+  max-width: 46rem;
+}
+
+.glass-alert {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(10, 102, 217, 0.08);
+  border-radius: 1rem;
+}
+
+.pill-badge {
+  background: var(--brand-soft);
+  border: 1px solid rgba(10, 102, 217, 0.08);
+  border-radius: 999px;
+  color: var(--brand);
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.42rem 0.8rem;
+}
+
+.article-link {
+  color: var(--ink);
+
+  &:hover {
+    color: var(--brand);
+  }
+}
+
+.nav-pill.is-active {
+  background: rgba(17, 102, 204, 0.08);
+  color: var(--ink) !important;
+}
+
+.back-to-top {
+  align-items: center;
+  background: rgba(17, 24, 39, 0.88);
+  border: 0;
+  border-radius: 999px;
+  bottom: 1.5rem;
+  color: #fff;
+  display: inline-flex;
+  gap: 0.45rem;
+  opacity: 0;
+  padding: 0.7rem 1rem;
+  pointer-events: none;
+  position: fixed;
+  right: 1.5rem;
+  transform: translateY(10px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 20;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}

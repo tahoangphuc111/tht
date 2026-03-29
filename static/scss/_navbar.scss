@@ -1,0 +1,45 @@
+.container,
+.navbar,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.app-navbar {
+  background: rgba(250, 250, 252, 0.78);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(29, 29, 31, 0.06);
+
+  .nav-pill {
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.55rem 1rem !important;
+
+    &:hover,
+    &:focus {
+      background: rgba(0, 113, 227, 0.06);
+      color: var(--ink);
+    }
+  }
+}
+
+.brand-mark {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.user-chip {
+  background: rgba(0, 113, 227, 0.08);
+  border: 1px solid rgba(0, 113, 227, 0.08);
+  border-radius: 999px;
+  color: var(--brand);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  padding: 0.42rem 0.9rem;
+}

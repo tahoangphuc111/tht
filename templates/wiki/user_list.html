@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Danh sách người dùng | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+    <div class="page-header">
+        <div class="page-header__content">
+            <div class="section-eyebrow mb-2">Community</div>
+            <h1 class="hero-title-sm mb-1">Danh sách người dùng</h1>
+            <p class="text-secondary mb-0">Xem nhanh mức độ đóng góp của từng thành viên trong wiki.</p>
+        </div>
+        <a class="btn btn-outline-primary px-4" href="{% url 'wiki:article-list' %}">Về bài viết</a>
+    </div>
+    <section class="app-card card border-0 shadow-sm page-card">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-lg-9">
+                <label class="form-label" for="id_q">Tìm người dùng</label>
+                <input class="form-control" id="id_q" type="text" name="q" value="{{ query }}" placeholder="username, tên hiển thị hoặc tên thật">
+            </div>
+            <div class="col-lg-3">
+                <div class="action-row">
+                    <button class="btn btn-dark px-4" type="submit">Tìm kiếm</button>
+                    {% if query %}
+                        <a class="btn btn-outline-secondary px-4" href="{% url 'wiki:user-list' %}">Xóa</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </section>
+    <section class="app-card card border-0 shadow-sm table-shell">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Người dùng</th>
+                        <th>Bài viết</th>
+                        <th>Bình luận</th>
+                        <th>Điểm vote</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold"><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' user.pk %}">{{ user.profile.display_name|default:user.username }}</a></div>
+                                <div class="small text-secondary">@{{ user.username }}{% if user.profile.is_profile_private %} • Riêng tư{% endif %}</div>
+                            </td>
+                            <td>{{ user.article_count }}</td>
+                            <td>{{ user.comment_count }}</td>
+                            <td><span id="user-{{ user.pk }}-score">{{ user.vote_score }}</span></td>
+                            <td>
+                                {% if request.user.is_authenticated and request.user != user %}
+                                    <form method="post" action="{% url 'wiki:user-vote' user.pk %}" class="d-inline-block me-1 ajax-vote-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <input type="hidden" name="vote" value="1" />
+                                        <button class="btn btn-sm btn-outline-success px-3">Ủng hộ</button>
+                                    </form>
+                                    <form method="post" action="{% url 'wiki:user-vote' user.pk %}" class="d-inline-block ajax-vote-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        <input type="hidden" name="vote" value="-1" />
+                                        <button class="btn btn-sm btn-outline-danger px-3">Giảm điểm</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-secondary small">Không khả dụng</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="py-4"><div class="empty-state centered">Chưa có người dùng nào.</div></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Xóa danh mục | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row confirm-shell">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-lg app-card confirm-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="section-eyebrow mb-2">Danger Zone</div>
+                <h1 class="hero-title-sm mb-3">Xóa danh mục</h1>
+                <p class="form-intro mb-2">Bạn có chắc muốn xóa danh mục <strong>{{ object.name }}</strong> không?</p>
+                <p class="text-secondary">Danh mục đang được dùng sẽ được bảo vệ bởi ràng buộc dữ liệu của hệ thống.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-row">
+                        <button class="btn btn-danger rounded-pill px-4" type="submit">Xóa</button>
+                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{% url 'wiki:category-list' %}">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Sửa bài viết{% else %}Tạo bài viết{% endif %} | CP Wiki{% endblock %}
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block content %}
+<div class="row g-4 align-items-start">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg app-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="section-eyebrow mb-2">Markdown Editor</div>
+                <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Chỉnh sửa bài viết{% else %}Tạo bài viết mới{% endif %}</h1>
+                <p class="text-secondary mb-4">Martor đã được tích hợp để bạn soạn nội dung bằng Markdown với live preview, code block và hỗ trợ công thức KaTeX như <code>$n$</code> hoặc <code>$$\sum_{i=1}^{n} i$$</code>.</p>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-4">
+                            {% if field.name == 'allow_comments' %}
+                                <div class="form-check article-form-check">
+                                    {{ field }}
+                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                </div>
+                            {% else %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" for="id_attachments">Tệp đính kèm</label>
+                        <input type="file" name="attachments" id="id_attachments" class="form-control" multiple>
+                        <div class="form-text">Tải lên tối đa 5 file pdf/docx/png/jpg, mỗi file tối đa 15MB.</div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="alert alert-info small">
+                            Nếu bạn tải file PDF/DOCX/PNG lên ở phần “Tệp đính kèm”, đường dẫn thường sẽ có dạng `{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}...`.
+                            Dán vào nội dung Markdown theo dạng: `![Tên hình]({{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}path/to/file.png)` hoặc `[Tên file](URL)`.
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-dark rounded-pill px-4" type="submit">Lưu bài viết</button>
+                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{% url 'wiki:article-list' %}">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm app-card soft-panel">
+            <div class="card-body p-4">
+                <div class="section-eyebrow mb-2">Mẹo Soạn Thảo</div>
+                <h2 class="h4 mb-3">Viết ghi chú rõ ràng</h2>
+                <ul class="helper-list mb-0">
+                    <li>Dùng `#`, `##` để chia tiêu đề lớn và nhỏ.</li>
+                    <li>Chèn code bằng block ba dấu backtick để Martor highlight tốt hơn.</li>
+                    <li>Viết công thức inline bằng <code>$n$</code> và block math bằng <code>$$...$$</code>.</li>
+                    <li>Ghi rõ ý tưởng, độ phức tạp, và khi nào nên áp dụng.</li>
+                    <li>Thêm ví dụ input/output hoặc edge cases để bài viết dễ tra cứu hơn.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}{% if form.instance.pk %}Sửa câu hỏi{% else %}Thêm câu hỏi{% endif %} | CP Wiki{% endblock %}
+{% block extra_head %}{{ form.media }}{% endblock %}
+
+{% block content %}
+<div class="row form-shell">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm app-card form-card">
+            <div class="card-body p-4 p-lg-5">
+                <a href="{% url 'wiki:article-quiz-manage' article.pk %}" class="back-link mb-3">&larr; Quay lại danh sách câu hỏi</a>
+                <div class="section-eyebrow mb-2">Quiz Editor</div>
+                <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Sửa câu hỏi{% else %}Thêm câu hỏi mới{% endif %}</h1>
+                <p class="form-intro">Tạo câu hỏi ngắn gọn, đáp án rõ ràng và thêm giải thích để người học tự kiểm tra kiến thức sau khi đọc bài.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Thông tin câu hỏi</h5>
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <hr class="my-4">
+                    <h5 class="mb-3">Các lựa chọn (Choices)</h5>
+                    {{ choice_formset.management_form }}
+                    
+                    <div id="choice-formset-container">
+                    {% for form in choice_formset %}
+                        <div class="choice-form card bg-light border-0 mb-3 p-3 app-card">
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-7">
+                                    <label class="form-label small">Nội dung</label>
+                                    {{ form.content }}
+                                </div>
+                                <div class="col-md-3 mt-md-4 text-center">
+                                    <div class="form-check d-inline-block">
+                                        {{ form.is_correct }}
+                                        <label class="form-check-label small" for="{{ form.is_correct.auto_id }}">Đáp án đúng</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mt-md-4 text-end">
+                                    {% if choice_formset.can_delete %}
+                                        <div class="form-check d-inline-block text-danger">
+                                            {{ form.DELETE }}
+                                            <label class="form-check-label small" for="{{ form.DELETE.auto_id }}">Xóa</label>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% for error in form.non_field_errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="form-text mb-4">Đánh dấu (check) vào ô "Xóa" nếu muốn bỏ đi một lựa chọn thừa. Nhớ đánh dấu một lựa chọn là đáp án đúng!</div>
+
+                    <div class="action-row">
+                        <button type="submit" class="btn btn-primary px-4 rounded-pill">Lưu câu hỏi</button>
+                        <a href="{% url 'wiki:article-quiz-manage' article.pk %}" class="btn btn-outline-secondary px-4 rounded-pill">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Trang chủ | CP Wiki{% endblock %}
+
+{% block content %}
+<section class="hero-panel mb-4">
+    <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+            <div class="section-eyebrow mb-2">Home Dashboard</div>
+            <h1 class="hero-title mb-3">Không gian trung tâm cho ghi chú contest, bài viết và thảo luận của nhóm.</h1>
+            <p class="hero-copy mb-4">Trang chủ giờ là dashboard thật sự: vào là thấy ngay bài nổi bật, danh mục nhiều nội dung, thảo luận mới và toàn cảnh hoạt động của wiki.</p>
+            <div class="d-flex gap-3 flex-wrap">
+                <a class="btn btn-light btn-lg rounded-pill px-4" href="{% url 'wiki:article-list' %}">Khám phá bài viết</a>
+                {% if can_publish %}
+                    <a class="btn btn-accent btn-lg rounded-pill px-4" href="{% url 'wiki:article-create' %}">Viết bài mới</a>
+                {% elif not user.is_authenticated %}
+                    <a class="btn btn-accent btn-lg rounded-pill px-4" href="{% url 'wiki:signup' %}">Tạo tài khoản</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_articles }}</div>
+                    <div class="stat-label">Bài viết đang lưu trữ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_comments }}</div>
+                    <div class="stat-label">Bình luận đã duyệt</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm app-card h-100">
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                    <div>
+                        <div class="section-eyebrow mb-1">Featured</div>
+                        <h2 class="hero-title-sm mb-0">Bài viết nổi bật</h2>
+                    </div>
+                    <span class="pill-badge">{{ open_comment_articles }} bài đang mở bình luận</span>
+                </div>
+                {% if featured_article %}
+                    <article class="featured-article">
+                        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                            <span class="pill-badge">{{ featured_article.category.name }}</span>
+                            <span class="text-secondary small">Cập nhật {{ featured_article.updated_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <h3 class="h2 mb-2"><a class="text-decoration-none article-link" href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a></h3>
+                        <p class="text-secondary mb-3">Tác giả: <a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' featured_article.author.pk %}">{{ featured_article.author.username }}</a> • {{ featured_article.comment_count }} bình luận • {{ featured_article.reading_time_minutes }} phút đọc</p>
+                        <p class="mb-4">{{ featured_article.content|striptags|truncatechars:260 }}</p>
+                        <a class="btn btn-dark rounded-pill px-4" href="{{ featured_article.get_absolute_url }}">Đọc bài</a>
+                    </article>
+                {% else %}
+                    <div class="empty-state">Chưa có bài viết nào để hiển thị nổi bật.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm app-card h-100">
+            <div class="card-body p-4">
+                <div class="section-eyebrow mb-1">Top Categories</div>
+                <h2 class="h4 mb-3">Danh mục nổi bật</h2>
+                <div class="sidebar-stack">
+                    {% for category in top_categories %}
+                        <a class="sidebar-link-item" href="{{ category.get_absolute_url }}">
+                            <span>{{ category.name }}</span>
+                            <span class="pill-badge">{{ category.article_total }}</span>
+                        </a>
+                    {% empty %}
+                        <div class="empty-state">Chưa có danh mục nào.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm app-card">
+            <div class="card-body p-4">
+                <div class="section-eyebrow mb-1">Latest Articles</div>
+                <h2 class="h4 mb-3">Bài mới đăng</h2>
+                <div class="sidebar-stack">
+                    {% for article in latest_articles %}
+                        <a class="sidebar-link-item" href="{{ article.get_absolute_url }}">
+                            <div>
+                                <div class="fw-semibold">{{ article.title }}</div>
+                                <div class="text-secondary small">{{ article.category.name }} • <a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' article.author.pk %}">{{ article.author.username }}</a> • {{ article.reading_time_minutes }} phút đọc</div>
+                            </div>
+                            <span class="text-secondary small">{{ article.created_at|date:"d/m" }}</span>
+                        </a>
+                    {% empty %}
+                        <div class="empty-state">Chưa có bài viết mới.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm app-card">
+            <div class="card-body p-4">
+                <div class="section-eyebrow mb-1">Recent Discussion</div>
+                <h2 class="h4 mb-3">Bình luận mới</h2>
+                <div class="sidebar-stack">
+                    {% for comment in recent_comments %}
+                        <a class="sidebar-link-item" href="{{ comment.article.get_absolute_url }}">
+                            <div>
+                                <div class="fw-semibold">{{ comment.author.username }}</div>
+                                <div class="text-secondary small">{{ comment.content|truncatechars:90 }}</div>
+                            </div>
+                            <i class="bi bi-arrow-up-right"></i>
+                        </a>
+                    {% empty %}
+                        <div class="empty-state">Chưa có bình luận mới.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

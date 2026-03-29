@@ -1,0 +1,54 @@
+@media (max-width: 991px) {
+  .hero-panel {
+    padding: 1.5rem;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-title {
+    max-width: none;
+  }
+
+  .stat-grid,
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .contribution-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .article-meta-row,
+  .filter-toolbar,
+  .stack-item,
+  .attachment-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .stack-item__actions,
+  .article-toolbar,
+  .article-toolbar__group {
+    width: 100%;
+  }
+
+  .stack-item__actions .btn,
+  .article-toolbar .btn,
+  .filter-toolbar .btn {
+    width: 100%;
+  }
+
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+  }
+}

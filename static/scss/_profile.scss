@@ -1,0 +1,64 @@
+.profile-hero {
+  padding: 2rem;
+}
+
+.profile-avatar {
+  align-items: center;
+  background: linear-gradient(180deg, #0a66d9, #58a3ff);
+  border-radius: 1.2rem;
+  color: #fff;
+  display: inline-flex;
+  font-size: 2rem;
+  font-weight: 700;
+  height: 4.5rem;
+  justify-content: center;
+  width: 4.5rem;
+}
+
+.profile-stats {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.profile-stat {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(29, 29, 31, 0.06);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.1rem;
+  padding: 1rem;
+}
+
+.profile-stat__value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.profile-stat__label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.chart-shell {
+  height: 300px;
+}
+
+.contribution-grid {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.contribution-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.42rem;
+  min-height: 16px;
+}
+
+.contribution-level-0 { background: #ececf1; }
+.contribution-level-1 { background: #d6e9ff; }
+.contribution-level-2 { background: #9ccbff; }
+.contribution-level-3 { background: #5da6ff; }
+.contribution-level-4 { background: #0a66d9; }

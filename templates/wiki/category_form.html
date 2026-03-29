@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Sửa danh mục{% else %}Tạo danh mục{% endif %} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row form-shell">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg app-card form-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="section-eyebrow mb-2">Admin Tools</div>
+                <h1 class="hero-title-sm mb-4">{% if form.instance.pk %}Chỉnh sửa danh mục{% else %}Tạo danh mục mới{% endif %}</h1>
+                <p class="form-intro">Giữ slug gọn, dễ nhớ và mô tả ngắn để người đọc lọc nội dung nhanh hơn.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="action-row">
+                        <button class="btn btn-dark rounded-pill px-4" type="submit">Lưu danh mục</button>
+                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{% url 'wiki:category-list' %}">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

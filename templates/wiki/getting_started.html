@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Hướng dẫn sử dụng | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-lg app-card">
+    <div class="card-body p-4 p-lg-5">
+        <div class="section-eyebrow mb-2">First Run Guide</div>
+        <h1 class="hero-title-sm mb-4">Hướng dẫn sử dụng lần đầu</h1>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="guide-step">
+                    <h2 class="h5">1. Tạo và đăng nhập tài khoản</h2>
+                    <p>Chọn <strong>Đăng ký</strong> để tạo tài khoản. Sau khi đăng nhập, bạn có thể chỉnh sửa hồ sơ và đổi mật khẩu trong mục <strong>Tài khoản</strong>.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="guide-step">
+                    <h2 class="h5">2. Tạo bài viết wiki</h2>
+                    <p>Vào trang <strong>Bài viết</strong>, nhấn <strong>Tạo bài viết</strong>, điền tiêu đề, chọn danh mục và viết nội dung. Hệ thống tự lưu tác giả và ngày tạo.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="guide-step">
+                    <h2 class="h5">3. Tìm kiếm kiến thức</h2>
+                    <p>Dùng ô tìm kiếm để tìm theo tiêu đề hoặc nội dung. Bạn cũng có thể lọc theo danh mục như thuật toán, cấu trúc dữ liệu hoặc bài toán thi đấu.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="guide-step">
+                    <h2 class="h5">4. Quyền truy cập</h2>
+                    <p>Nhóm <strong>admin</strong>, <strong>editor</strong> và <strong>contributor</strong> có thể đăng bài. Người dùng thường tập trung bình luận, đặt câu hỏi và phản hồi dưới mỗi bài viết.</p>
+                </div>
+            </div>
+        </div>
+        {% if user.is_authenticated and not user.profile.guide_seen %}
+            <form method="post" action="{% url 'wiki:dismiss-guide' %}" class="mt-4">
+                {% csrf_token %}
+                <button class="btn btn-dark rounded-pill px-4" type="submit">Đánh dấu đã đọc</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

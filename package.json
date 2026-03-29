@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build:css": "sass static/scss/site.scss static/css/site.css --no-source-map --style=expanded",
+    "watch:css": "sass --watch static/scss/site.scss:static/css/site.css --style=expanded"
+  },
+  "devDependencies": {
+    "sass": "^1.98.0"
+  }
+}

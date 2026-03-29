@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Xóa câu hỏi | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row confirm-shell">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-sm mt-5 app-card confirm-card">
+            <div class="card-body p-4 p-md-5 text-center">
+                <div class="mb-4 text-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                      <path d="M7.002 11a1 1 0 1 0 2 0 1 1 0 0 0-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                    </svg>
+                </div>
+                <div class="section-eyebrow mb-2">Danger Zone</div>
+                <h1 class="hero-title-sm mb-3">Xóa câu hỏi?</h1>
+                <p class="text-secondary mb-4">Bạn có chắc chắn muốn xóa câu hỏi <strong>"{{ object.content|truncatewords:10 }}"</strong>? Hành động này không thể hoàn tác.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-row justify-content-center">
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Xác nhận Xóa</button>
+                        <a href="{% url 'wiki:article-quiz-manage' object.article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
