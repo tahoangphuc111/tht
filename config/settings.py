@@ -143,15 +143,20 @@ MEDIA_URL = '/media/'
 LOCAL_MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_ROOT = LOCAL_MEDIA_ROOT
 
+# Authentication
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'wiki:article-list'
-
-LOCAL_DEBUG = DEBUG
-
 LOGOUT_REDIRECT_URL = 'wiki:login'
 
+# OAuth Placeholders (Set these in local_settings.py)
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = None
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = None
+SOCIAL_AUTH_GITHUB_KEY = None
+SOCIAL_AUTH_GITHUB_SECRET = None
 
+# Martor Configuration
 MARTOR_THEME = 'bootstrap'
+
 MARTOR_ENABLE_CONFIGS = {
     'emoji': 'true',
     'imgur': 'true',

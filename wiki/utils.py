@@ -20,7 +20,7 @@ def can_publish_articles(user):
 def get_profile_name(user):
     return user.profile.display_name or user.get_full_name() or user.username
 
-def build_profile_stats(user):
+def build_profile_stats(user, viewer=None):
     articles = list(user.articles.select_related('category').order_by('-updated_at'))
     now = timezone.localdate()
     start_date = now - timedelta(days=83)
@@ -39,9 +39,22 @@ def build_profile_stats(user):
         contribution_days.append({'date': curr, 'count': count, 'level': min(count, 4)})
         curr += timedelta(days=1)
 
+    # Permission check for private profile
+    is_owner = viewer == user
+    is_admin = viewer and viewer.is_superuser
+    can_view = not user.profile.is_profile_private or is_owner or is_admin
+
     return {
-        'articles': articles,
+        'profile_user': user,
+        'profile_name': get_profile_name(user),
+        'can_view_profile': can_view,
+        'recent_articles': articles,
         'article_count': len(articles),
         'contribution_days': contribution_days,
         'total_contributions': sum(d['count'] for d in contribution_days),
+        'user_vote_score': user.profile.vote_score,
+        'role_names': [g.name for g in user.groups.all()] or ['user'],
+        'edited_articles_count': ArticleRevision.objects.filter(author=user).values('article').distinct().count(),
+        'comment_count': user.comments.count(),
+        'total_users': User.objects.count(),
     }

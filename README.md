@@ -1,35 +1,46 @@
-# CP Wiki 🚀
+# CP Wiki
 
-Lowkey là một cái wiki cho anh em chuyên thuật toán (Competitive Programming), highkey là project để lưu trick, snippet và thảo luận mấy bài contest khó nhằn. No cap, project này build để chạy mượt, dễ dùng và trông cũng khá là vibe.
+CP Wiki is a knowledge base platform designed for competitive programming notes and community discussions. It provides structured storage for algorithm patterns, data structures, and contest strategies.
 
-## Có gì ở đây?
-- **Algorithm Notebook**: Lưu mấy pattern Segment Tree, DFS/BFS, DP... gõ một lần xài mãi mãi.
-- **Vibe UI**: Giao diện Apple-ish, sạch sẽ, không rườm rà. Quan trọng nhất là đã fix lag, chạy bao mượt.
-- **Discussion**: Có chỗ để anh em vào cmt, hỏi trick, vote bài viết. 
-- **Quiz**: Chỗ để test trình độ thuật toán của bản thân.
+## Requirements
 
-## Setup nhanh cho đỡ tốn thời gian
-1. Create venv rồi cài lẹ requirements:
+- Python 3.10+
+- Django 5.0+
+- Node.js (for SCSS builds)
+
+## Installation
+
+1. Create and activate a virtual environment:
    ```bash
    python -m venv venv
-   source venv/bin/activate # hoặc venv\Scripts\activate trên windows
+   source venv/bin/activate
+   ```
+
+2. Install dependencies:
+   ```bash
    pip install -r requirements.txt
    ```
-2. Config tí cho nó chạy:
-   - Tạo file `config/local_settings.py` (copy cái đống trong `local_settings.py` mẫu ra).
-   - Không cần dùng `.env` nữa cho mệt người.
-3. Migrate db:
+
+3. Configure the environment:
+   Create `config/local_settings.py` based on the provided template to override default settings.
+
+4. Run migrations:
    ```bash
    python manage.py migrate
    ```
-4. Ship it:
+
+5. Start the development server:
    ```bash
    python manage.py runserver
    ```
 
-## Một vài note nhỏ cho dev
-- Giao diện xài SCSS, muốn sửa thì vọc trong `static/scss`.
-- Build CSS: `npm run build:css`.
-- Config nhạy cảm thì cứ quăng vào `local_settings.py` nhé, đừng quăng lên git.
+## Development
 
-Peace out! ✌️
+SCSS files are located in `static/scss`. To rebuild the CSS, use:
+```bash
+npm run build:css
+```
+
+## Contribution
+
+All pull requests must pass the CI build tests before merging. Use the provided template for submission.

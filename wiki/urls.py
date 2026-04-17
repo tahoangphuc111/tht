@@ -1,65 +1,52 @@
+from django.urls import path
 from django.contrib.auth import views as auth_views
-from django.urls import path, reverse_lazy
-
-from . import views
-from .forms import LoginForm
+from .views import base, articles, users, voting, files, categories, quiz
 
 app_name = 'wiki'
 
 urlpatterns = [
-    path('', views.HomeRedirectView.as_view(), name='home'),
-    path('articles/', views.ArticleListView.as_view(), name='article-list'),
-    path('articles/create/', views.ArticleCreateView.as_view(), name='article-create'),
-    path('articles/<int:pk>/edit/', views.ArticleUpdateView.as_view(), name='article-edit'),
-    path('articles/<int:pk>/delete/', views.ArticleDeleteView.as_view(), name='article-delete'),
-    path('articles/<int:pk>/history/', views.ArticleHistoryView.as_view(), name='article-history'),
-    path('revisions/<int:pk>/', views.ArticleRevisionDetailView.as_view(), name='revision-detail'),
-    path('articles/<int:article_pk>/quiz/', views.ArticleQuizManageView.as_view(), name='article-quiz-manage'),
-    path('articles/<int:article_pk>/quiz/add/', views.QuestionCreateView.as_view(), name='question-create'),
-    path('questions/<int:pk>/edit/', views.QuestionUpdateView.as_view(), name='question-edit'),
-    path('questions/<int:pk>/delete/', views.QuestionDeleteView.as_view(), name='question-delete'),
-    path('articles/<int:article_pk>/quiz/submit/', views.SubmitQuizView.as_view(), name='submit-quiz'),
-    path('articles/<int:article_pk>/quiz/upload/', views.upload_quiz_file, name='upload-quiz-file'),
-    path('articles/<int:pk>/export/pdf/', views.export_article_pdf, name='export-article-pdf'),
-    path('articles/<int:pk>/vote/', views.vote_article, name='article-vote'),
-    path('articles/<int:pk>/<slug:slug>/', views.ArticleDetailView.as_view(), name='article-detail'),
-    path('comments/<int:pk>/vote/', views.vote_comment, name='comment-vote'),
-    path('categories/', views.CategoryListView.as_view(), name='category-list'),
-    path('categories/create/', views.CategoryCreateView.as_view(), name='category-create'),
-    path('categories/<int:pk>/edit/', views.CategoryUpdateView.as_view(), name='category-edit'),
-    path('categories/<int:pk>/delete/', views.CategoryDeleteView.as_view(), name='category-delete'),
-    path('signup/', views.signup_view, name='signup'),
-    path(
-        'login/',
-        auth_views.LoginView.as_view(
-            template_name='registration/login.html',
-            authentication_form=LoginForm,
-            redirect_authenticated_user=True,
-        ),
-        name='login',
-    ),
+    # Base
+    path('', base.home_view, name='home'),
+    path('getting-started/', base.getting_started_view, name='getting-started'),
+    path('dismiss-guide/', base.dismiss_guide_view, name='dismiss-guide'),
+    path('signup/', base.signup_view, name='signup'),
+
+    # Articles (Specific routes first)
+    path('articles/', articles.ArticleListView.as_view(), name='article-list'),
+    path('article/create/', articles.ArticleCreateView.as_view(), name='article-create'),
+    path('article/<int:pk>/edit/', articles.ArticleUpdateView.as_view(), name='article-edit'),
+    path('article/<int:pk>/delete/', articles.ArticleDeleteView.as_view(), name='article-delete'),
+    path('article/<int:pk>/history/', articles.ArticleHistoryView.as_view(), name='article-history'),
+    path('revision/<int:pk>/', articles.ArticleRevisionDetailView.as_view(), name='revision-detail'),
+    path('revision/<int:pk>/detail/', articles.ArticleRevisionDetailView.as_view(), name='article-revision-detail'),
+    path('article/<int:pk>/export-pdf/', articles.export_article_pdf, name='export-article-pdf'),
+    path('article/<int:pk>/<slug:slug>/', articles.ArticleDetailView.as_view(), name='article-detail'),
+    
+    # Categories
+    path('categories/', categories.CategoryListView.as_view(), name='category-list'),
+    path('category/create/', categories.CategoryCreateView.as_view(), name='category-create'),
+    path('category/<int:pk>/edit/', categories.CategoryUpdateView.as_view(), name='category-edit'),
+    path('category/<int:pk>/delete/', categories.CategoryDeleteView.as_view(), name='category-delete'),
+
+    # Quiz
+    path('article/<int:article_pk>/quiz/manage/', quiz.article_quiz_manage_view, name='article-quiz-manage'),
+    path('article/<int:article_pk>/quiz/submit/', quiz.submit_quiz_view, name='submit-quiz'),
+
+    # Files
+    path('upload-files/', files.upload_file_view, name='upload-files'),
+
+    # Voting
+    path('article/<int:pk>/vote/', voting.vote_article, name='article-vote'),
+    path('comment/<int:pk>/vote/', voting.vote_comment, name='comment-vote'),
+    path('user/<str:username>/vote/', voting.vote_user, name='user-vote'),
+
+    # Users
+    path('users/', users.UserListView.as_view(), name='user-list'),
+    path('profile/', users.profile_view, name='profile'),
+    path('profile/edit/', users.profile_edit_view, name='profile-edit'),
+    path('u/<str:username>/', users.public_profile_view, name='public-profile'),
+    
+    # Auth
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html', redirect_authenticated_user=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path(
-        'password-change/',
-        auth_views.PasswordChangeView.as_view(
-            template_name='registration/password_change_form.html',
-            success_url=reverse_lazy('wiki:password-change-done'),
-        ),
-        name='password-change',
-    ),
-    path(
-        'password-change/done/',
-        auth_views.PasswordChangeDoneView.as_view(
-            template_name='registration/password_change_done.html'
-        ),
-        name='password-change-done',
-    ),
-    path('users/', views.UserListView.as_view(), name='user-list'),
-    path('users/<str:username>/vote/', views.vote_user, name='user-vote'),
-    path('users/<str:username>/', views.public_profile_view, name='public-profile'),
-    path('files/upload/', views.upload_file_view, name='upload-files'),
-    path('profile/', views.profile_view, name='profile'),
-    path('profile/edit/', views.profile_edit_view, name='profile-edit'),
-    path('getting-started/', views.getting_started_view, name='getting-started'),
-    path('dismiss-guide/', views.dismiss_guide_view, name='dismiss-guide'),
 ]
