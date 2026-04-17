@@ -18,11 +18,26 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 import json
-
+import docx
+from PyPDF2 import PdfReader
+from io import BytesIO
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from django.http import HttpResponse, JsonResponse
 from .forms import ArticleForm, CategoryForm, CommentForm, ProfileForm, SignUpForm, UserUpdateForm, UploadFileForm, QuestionForm, ChoiceFormSet
-from .models import Article, Category, Comment, UploadedFile, ArticleVote, CommentVote, UserVote, Question, Choice, UserAnswer
+from .models import Article, Category, Comment, UploadedFile, ArticleVote, CommentVote, UserVote, Question, Choice, UserAnswer, ArticleRevision
 
 PUBLISHER_ROLES = ['admin', 'editor', 'contributor']
+
+
+def save_article_revision(article, user, change_summary):
+    ArticleRevision.objects.create(
+        article=article,
+        title=article.title,
+        content=article.content,
+        author=user,
+        change_summary=change_summary
+    )
 
 
 def can_publish_articles(user):
@@ -149,7 +164,7 @@ def build_profile_context(target_user, viewer):
         'is_own_profile': is_own_profile,
         'can_view_profile': can_view_full_profile,
         'public_email': public_email,
-        'profile_link': reverse('wiki:public-profile', kwargs={'pk': target_user.pk}),
+        'profile_link': reverse('wiki:public-profile', kwargs={'username': target_user.username}),
         'joined_date': timezone.localtime(target_user.date_joined),
         'recent_uploads': list(target_user.uploaded_files.order_by('-created_at')[:5]),
         'upload_count': target_user.uploaded_files.count(),
@@ -368,6 +383,7 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         response = super().form_valid(form)
+        save_article_revision(self.object, self.request.user, form.cleaned_data.get('change_summary', 'Initial revision'))
         files = self.request.FILES.getlist('attachments')
         for f in files[:5]:
             UploadedFile.objects.create(user=self.request.user, article=self.object, file=f)
@@ -383,11 +399,29 @@ class ArticleUpdateView(LoginRequiredMixin, ArticlePermissionMixin, UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        save_article_revision(self.object, self.request.user, form.cleaned_data.get('change_summary', ''))
         files = self.request.FILES.getlist('attachments')
         for f in files[:5]:
             UploadedFile.objects.create(user=self.request.user, article=self.object, file=f)
         messages.success(self.request, 'Đã cập nhật bài viết.')
         return response
+
+
+class ArticleHistoryView(DetailView):
+    model = Article
+    template_name = 'wiki/article_history.html'
+    context_object_name = 'article'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['revisions'] = self.object.revisions.select_related('author').all()
+        return context
+
+
+class ArticleRevisionDetailView(DetailView):
+    model = ArticleRevision
+    template_name = 'wiki/article_revision_detail.html'
+    context_object_name = 'revision'
 
 
 class ArticleDeleteView(LoginRequiredMixin, ArticlePermissionMixin, DeleteView):
@@ -486,8 +520,8 @@ def profile_view(request):
     return render(request, 'wiki/profile.html', build_profile_context(request.user, request.user))
 
 
-def public_profile_view(request, pk):
-    target_user = get_object_or_404(User.objects.select_related('profile'), pk=pk)
+def public_profile_view(request, username):
+    target_user = get_object_or_404(User.objects.select_related('profile'), username=username)
     context = build_profile_context(target_user, request.user)
     if not context['can_view_profile']:
         messages.info(request, 'Người dùng này đã đặt hồ sơ ở chế độ riêng tư.')
@@ -544,122 +578,51 @@ class UserListView(ListView):
 
 
 
-@login_required
+def _handle_vote(request, model, target_field, target_obj, vote_attr):
+    if not request.user.is_authenticated:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'message': 'Bạn cần đăng nhập.'}, status=401)
+        return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
+    try:
+        val = int(request.POST.get('vote', 0))
+        if val not in (1, -1): raise ValueError
+    except ValueError:
+        return redirect(target_obj.get_absolute_url()) if hasattr(target_obj, 'get_absolute_url') else redirect('wiki:home')
+
+    model.objects.update_or_create(
+        **{'user' if target_field != 'target' else 'voter': request.user, target_field: target_obj},
+        defaults={'value': val}
+    )
+    
+    # Refresh object to get updated properties
+    target_obj.refresh_from_db()
+    payload = {
+        f'{vote_attr}_score': target_obj.vote_score,
+        f'{vote_attr}_upvotes': target_obj.upvotes,
+        f'{vote_attr}_downvotes': target_obj.downvotes,
+        f'{vote_attr}_pk': target_obj.pk
+    }
+    
+    try: broadcast_vote_update(payload)
+    except: pass
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': 'Cập nhật thành công.', **payload})
+    return redirect(target_obj.get_absolute_url())
+
 def vote_article(request, pk):
-    if request.method != 'POST':
-        return redirect('wiki:article-detail', pk=pk, slug=Article.objects.get(pk=pk).slug)
-    article = get_object_or_404(Article, pk=pk)
-    try:
-        vote_value = int(request.POST.get('vote', 0))
-    except ValueError:
-        vote_value = 0
-    if vote_value not in (1, -1):
-        messages.error(request, 'Giá trị vote không hợp lệ.')
-        return redirect(article.get_absolute_url())
+    return _handle_vote(request, ArticleVote, 'article', get_object_or_404(Article, pk=pk), 'article')
 
-    ArticleVote.objects.update_or_create(
-        user=request.user,
-        article=article,
-        defaults={'value': vote_value},
-    )
-    payload = {
-        'article_vote_score': article.vote_score,
-        'article_upvotes': article.upvotes,
-        'article_downvotes': article.downvotes,
-        'article_pk': article.pk,
-    }
-    try:
-        broadcast_vote_update(payload)
-    except Exception:
-        pass
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({
-            'success': True,
-            'message': 'Cảm ơn bạn đã đánh giá bài viết.',
-            **payload,
-        })
-    messages.success(request, 'Cảm ơn bạn đã đánh giá bài viết.')
-    return redirect(article.get_absolute_url())
-
-
-@login_required
 def vote_comment(request, pk):
-    if request.method != 'POST':
-        return redirect('wiki:home')
-    comment = get_object_or_404(Comment, pk=pk)
-    try:
-        vote_value = int(request.POST.get('vote', 0))
-    except ValueError:
-        vote_value = 0
-    if vote_value not in (1, -1):
-        messages.error(request, 'Giá trị vote không hợp lệ.')
-        return redirect(comment.article.get_absolute_url())
+    return _handle_vote(request, CommentVote, 'comment', get_object_or_404(Comment, pk=pk), 'comment')
 
-    CommentVote.objects.update_or_create(
-        user=request.user,
-        comment=comment,
-        defaults={'value': vote_value},
-    )
-    payload = {
-        'comment_vote_score': comment.vote_score,
-        'comment_upvotes': comment.upvotes,
-        'comment_downvotes': comment.downvotes,
-        'comment_pk': comment.pk,
-    }
-    try:
-        broadcast_vote_update(payload)
-    except Exception:
-        pass
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({
-            'success': True,
-            'message': 'Cảm ơn bạn đã đánh giá bình luận.',
-            **payload,
-        })
-    messages.success(request, 'Cảm ơn bạn đã đánh giá bình luận.')
-    return redirect(comment.article.get_absolute_url())
+def vote_user(request, username):
+    target = get_object_or_404(User, username=username)
+    if target == request.user:
+        return JsonResponse({'success': False, 'message': 'Không thể vote chính mình.'}, status=400)
+    return _handle_vote(request, UserVote, 'target', target, 'target_user')
 
-
-@login_required
-def vote_user(request, pk):
-    next_url = request.POST.get('next') or reverse('wiki:public-profile', kwargs={'pk': pk})
-    if request.method != 'POST':
-        return redirect(next_url)
-    target_user = get_object_or_404(User, pk=pk)
-    if target_user == request.user:
-        messages.error(request, 'Bạn không thể vote chính bản thân mình.')
-        return redirect(next_url)
-    try:
-        vote_value = int(request.POST.get('vote', 0))
-    except ValueError:
-        vote_value = 0
-    if vote_value not in (1, -1):
-        messages.error(request, 'Giá trị vote không hợp lệ.')
-        return redirect(next_url)
-
-    UserVote.objects.update_or_create(
-        voter=request.user,
-        target=target_user,
-        defaults={'value': vote_value},
-    )
-    payload = {
-        'target_vote_score': target_user.profile.vote_score,
-        'target_upvotes': target_user.profile.upvotes,
-        'target_downvotes': target_user.profile.downvotes,
-        'target_user_pk': target_user.pk,
-    }
-    try:
-        broadcast_vote_update(payload)
-    except Exception:
-        pass
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({
-            'success': True,
-            'message': 'Cảm ơn bạn đã đánh giá người dùng.',
-            **payload,
-        })
-    messages.success(request, 'Cảm ơn bạn đã đánh giá người dùng.')
-    return redirect(next_url)
 
 
 @login_required
@@ -856,3 +819,48 @@ class SubmitQuizView(View):
             'total_questions': total_questions,
             'results': results
         })
+
+@login_required
+def export_article_pdf(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+    html_content = render_to_string('wiki/article_pdf.html', {'article': article, 'request': request})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{article.slug}.pdf"'
+    pisa_status = pisa.CreatePDF(html_content, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Lỗi khi xuất PDF', status=500)
+    return response
+
+@login_required
+def upload_quiz_file(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    if request.method == 'POST':
+        file = request.FILES.get('quiz_file')
+        if not file:
+            messages.error(request, "Vui lòng chọn file.")
+            return redirect('wiki:article-quiz-manage', article_pk=article.pk)
+        text = ""
+        try:
+            if file.name.endswith('.docx'):
+                doc = docx.Document(file)
+                text = "\n".join([para.text for para in doc.paragraphs])
+            elif file.name.endswith('.pdf'):
+                reader = PdfReader(file)
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+            else:
+                text = file.read().decode('utf-8', errors='ignore')
+        except Exception as e:
+            messages.error(request, f"Lỗi đọc file: {str(e)}")
+            return redirect('wiki:article-quiz-manage', article_pk=article.pk)
+
+        lines = [line.strip() for line in text.split('\n') if len(line.strip()) > 10]
+        count = 0
+        for line in lines:
+            q = Question.objects.create(article=article, content=line)
+            Choice.objects.create(question=q, content="Lựa chọn 1", is_correct=True)
+            Choice.objects.create(question=q, content="Lựa chọn 2", is_correct=False)
+            count += 1
+        messages.success(request, f"Đã trích xuất {count} câu hỏi. Hãy chỉnh sửa để hoàn thiện.")
+        return redirect('wiki:article-quiz-manage', article_pk=article.pk)
+    return render(request, 'wiki/quiz_upload.html', {'article': article})

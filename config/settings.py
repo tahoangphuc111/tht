@@ -172,3 +172,9 @@ MARTOR_ALLOWED_UPLOADS = [
     'image/jpeg',
     'image/jpg',
 ]
+
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+

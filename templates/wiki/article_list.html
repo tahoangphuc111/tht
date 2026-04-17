@@ -3,30 +3,36 @@
 {% block title %}Bài viết | CP Wiki{% endblock %}
 
 {% block content %}
-<section class="hero-panel mb-4">
+<section class="hero-panel mb-5">
     <div class="row g-4 align-items-center">
         <div class="col-lg-7">
             <div class="section-eyebrow mb-2">Competitive Programming Notebook</div>
-            <h1 class="hero-title mb-3">Tra cứu kiến thức thuật toán bằng giao diện gọn, nhanh và dễ viết.</h1>
-            <p class="hero-copy mb-4">Lưu lại pattern, cấu trúc dữ liệu, chiến thuật contest và ghi chú tối ưu. Admin, editor và contributor có thể đăng bài; người dùng thường tập trung vào thảo luận qua bình luận.</p>
+            <h1 class="hero-title mb-3">Tra cứu kiến thức thuật toán & Cấu trúc dữ liệu</h1>
+            <p class="hero-copy mb-4">Lưu lại pattern, cấu trúc dữ liệu, chiến thuật contest và ghi chú tối ưu. Thảo luận và chia sẻ kinh nghiệm cùng cộng đồng CP Wiki.</p>
             <div class="d-flex gap-2 flex-wrap">
                 {% if can_publish %}
-                    <a class="btn btn-dark rounded-pill px-4" href="{% url 'wiki:article-create' %}">Tạo bài viết</a>
+                    <a class="btn btn-primary rounded-pill px-4 shadow-sm" href="{% url 'wiki:article-create' %}">
+                        <i class="fa-solid fa-plus me-2"></i>Tạo bài viết
+                    </a>
                 {% else %}
-                    <a class="btn btn-dark rounded-pill px-4" href="{% url 'wiki:signup' %}">Bắt đầu ngay</a>
+                    <a class="btn btn-primary rounded-pill px-4 shadow-sm" href="{% url 'wiki:signup' %}">
+                        <i class="fa-solid fa-rocket me-2"></i>Bắt đầu ngay
+                    </a>
                 {% endif %}
-                <a class="btn btn-outline-dark rounded-pill px-4" href="{% url 'wiki:getting-started' %}">Xem hướng dẫn</a>
+                <a class="btn btn-soft rounded-pill px-4" href="{% url 'wiki:getting-started' %}">
+                    <i class="fa-solid fa-book me-2"></i>Xem hướng dẫn
+                </a>
             </div>
         </div>
         <div class="col-lg-5">
             <div class="stat-grid">
-                <div class="stat-card">
+                <div class="stat-card app-card">
                     <div class="stat-value">{{ articles.paginator.count }}</div>
-                    <div class="stat-label">Bài viết</div>
+                    <div class="stat-label"><i class="fa-solid fa-newspaper me-1"></i> Bài viết</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card app-card">
                     <div class="stat-value">{{ categories|length }}</div>
-                    <div class="stat-label">Danh mục</div>
+                    <div class="stat-label"><i class="fa-solid fa-tags me-1"></i> Danh mục</div>
                 </div>
             </div>
         </div>
@@ -34,95 +40,95 @@
 </section>
 
 {% if user.is_authenticated and not user.profile.guide_seen %}
-    <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-3 glass-alert">
-        <div>
-            <strong>Bắt đầu nhanh:</strong> xem hướng dẫn sử dụng để biết cách tạo bài viết, tìm kiếm và quản lý tài khoản.
+    <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-3 glass-alert mb-5 p-4 rounded-4 shadow-sm">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-circle-info fs-3 text-primary"></i>
+            <div>
+                <strong class="d-block mb-1">Bắt đầu nhanh:</strong> 
+                <span>Xem hướng dẫn sử dụng để biết cách tạo bài viết, tìm kiếm và quản lý tài khoản.</span>
+            </div>
         </div>
         <div class="d-flex gap-2">
             <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{% url 'wiki:getting-started' %}">Mở hướng dẫn</a>
-            <form method="post" action="{% url 'wiki:dismiss-guide' %}">
+            <form method="post" action="{% url 'wiki:dismiss-guide' %}" class="m-0">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button class="btn btn-sm btn-primary rounded-pill px-3" type="submit">Đã hiểu</button>
+                <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" type="submit">Đã hiểu</button>
             </form>
         </div>
     </div>
 {% endif %}
 
-<div class="card shadow-sm border-0 mb-4 app-card">
-    <div class="card-body">
+<div class="card shadow-sm border-0 mb-5 app-card overflow-hidden">
+    <div class="card-body p-4">
         <form method="get" class="row g-3">
             <div class="col-lg-4 col-md-6">
-                <label class="form-label" for="id_q">Từ khóa</label>
-                <input class="form-control search-input" id="id_q" type="text" name="q" value="{{ query }}" placeholder="Ví dụ: segment tree, BFS, DP bitmask">
+                <label class="form-label fw-bold small" for="id_q"><i class="fa-solid fa-magnifying-glass me-1"></i> Từ khóa</label>
+                <input class="form-control bg-light border-0 rounded-3" id="id_q" type="text" name="q" value="{{ query }}" placeholder="segment tree, BFS, DP bitmask...">
             </div>
             <div class="col-lg-2 col-md-6">
-                <label class="form-label" for="id_author">Tác giả</label>
-                <input class="form-control search-input" id="id_author" type="text" name="author" value="{{ selected_author }}" placeholder="username">
+                <label class="form-label fw-bold small" for="id_author"><i class="fa-solid fa-user me-1"></i> Tác giả</label>
+                <input class="form-control bg-light border-0 rounded-3" id="id_author" type="text" name="author" value="{{ selected_author }}" placeholder="username">
             </div>
             <div class="col-lg-2 col-md-6">
-                <label class="form-label" for="id_category">Danh mục</label>
-                <select class="form-select search-input" id="id_category" name="category">
-                    <option value="">Tất cả danh mục</option>
+                <label class="form-label fw-bold small" for="id_category"><i class="fa-solid fa-folder-open me-1"></i> Danh mục</label>
+                <select class="form-select bg-light border-0 rounded-3" id="id_category" name="category">
+                    <option value="">Tất cả</option>
                     {% for category in categories %}
                         <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>{{ category.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-lg-2 col-md-6">
-                <label class="form-label" for="id_discussion">Bình luận</label>
-                <select class="form-select search-input" id="id_discussion" name="discussion">
+                <label class="form-label fw-bold small" for="id_discussion"><i class="fa-solid fa-comments me-1"></i> Bình luận</label>
+                <select class="form-select bg-light border-0 rounded-3" id="id_discussion" name="discussion">
                     <option value="">Tất cả</option>
                     <option value="open" {% if selected_discussion == 'open' %}selected{% endif %}>Đang mở</option>
                     <option value="locked" {% if selected_discussion == 'locked' %}selected{% endif %}>Đã khóa</option>
                 </select>
             </div>
-            <div class="col-lg-2 col-md-6">
-                <label class="form-label" for="id_sort">Sắp xếp</label>
-                <select class="form-select search-input" id="id_sort" name="sort">
-                    <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Mới nhất</option>
-                    <option value="updated" {% if selected_sort == 'updated' %}selected{% endif %}>Vừa cập nhật</option>
-                    <option value="commented" {% if selected_sort == 'commented' %}selected{% endif %}>Nhiều bình luận</option>
-                    <option value="top" {% if selected_sort == 'top' %}selected{% endif %}>Điểm vote cao</option>
-                </select>
-            </div>
             <div class="col-lg-2 col-md-6 d-flex align-items-end">
-                <button class="btn btn-dark w-100 rounded-pill" type="submit">Tìm kiếm</button>
+                <button class="btn btn-primary w-100 rounded-pill shadow-sm py-2" type="submit">Tìm kiếm</button>
             </div>
         </form>
-        <div class="filter-toolbar">
-            <div class="filter-summary">
-                {{ articles.paginator.count }} bài viết{% if query or selected_author or selected_category or selected_discussion or selected_sort != 'newest' %} phù hợp với bộ lọc hiện tại{% endif %}.
-            </div>
-            {% if query or selected_author or selected_category or selected_discussion or selected_sort != 'newest' %}
-                <a class="btn btn-outline-secondary px-4" href="{% url 'wiki:article-list' %}">Xóa bộ lọc</a>
-            {% endif %}
-        </div>
     </div>
 </div>
 
 <div class="row g-4">
     {% for article in articles %}
         <div class="col-12">
-            <div class="card border-0 shadow-sm h-100 app-card article-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
-                        <span class="pill-badge">{{ article.category.name }}</span>
-                        <small class="text-secondary">{{ article.created_at|date:"d/m/Y H:i" }}</small>
+            <div class="card border-0 shadow-sm h-100 app-card article-card overflow-hidden">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <span class="pill-badge bg-primary text-white border-0">{{ article.category.name }}</span>
+                        <span class="text-secondary small"><i class="fa-solid fa-calendar-day me-1"></i>{{ article.created_at|date:"d/m/Y" }}</span>
                     </div>
-                    <h2 class="h4 mb-2"><a class="text-decoration-none article-link" href="{{ article.get_absolute_url }}">{{ article.title }}</a></h2>
-                    <p class="text-secondary mb-3">Tác giả: <a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' article.author.pk %}">{{ article.author.username }}</a> • {{ article.comment_count }} bình luận • {{ article.vote_balance|default:0 }} điểm • {{ article.reading_time_minutes }} phút đọc{% if not article.allow_comments %} • Đã khóa bình luận{% endif %}</p>
-                    <p class="mb-0 text-dark">{{ article.content|striptags|truncatechars:220 }}</p>
+                    <h2 class="h3 mb-3 fw-bold lh-tight"><a class="text-decoration-none article-link" href="{{ article.get_absolute_url }}">{{ article.title }}</a></h2>
+                    <div class="item-meta small mb-4 text-secondary">
+                        <i class="fa-solid fa-user-pen me-1"></i> <a class="article-link text-decoration-none fw-semibold" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a>
+                        <span class="mx-2">•</span>
+                        <i class="fa-solid fa-comment me-1"></i> {{ article.comment_count }} bình luận
+                        <span class="mx-2">•</span>
+                        <i class="fa-solid fa-circle-check text-success me-1"></i> {{ article.vote_balance|default:0 }} điểm
+                        <span class="mx-2">•</span>
+                        <i class="fa-solid fa-clock me-1"></i> {{ article.reading_time_minutes }} phút đọc
+                        {% if not article.allow_comments %}
+                            <span class="mx-2">•</span>
+                            <i class="fa-solid fa-lock text-muted me-1"></i> Đã khóa
+                        {% endif %}
+                    </div>
+                    <p class="mb-0 text-dark opacity-75 fs-5">{{ article.content|striptags|truncatechars:240 }}</p>
                 </div>
             </div>
         </div>
     {% empty %}
         <div class="col-12">
-            <div class="empty-state centered">
-                Chưa có bài viết phù hợp với bộ lọc hiện tại.
+            <div class="empty-state centered p-5 app-card">
+                <i class="fa-solid fa-box-open fs-1 text-muted mb-3 d-block"></i>
+                <span class="fs-5">Chưa có bài viết phù hợp với bộ lọc hiện tại.</span>
                 {% if query or selected_author or selected_category or selected_discussion or selected_sort != 'newest' %}
-                    <div class="mt-3">
-                        <a class="btn btn-outline-secondary px-4" href="{% url 'wiki:article-list' %}">Quay về danh sách đầy đủ</a>
+                    <div class="mt-4">
+                        <a class="btn btn-soft rounded-pill px-4" href="{% url 'wiki:article-list' %}">Quay về danh sách đầy đủ</a>
                     </div>
                 {% endif %}
             </div>
@@ -131,14 +137,14 @@
 </div>
 
 {% if is_paginated %}
-    <nav class="mt-4">
+    <nav class="mt-5">
         <ul class="pagination justify-content-center gap-2">
             {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link rounded-pill" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}">Trước</a></li>
+                <li class="page-item"><a class="page-link rounded-pill px-4 border-0 shadow-sm" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-chevron-left me-1"></i> Trước</a></li>
             {% endif %}
-            <li class="page-item active"><span class="page-link rounded-pill border-0">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span></li>
+            <li class="page-item active"><span class="page-link rounded-pill border-0 shadow-sm px-4 bg-primary">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
             {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link rounded-pill" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}">Sau</a></li>
+                <li class="page-item"><a class="page-link rounded-pill px-4 border-0 shadow-sm" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}">Sau <i class="fa-solid fa-chevron-right ms-1"></i></a></li>
             {% endif %}
         </ul>
     </nav>

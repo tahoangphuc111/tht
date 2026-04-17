@@ -153,13 +153,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         <a class="btn btn-outline-dark rounded-pill px-4" href="{% url 'wiki:password-change' %}">Đổi mật khẩu</a>
                     {% elif request.user.is_authenticated and request.user != profile_user %}
                         <div class="action-row">
-                            <form method="post" action="{% url 'wiki:user-vote' profile_user.pk %}" class="ajax-vote-form m-0">
+                            <form method="post" action="{% url 'wiki:user-vote' profile_user.username %}" class="ajax-vote-form m-0">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                 <input type="hidden" name="vote" value="1" />
                                 <button class="btn btn-outline-success rounded-pill px-4" type="submit">Ủng hộ</button>
                             </form>
-                            <form method="post" action="{% url 'wiki:user-vote' profile_user.pk %}" class="ajax-vote-form m-0">
+                            <form method="post" action="{% url 'wiki:user-vote' profile_user.username %}" class="ajax-vote-form m-0">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                 <input type="hidden" name="vote" value="-1" />

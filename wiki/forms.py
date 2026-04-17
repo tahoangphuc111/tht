@@ -33,30 +33,10 @@ class SignUpForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        label='Tên đăng nhập',
-        widget=forms.TextInput(),
-    )
-    password = forms.CharField(
-        label='Mật khẩu',
-        strip=False,
-        widget=forms.PasswordInput(),
-    )
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        placeholders = {
-            'username': 'Nhập tên đăng nhập',
-            'password': 'Nhập mật khẩu',
-        }
-        for name, field in self.fields.items():
-            field.widget.attrs.update({
-                'class': 'form-control form-control-lg',
-                'placeholder': placeholders.get(name, ''),
-            })
-
-        self.fields['username'].widget.attrs['autocomplete'] = 'username'
-        self.fields['password'].widget.attrs['autocomplete'] = 'current-password'
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
 
 
 class UserUpdateForm(forms.ModelForm):
@@ -112,6 +92,14 @@ class CategoryForm(forms.ModelForm):
 
 
 class ArticleForm(forms.ModelForm):
+    change_summary = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Tóm tắt các thay đổi của bạn (không bắt buộc)...',
+        })
+    )
     content = MartorFormField(
         widget=MartorWidget(attrs={
             'class': 'form-control',
@@ -121,7 +109,7 @@ class ArticleForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ('title', 'slug', 'category', 'allow_comments', 'content')
+        fields = ('title', 'slug', 'category', 'allow_comments', 'content', 'change_summary')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -10,7 +10,10 @@
                 <a href="{{ article.get_absolute_url }}" class="back-link mb-2">&larr; Quay lại bài viết</a>
                 <h1 class="hero-title-sm mb-0">Quản lý trắc nghiệm: {{ article.title }}</h1>
             </div>
-            <a href="{% url 'wiki:question-create' article.pk %}" class="btn btn-primary rounded-pill px-4">Thêm câu hỏi</a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'wiki:upload-quiz-file' article.pk %}" class="btn btn-outline-secondary rounded-pill px-3" title="Upload từ file"><i class="fa-solid fa-file-import"></i></a>
+                <a href="{% url 'wiki:question-create' article.pk %}" class="btn btn-primary rounded-pill px-3" title="Thêm câu hỏi"><i class="fa-solid fa-plus"></i></a>
+            </div>
         </div>
 
         {% if questions %}
@@ -34,8 +37,8 @@
                                 {% endif %}
                             </div>
                             <div class="stack-item__actions">
-                                <a href="{% url 'wiki:question-edit' question.pk %}" class="btn btn-sm btn-outline-secondary px-3">Sửa</a>
-                                <a href="{% url 'wiki:question-delete' question.pk %}" class="btn btn-sm btn-outline-danger px-3">Xóa</a>
+                                <a href="{% url 'wiki:question-edit' question.pk %}" class="btn btn-sm btn-outline-secondary px-2" title="Sửa"><i class="fa-solid fa-pen"></i></a>
+                                <a href="{% url 'wiki:question-delete' question.pk %}" class="btn btn-sm btn-outline-danger px-2" title="Xóa"><i class="fa-solid fa-trash"></i></a>
                             </div>
                         </div>
                     </div>

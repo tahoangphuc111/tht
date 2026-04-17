@@ -1,3 +1,6 @@
 Django>=6.0,<6.1
 django-martor>=1.7.15
 Pillow>=10.0
+xhtml2pdf
+python-docx
+PyPDF2

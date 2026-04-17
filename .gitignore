@@ -6,3 +6,5 @@ venv/
 __pycache__/
 local_settings.py
 local_urls.py
+static/
+node_modules/

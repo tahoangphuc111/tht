@@ -43,7 +43,7 @@
                     {% for user in users %}
                         <tr>
                             <td>
-                                <div class="fw-semibold"><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' user.pk %}">{{ user.profile.display_name|default:user.username }}</a></div>
+                                <div class="fw-semibold"><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' user.username %}">{{ user.profile.display_name|default:user.username }}</a></div>
                                 <div class="small text-secondary">@{{ user.username }}{% if user.profile.is_profile_private %} • Riêng tư{% endif %}</div>
                             </td>
                             <td>{{ user.article_count }}</td>
@@ -51,17 +51,17 @@
                             <td><span id="user-{{ user.pk }}-score">{{ user.vote_score }}</span></td>
                             <td>
                                 {% if request.user.is_authenticated and request.user != user %}
-                                    <form method="post" action="{% url 'wiki:user-vote' user.pk %}" class="d-inline-block me-1 ajax-vote-form">
+                                    <form method="post" action="{% url 'wiki:user-vote' user.username %}" class="d-inline-block me-1 ajax-vote-form">
                                         {% csrf_token %}
                                         <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                         <input type="hidden" name="vote" value="1" />
-                                        <button class="btn btn-sm btn-outline-success px-3">Ủng hộ</button>
+                                        <button class="btn btn-sm btn-outline-success px-2" title="Ủng hộ"><i class="fa-solid fa-caret-up"></i></button>
                                     </form>
-                                    <form method="post" action="{% url 'wiki:user-vote' user.pk %}" class="d-inline-block ajax-vote-form">
+                                    <form method="post" action="{% url 'wiki:user-vote' user.username %}" class="d-inline-block ajax-vote-form">
                                         {% csrf_token %}
                                         <input type="hidden" name="next" value="{{ request.get_full_path }}">
                                         <input type="hidden" name="vote" value="-1" />
-                                        <button class="btn btn-sm btn-outline-danger px-3">Giảm điểm</button>
+                                        <button class="btn btn-sm btn-outline-danger px-2" title="Giảm điểm"><i class="fa-solid fa-caret-down"></i></button>
                                     </form>
                                 {% else %}
                                     <span class="text-secondary small">Không khả dụng</span>

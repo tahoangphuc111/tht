@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Quiz | {{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-lg app-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="section-eyebrow mb-2">Quiz Management</div>
+                <h2 class="h4 mb-4">Upload câu hỏi từ file</h2>
+                <p class="text-secondary mb-4">Hỗ trợ file .docx, .pdf hoặc .txt. Hệ thống sẽ cố gắng trích xuất các đoạn văn bản dài hơn 10 ký tự làm câu hỏi.</p>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="quiz_file" class="form-label fw-semibold">Chọn file câu hỏi</label>
+                        <input type="file" name="quiz_file" id="quiz_file" class="form-control rounded-pill" accept=".docx,.pdf,.txt" required>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-accent rounded-pill px-4">Bắt đầu trích xuất</button>
+                        <a href="{% url 'wiki:article-quiz-manage' article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

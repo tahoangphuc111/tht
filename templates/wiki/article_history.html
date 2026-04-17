@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch sử: {{ article.title }} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-lg app-card">
+    <div class="card-body p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <div class="section-eyebrow mb-2">Revision History</div>
+                <h1 class="hero-title-sm mb-0">{{ article.title }}</h1>
+            </div>
+            <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ article.get_absolute_url }}">Quay lại bài viết</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ngày sửa</th>
+                        <th>Người sửa</th>
+                        <th>Tóm tắt thay đổi</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for revision in revisions %}
+                    <tr>
+                        <td>{{ revision.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if revision.author %}
+                                {{ revision.author.username }}
+                            {% else %}
+                                <span class="text-muted italic">Ẩn danh</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if revision.change_summary %}
+                                {{ revision.change_summary }}
+                            {% else %}
+                                <span class="text-muted italic">Không có mô tả</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'wiki:revision-detail' revision.pk %}" class="btn btn-sm btn-soft">Xem bản này</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Chưa có lịch sử chỉnh sửa nào được lưu lại.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

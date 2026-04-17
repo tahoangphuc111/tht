@@ -16,12 +16,13 @@
                 <span class="badge bg-primary px-3 py-2 text-uppercase">{{ article.category.name }}</span>
                 {% if can_edit_article or can_delete_article %}
                     <div class="article-toolbar__group">
+                        <a class="btn btn-sm btn-outline-secondary rounded-pill px-3" href="{% url 'wiki:article-history' article.pk %}" title="Lịch sử"><i class="fa-solid fa-clock-rotate-left"></i></a>
                         {% if can_edit_article %}
-                            <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{% url 'wiki:article-quiz-manage' article.pk %}">Sửa Quiz</a>
-                            <a class="btn btn-sm btn-outline-dark rounded-pill px-3" href="{% url 'wiki:article-edit' article.pk %}">Sửa Bài</a>
+                            <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{% url 'wiki:article-quiz-manage' article.pk %}" title="Sửa Quiz"><i class="fa-solid fa-list-check"></i></a>
+                            <a class="btn btn-sm btn-outline-dark rounded-pill px-3" href="{% url 'wiki:article-edit' article.pk %}" title="Sửa Bài"><i class="fa-solid fa-pen-to-square"></i></a>
                         {% endif %}
                         {% if can_delete_article %}
-                            <a class="btn btn-sm btn-outline-danger rounded-pill px-3" href="{% url 'wiki:article-delete' article.pk %}">Xóa</a>
+                            <a class="btn btn-sm btn-outline-danger rounded-pill px-3" href="{% url 'wiki:article-delete' article.pk %}" title="Xóa"><i class="fa-solid fa-trash"></i></a>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -39,7 +40,7 @@
                         </div>
                     {% endif %}
                     <div>
-                        <strong class="text-dark d-block lh-1"><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' article.author.pk %}">{{ article.author.username }}</a></strong>
+                        <strong class="text-dark d-block lh-1"><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a></strong>
                         <small>{{ article.created_at|date:"d/m/Y H:i" }} • {{ article.reading_time_minutes }} phút đọc</small>
                     </div>
                 </div>
@@ -48,38 +49,47 @@
                     <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
                         {% csrf_token %}
                         <input type="hidden" name="vote" value="1" />
-                        <button class="vote-button is-up" type="submit" title="Ủng hộ">&#9650;</button>
+                        <button class="vote-button is-up" type="submit" title="Ủng hộ"><i class="bi bi-caret-up-fill"></i></button>
                     </form>
                     <span class="vote-score" id="article-score" title="Ủng hộ: {{ article_upvotes|default:0 }} | Giảm điểm: {{ article_downvotes|default:0 }}">{{ article_vote_score|default:0 }}</span>
                     <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
                         {% csrf_token %}
                         <input type="hidden" name="vote" value="-1" />
-                        <button class="vote-button is-down" type="submit" title="Giảm điểm">&#9660;</button>
+                        <button class="vote-button is-down" type="submit" title="Giảm điểm"><i class="bi bi-caret-down-fill"></i></button>
                     </form>
                 </div>
             </div>
-            <div class="article-toolbar">
-                <div class="article-toolbar__group">
-                    <button
-                        class="btn btn-soft btn-sm article-copy-link"
-                        type="button"
-                        data-copy-url="{{ request.build_absolute_uri }}"
-                    >
-                        Sao chép liên kết
+            <div class="article-actions-bar d-flex align-items-center flex-wrap gap-2">
+                <div class="vote-pill shadow-sm">
+                    <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="vote" value="1" />
+                        <button class="vote-button is-up" type="submit" title="Ủng hộ"><i class="fa-solid fa-chevron-up"></i></button>
+                    </form>
+                    <span class="vote-score fw-bold" id="article-score">{{ article_vote_score|default:0 }}</span>
+                    <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="vote" value="-1" />
+                        <button class="vote-button is-down" type="submit" title="Giảm điểm"><i class="fa-solid fa-chevron-down"></i></button>
+                    </form>
+                </div>
+
+                <div class="toolbar-pill shadow-sm d-flex align-items-center">
+                    <button class="tool-btn article-copy-link" type="button" data-copy-url="{{ request.build_absolute_uri }}" title="Sao chép liên kết">
+                        <i class="fa-solid fa-link"></i>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm article-save-toggle" type="button" data-article-key="article-{{ article.pk }}">
-                        Lưu bài viết
+                    <button class="tool-btn article-save-toggle" type="button" data-article-key="article-{{ article.pk }}" title="Lưu bài viết">
+                        <i class="fa-regular fa-bookmark"></i>
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm article-focus-toggle" type="button">
-                        Chế độ tập trung
+                    <button class="tool-btn article-focus-toggle" type="button" title="Chế độ tập trung">
+                        <i class="fa-solid fa-eye"></i>
                     </button>
-                    <a class="btn btn-outline-secondary btn-sm" href="#comment-section">Tới bình luận</a>
-                    {% if article.questions.exists %}
-                        <a class="btn btn-outline-secondary btn-sm" href="#quiz-section">Tới quiz</a>
-                    {% endif %}
+                    <a class="tool-btn text-decoration-none" href="{% url 'wiki:export-article-pdf' article.pk %}" title="Xuất PDF">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </a>
                 </div>
             </div>
-            <div class="article-shortcuts">Phím tắt: `/` tìm kiếm, `S` lưu bài, `F` bật chế độ tập trung, `Esc` để thoát.</div>
+            <div class="article-shortcuts mt-3 opacity-50 small">Phím tắt: <kbd>/</kbd> tìm kiếm, <kbd>S</kbd> lưu bài, <kbd>F</kbd> tập trung, <kbd>Esc</kbd> thoát.</div>
         </div>
         <div class="article-content markdown-body">{{ article.content|safe_markdown }}</div>
         <div class="mt-4 article-section-note">
@@ -260,17 +270,17 @@
                             <strong class="comment-author text-dark fs-5">{{ comment.author.username }}</strong>
                             <span class="text-secondary small ms-2">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
                         </div>
-                        <div class="d-inline-flex align-items-center bg-white border rounded px-2 py-1 gap-2 shadow-sm">
+                        <div class="vote-pill">
                             <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:comment-vote' comment.pk %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="vote" value="1" />
-                                <button class="vote-button is-up" type="submit" title="Ủng hộ">&#9650;</button>
+                                <button class="vote-button is-up" type="submit" title="Ủng hộ"><i class="bi bi-caret-up-fill"></i></button>
                             </form>
                             <span class="vote-score" id="comment-{{ comment.pk }}-score" title="Ủng hộ: {{ comment.upvotes }} | Giảm điểm: {{ comment.downvotes }}">{{ comment.vote_score }}</span>
                             <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:comment-vote' comment.pk %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="vote" value="-1" />
-                                <button class="vote-button is-down" type="submit" title="Giảm điểm">&#9660;</button>
+                                <button class="vote-button is-down" type="submit" title="Giảm điểm"><i class="bi bi-caret-down-fill"></i></button>
                             </form>
                         </div>
                     </div>
@@ -291,13 +301,16 @@
         <div class="row g-3">
             {% for related in related_articles %}
                 <div class="col-md-4">
-                    <a class="sidebar-link-item h-100" href="{{ related.get_absolute_url }}">
-                        <div>
-                            <div class="fw-semibold">{{ related.title }}</div>
-                        <div class="text-secondary small">{{ related.author.username }} • {{ related.comment_count }} bình luận</div>
+                    <div class="sidebar-link-item h-100">
+                        <div class="item-content">
+                            <a href="{{ related.get_absolute_url }}" class="item-title text-decoration-none">{{ related.title }}</a>
+                            <div class="item-meta">
+                                <a href="{% url 'wiki:public-profile' related.author.username %}" class="article-author-name">{{ related.author.username }}</a>
+                                <span>• {{ related.comment_count }} bình luận</span>
+                            </div>
                         </div>
                         <i class="bi bi-arrow-up-right"></i>
-                    </a>
+                    </div>
                 </div>
             {% endfor %}
         </div>

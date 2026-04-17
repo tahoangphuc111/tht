@@ -221,6 +221,29 @@ class UploadedFile(models.Model):
         return f'{self.file.name} by {self.user.username}'
 
 
+class ArticleRevision(models.Model):
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name='revisions',
+    )
+    title = models.CharField(max_length=220)
+    content = MartorField()
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    change_summary = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Revision of {self.article.title} at {self.created_at}'
+
+
 class ArticleVote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='article_votes')
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='article_votes')
