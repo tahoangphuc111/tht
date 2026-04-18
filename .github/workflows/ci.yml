@@ -7,29 +7,56 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build:
+  test:
+    name: Run Tests & Quality Checks
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
       matrix:
-        python-version: [3.10, 3.11, 3.12]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
     - name: Install Dependencies
+        # python-dotenv, django-dotenv, martor, Pillow, xhtml2pdf, etc.
+        # pylint-django is for quality checks
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pylint-django bandit black mypy
+
+    - name: Run System Check
+      run: |
+        python manage.py check
+
     - name: Run Migrations
       run: |
         python manage.py migrate
-    - name: Check for errors
-      run: |
-        python manage.py check
+
     - name: Run Tests
       run: |
-        python manage.py test
+        python manage.py test wiki
+
+    - name: Run Pylint
+      run: |
+        pylint wiki config manage.py
+
+    - name: Security Check (Bandit)
+        # Skip B311 (random is okay for non-crypto), B101 (assert is okay for tests)
+      run: |
+        bandit -r wiki config -x wiki/tests.py,wiki/test_history.py -ll
+
+    - name: Check Formatting (Black)
+      run: |
+        black --check wiki config manage.py
+
+    - name: Type Check (Mypy)
+        # Ignore missing imports for third-party libs without stubs
+      run: |
+        mypy --ignore-missing-imports wiki config manage.py
