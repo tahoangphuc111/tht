@@ -15,7 +15,9 @@ disable=
     attribute-defined-outside-init,
     unused-argument,
     invalid-name,
-    too-many-return-statements
+    too-many-return-statements,
+    too-many-ancestors,
+    import-outside-toplevel
 
 [FORMAT]
 max-line-length=100
