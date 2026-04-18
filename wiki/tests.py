@@ -40,6 +40,7 @@ class WikiFlowTests(TestCase):
             content="Cau truc du lieu ho tro truy van nhanh.",
             category=self.category,
             author=self.author,
+            status="published",
         )
         self.author.profile.display_name = "Author Display"
         self.author.profile.save(update_fields=["display_name"])
@@ -201,6 +202,7 @@ class WikiFlowTests(TestCase):
             content="Cap nhat va truy van prefix sum.",
             category=self.category,
             author=self.author,
+            status="published",
         )
         ArticleVote.objects.create(user=self.other_user, article=other_article, value=1)
 
