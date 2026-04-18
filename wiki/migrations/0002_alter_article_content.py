@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wiki', '0001_initial'),
+        ("wiki", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='article',
-            name='content',
+            model_name="article",
+            name="content",
             field=martor.models.MartorField(),
         ),
     ]

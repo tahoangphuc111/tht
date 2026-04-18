@@ -7,41 +7,47 @@ from django.utils.text import slugify
 
 
 def populate_article_slugs(apps, schema_editor):
-    Article = apps.get_model('wiki', 'Article')
-    Category = apps.get_model('wiki', 'Category')
+    Article = apps.get_model("wiki", "Article")
+    Category = apps.get_model("wiki", "Category")
 
     uncategorized, _ = Category.objects.get_or_create(
-        slug='chua-phan-loai',
+        slug="chua-phan-loai",
         defaults={
-            'name': 'Chưa phân loại',
-            'description': 'Các bài viết chưa được gán danh mục cụ thể.',
+            "name": "Chưa phân loại",
+            "description": "Các bài viết chưa được gán danh mục cụ thể.",
         },
     )
 
     for article in Article.objects.all():
         if not article.slug:
-            article.slug = (slugify(article.title) or f'article-{article.pk}')[:240]
+            article.slug = (slugify(article.title) or f"article-{article.pk}")[:240]
         if not article.category_id:
             article.category_id = uncategorized.pk
-        article.save(update_fields=['slug', 'category'])
+        article.save(update_fields=["slug", "category"])
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wiki', '0003_comment'),
+        ("wiki", "0003_comment"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='article',
-            name='slug',
+            model_name="article",
+            name="slug",
             field=models.SlugField(blank=True, db_index=True, max_length=240),
         ),
         migrations.AlterField(
-            model_name='article',
-            name='category',
-            field=models.ForeignKey(blank=True, default=wiki.models.get_uncategorized_category, on_delete=django.db.models.deletion.PROTECT, related_name='articles', to='wiki.category'),
+            model_name="article",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                default=wiki.models.get_uncategorized_category,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="articles",
+                to="wiki.category",
+            ),
         ),
         migrations.RunPython(populate_article_slugs, migrations.RunPython.noop),
     ]

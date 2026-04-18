@@ -1,6 +1,7 @@
 """
 Tests for article revision history.
 """
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -17,17 +18,15 @@ class ArticleHistoryTests(TestCase):
 
     def setUp(self):
         """Set up test data before each test."""
-        self.contributor_group, _ = Group.objects.get_or_create(
-            name='contributor'
-        )
+        self.contributor_group, _ = Group.objects.get_or_create(name="contributor")
         self.category = Category.objects.create(
-            name='Thuật toán',
-            slug='thuat-toan',
-            description='Ghi chú về thuật toán',
+            name="Thuật toán",
+            slug="thuat-toan",
+            description="Ghi chú về thuật toán",
         )
         self.author = User.objects.create_user(
-            username='author',
-            password='StrongPass123',
+            username="author",
+            password="StrongPass123",
         )
         self.author.groups.add(self.contributor_group)
 
@@ -38,35 +37,31 @@ class ArticleHistoryTests(TestCase):
 
     def test_article_creation_creates_initial_revision(self):
         """Test that creating an article saves an initial revision."""
-        self.client.login(username='author', password='StrongPass123')
+        self.client.login(username="author", password="StrongPass123")
         response = self.client.post(
-            reverse('wiki:article-create'),
+            reverse("wiki:article-create"),
             {
-                'title': 'Initial Article',
-                'content': 'This is the first version of the article.',
-                'category': self.category.pk,
-                'change_summary': 'Initial creation'
-            }
+                "title": "Initial Article",
+                "content": "This is the first version of the article.",
+                "category": self.category.pk,
+                "change_summary": "Initial creation",
+            },
         )
         self.assertEqual(response.status_code, 302)
-        article = Article.objects.get(title='Initial Article')
+        article = Article.objects.get(title="Initial Article")
         revisions = ArticleRevision.objects.filter(article=article)
         self.assertEqual(revisions.count(), 1)
+        self.assertEqual(revisions.first().change_summary, "Initial creation")
         self.assertEqual(
-            revisions.first().change_summary,
-            'Initial creation'
-        )
-        self.assertEqual(
-            revisions.first().content,
-            'This is the first version of the article.'
+            revisions.first().content, "This is the first version of the article."
         )
 
     def test_article_update_creates_new_revision(self):
         """Test that updating an article saves a new revision."""
         article = Article.objects.create(
-            title='Updatable Article',
-            slug='updatable-article',
-            content='Original content.',
+            title="Updatable Article",
+            slug="updatable-article",
+            content="Original content.",
             category=self.category,
             author=self.author,
         )
@@ -76,84 +71,79 @@ class ArticleHistoryTests(TestCase):
             title=article.title,
             content=article.content,
             author=self.author,
-            change_summary='Initial'
+            change_summary="Initial",
         )
 
-        self.client.login(username='author', password='StrongPass123')
+        self.client.login(username="author", password="StrongPass123")
         response = self.client.post(
-            reverse('wiki:article-edit', args=[article.pk]),
+            reverse("wiki:article-edit", args=[article.pk]),
             {
-                'title': 'Updated Article',
-                'content': 'Updated content.',
-                'category': self.category.pk,
-                'change_summary': 'Updated it with more info'
-            }
+                "title": "Updated Article",
+                "content": "Updated content.",
+                "category": self.category.pk,
+                "change_summary": "Updated it with more info",
+            },
         )
         self.assertEqual(response.status_code, 302)
 
         article.refresh_from_db()
-        revisions = ArticleRevision.objects.filter(
-            article=article
-        ).order_by('-created_at')
-        self.assertEqual(revisions.count(), 2)
-        self.assertEqual(
-            revisions[0].change_summary,
-            'Updated it with more info'
+        revisions = ArticleRevision.objects.filter(article=article).order_by(
+            "-created_at"
         )
-        self.assertEqual(revisions[0].content, 'Updated content.')
-        self.assertEqual(revisions[1].change_summary, 'Initial')
+        self.assertEqual(revisions.count(), 2)
+        self.assertEqual(revisions[0].change_summary, "Updated it with more info")
+        self.assertEqual(revisions[0].content, "Updated content.")
+        self.assertEqual(revisions[1].change_summary, "Initial")
 
     def test_article_history_view_shows_revisions(self):
         """Test that the history view lists article revisions."""
         article = Article.objects.create(
-            title='History Article',
-            slug='history-article',
-            content='Content v1',
+            title="History Article",
+            slug="history-article",
+            content="Content v1",
             category=self.category,
             author=self.author,
         )
         ArticleRevision.objects.create(
             article=article,
             title=article.title,
-            content='Content v1',
+            content="Content v1",
             author=self.author,
-            change_summary='Rev 1'
+            change_summary="Rev 1",
         )
         ArticleRevision.objects.create(
             article=article,
             title=article.title,
-            content='Content v2',
+            content="Content v2",
             author=self.author,
-            change_summary='Rev 2'
+            change_summary="Rev 2",
         )
 
-        response = self.client.get(
-            reverse('wiki:article-history', args=[article.pk])
-        )
+        response = self.client.get(reverse("wiki:article-history", args=[article.pk]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Rev 1')
-        self.assertContains(response, 'Rev 2')
+        self.assertContains(response, "Rev 1")
+        self.assertContains(response, "Rev 2")
 
     def test_article_revision_detail_view(self):
         """Test that the revision detail view shows correct content."""
         article = Article.objects.create(
-            title='Detail Article',
-            slug='detail-article',
-            content='Latest content',
+            title="Detail Article",
+            slug="detail-article",
+            content="Latest content",
             category=self.category,
             author=self.author,
         )
         rev = ArticleRevision.objects.create(
             article=article,
             title=article.title,
-            content='Old content',
+            content="Old content",
             author=self.author,
-            change_summary='Old revision'
+            change_summary="Old revision",
         )
 
         response = self.client.get(
-            reverse('wiki:article-revision-detail', args=[rev.pk])
+            reverse("wiki:article-revision-detail", args=[rev.pk])
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Old content')
-        self.assertContains(response, 'Old revision')
+        self.assertContains(response, "Old content")
+        self.assertContains(response, "Old revision")

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wiki', '0004_article_slug_alter_article_category'),
+        ("wiki", "0004_article_slug_alter_article_category"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='article',
-            name='allow_comments',
+            model_name="article",
+            name="allow_comments",
             field=models.BooleanField(default=True),
         ),
     ]
