@@ -12,11 +12,13 @@ import json
 from asgiref.sync import async_to_sync
 from django.core.asgi import get_asgi_application
 
+from typing import Set, Any
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 django_app = get_asgi_application()
 
-connected_websockets = set()
+connected_websockets: Set[Any] = set()
 
 
 def broadcast_vote_update(payload):
