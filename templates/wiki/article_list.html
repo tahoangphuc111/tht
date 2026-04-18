@@ -100,7 +100,12 @@
             <div class="card border-0 shadow-sm h-100 app-card article-card overflow-hidden">
                 <div class="card-body p-4 p-lg-5">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                        <span class="pill-badge bg-primary text-white border-0">{{ article.category.name }}</span>
+                        <div>
+                            <span class="pill-badge bg-primary text-white border-0">{{ article.category.name }}</span>
+                            {% if article.status != 'published' %}
+                                <span class="pill-badge bg-warning text-dark border-0 ms-2">{{ article.get_status_display }}</span>
+                            {% endif %}
+                        </div>
                         <span class="text-secondary small"><i class="fa-solid fa-calendar-day me-1"></i>{{ article.created_at|date:"d/m/Y" }}</span>
                     </div>
                     <h2 class="h3 mb-3 fw-bold lh-tight"><a class="text-decoration-none article-link" href="{{ article.get_absolute_url }}">{{ article.title }}</a></h2>
@@ -117,7 +122,18 @@
                             <i class="fa-solid fa-lock text-muted me-1"></i> Đã khóa
                         {% endif %}
                     </div>
-                    <p class="mb-0 text-dark opacity-75 fs-5">{{ article.content|striptags|truncatechars:240 }}</p>
+                    <p class="mb-3 text-dark opacity-75 fs-5">{{ article.content|striptags|truncatechars:240 }}</p>
+                    
+                    {% if is_moderation_view %}
+                        <div class="d-flex gap-2 mt-4">
+                            <a href="{% url 'wiki:article-approve' article.pk %}" class="btn btn-success rounded-pill px-4 shadow-sm">
+                                <i class="fa-solid fa-check me-2"></i>Duyệt bài
+                            </a>
+                            <a href="{% url 'wiki:article-reject' article.pk %}" class="btn btn-danger rounded-pill px-4 shadow-sm">
+                                <i class="fa-solid fa-xmark me-2"></i>Từ chối
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

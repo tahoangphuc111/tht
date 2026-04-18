@@ -34,6 +34,11 @@ class ArticleListView(ListView):
 
     def get_queryset(self):
         """Annotate and filter the article queryset."""
+        user = self.request.user
+        can_manage = user.is_authenticated and (
+            user.is_superuser or user.has_perm("wiki.manage_all_articles")
+        )
+
         qs = Article.objects.select_related("author", "category").annotate(
             comment_count=Count("comments", distinct=True),
             vote_balance=(
@@ -43,10 +48,16 @@ class ArticleListView(ListView):
                 )
             ),
         )
+
+        # Non-managers only see published articles
+        if not can_manage:
+            qs = qs.filter(status="published")
+
         q = self.request.GET.get("q", "")
         auth = self.request.GET.get("author", "")
         cat = self.request.GET.get("category", "")
         sort = self.request.GET.get("sort", "newest")
+        status = self.request.GET.get("status", "")
 
         if q:
             qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
@@ -54,6 +65,8 @@ class ArticleListView(ListView):
             qs = qs.filter(author__username__icontains=auth)
         if cat:
             qs = qs.filter(category__slug=cat)
+        if status and can_manage:
+            qs = qs.filter(status=status)
 
         if sort == "updated":
             qs = qs.order_by("-updated_at", "-created_at")
@@ -85,6 +98,16 @@ class ArticleDetailView(DetailView):
     template_name = "wiki/article_detail.html"
     context_object_name = "article"
     query_pk_and_slug = True
+
+    def get_queryset(self):
+        """Restrict access to non-published articles."""
+        user = self.request.user
+        qs = super().get_queryset()
+        if user.is_authenticated and (
+            user.is_superuser or user.has_perm("wiki.manage_all_articles")
+        ):
+            return qs
+        return qs.filter(Q(status="published") | Q(author=user))
 
     def get_context_data(self, **kwargs):
         """Add comments and permissions to context."""
@@ -279,3 +302,57 @@ def export_article_pdf(request, pk):
     if pisa.CreatePDF(html, dest=response).err:
         return HttpResponse("Lỗi PDF", status=500)
     return response
+
+
+class ModerationListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """View for admins to see articles pending moderation."""
+
+    model = Article
+    template_name = "wiki/article_list.html"  # Reuse list template
+    context_object_name = "articles"
+    paginate_by = 20
+
+    def test_func(self):
+        """Only admins and managers can see this list."""
+        user = self.request.user
+        return user.is_authenticated and (
+            user.is_superuser or user.has_perm("wiki.manage_all_articles")
+        )
+
+    def get_queryset(self):
+        """Filter for pending articles."""
+        return (
+            Article.objects.filter(status="pending")
+            .select_related("author", "category")
+            .order_by("created_at")
+        )
+
+    def get_context_data(self, **kwargs):
+        """Add context for moderation mode."""
+        context = super().get_context_data(**kwargs)
+        context["is_moderation_view"] = True
+        return context
+
+
+@login_required
+def approve_article(request, pk):
+    """Approve a pending article."""
+    if not (request.user.is_superuser or request.user.has_perm("wiki.manage_all_articles")):
+        return HttpResponse("Unauthorized", status=403)
+
+    article = get_object_or_404(Article, pk=pk)
+    article.status = "published"
+    article.save()
+    return redirect("wiki:article-list")
+
+
+@login_required
+def reject_article(request, pk):
+    """Reject a pending article."""
+    if not (request.user.is_superuser or request.user.has_perm("wiki.manage_all_articles")):
+        return HttpResponse("Unauthorized", status=403)
+
+    article = get_object_or_404(Article, pk=pk)
+    article.status = "rejected"
+    article.save()
+    return redirect("wiki:article-list")

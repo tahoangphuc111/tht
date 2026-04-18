@@ -49,6 +49,9 @@ urlpatterns = [
         articles.export_article_pdf,
         name="export-article-pdf",
     ),
+    path("moderation/", articles.ModerationListView.as_view(), name="moderation-list"),
+    path("article/<int:pk>/approve/", articles.approve_article, name="article-approve"),
+    path("article/<int:pk>/reject/", articles.reject_article, name="article-reject"),
     path(
         "article/<int:pk>/<slug:slug>/",
         articles.ArticleDetailView.as_view(),

@@ -102,9 +102,19 @@ class Category(models.Model):
 class Article(models.Model):
     """Wiki article model."""
 
+    STATUS_CHOICES = (
+        ("draft", "Bản nháp"),
+        ("pending", "Chờ duyệt"),
+        ("published", "Đã xuất bản"),
+        ("rejected", "Bị từ chối"),
+    )
+
     title = models.CharField(max_length=220)
     slug = models.SlugField(max_length=240, blank=True, db_index=True)
     content = MartorField()
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default="pending", db_index=True
+    )
     allow_comments = models.BooleanField(default=True)
     category = models.ForeignKey(
         Category,
