@@ -1,49 +1,30 @@
+"""
+Django settings for config project.
+"""
+
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def load_local_env(path):
-    if not path.exists():
-        return
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-    for raw_line in path.read_text(encoding='utf-8').splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith('#') or '=' not in line:
-            continue
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 
-        key, value = line.split('=', 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        os.environ.setdefault(key, value)
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 
-def env_bool(name, default=False):
-    value = os.getenv(name)
-    if value is None:
-        return default
-    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
-
-
-def env_list(name, default=None):
-    value = os.getenv(name)
-    if value is None:
-        return default or []
-    return [item.strip() for item in value.split(',') if item.strip()]
-
-
-load_local_env(BASE_DIR / '.env')
-
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-&=)qom7#3qdd(r^8_eivq+)wn2eos#rx9@=0z(u5w6e0e#*qz1',
-)
-DEBUG = env_bool('DJANGO_DEBUG', default=True)
-ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
-CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
-SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
-
+# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,7 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'martor',
-    'wiki.apps.WikiConfig',
+    'wiki',
 ]
 
 MIDDLEWARE = [
@@ -75,10 +56,10 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media',
             ],
         },
     },
@@ -86,6 +67,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+
+# Database
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -95,21 +79,31 @@ DATABASES = {
 }
 
 
+# Password validation
+# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.NumericPasswordValidator',
     },
 ]
 
+
+# Internationalization
+# https://docs.djangoproject.com/en/6.0/topics/i18n/
 
 LANGUAGE_CODE = os.getenv('DJANGO_LANGUAGE_CODE', 'vi')
 
@@ -120,6 +114,9 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/6.0/howto/static-files/
+
 STATIC_URL = 'static/'
 LOCAL_STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_DIRS = [LOCAL_STATIC_ROOT]
@@ -129,19 +126,14 @@ MEDIA_ROOT = LOCAL_MEDIA_ROOT
 MEDIA_URL = '/media/'
 
 try:
-    import channels  # noqa: F401
+    # pylint: disable=unused-import
+    import channels
 except ImportError:
     ASGI_APPLICATION = 'config.asgi.application'
 else:
     if 'channels' not in INSTALLED_APPS:
         INSTALLED_APPS.append('channels')
     ASGI_APPLICATION = 'config.asgi.application'
-
-STATICFILES_DIRS = [LOCAL_STATIC_ROOT]
-
-MEDIA_URL = '/media/'
-LOCAL_MEDIA_ROOT = BASE_DIR / 'media'
-MEDIA_ROOT = LOCAL_MEDIA_ROOT
 
 # Authentication
 LOGIN_URL = '/login/'
@@ -179,7 +171,7 @@ MARTOR_ALLOWED_UPLOADS = [
 ]
 
 try:
+    # pylint: disable=wildcard-import, unused-wildcard-import
     from .local_settings import *
 except ImportError:
     pass
-

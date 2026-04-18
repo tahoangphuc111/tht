@@ -1,6 +1,8 @@
-Django>=6.0,<6.1
-django-martor>=1.7.15
+Django>=5.2,<6.1
+martor>=1.7.16
 Pillow>=10.0
 xhtml2pdf
 python-docx
 PyPDF2
+python-dotenv
+django-dotenv

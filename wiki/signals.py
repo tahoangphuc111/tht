@@ -1,12 +1,18 @@
-from django.contrib.auth.models import Group, Permission, User
+"""
+Signals for the wiki application.
+"""
+from django.conf import settings
+from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 
 from .models import Category, Profile
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_or_update_profile(sender, instance, created, **kwargs):
+    """Create or update user profile when User is saved."""
+    # pylint: disable=unused-argument
     if created:
         Profile.objects.create(user=instance)
     else:
@@ -15,6 +21,8 @@ def create_or_update_profile(sender, instance, created, **kwargs):
 
 @receiver(post_migrate)
 def ensure_default_groups(sender, **kwargs):
+    """Create default groups and permissions after migration."""
+    # pylint: disable=unused-argument
     if sender.name != 'wiki':
         return
 
@@ -26,50 +34,32 @@ def ensure_default_groups(sender, **kwargs):
     admin_permissions = Permission.objects.filter(
         content_type__app_label='wiki',
         codename__in=[
-            'add_article',
-            'change_article',
-            'delete_article',
-            'view_article',
-            'add_category',
-            'change_category',
-            'delete_category',
-            'view_category',
-            'manage_all_articles',
-            'add_comment',
-            'change_comment',
-            'delete_comment',
-            'view_comment',
+            'add_article', 'change_article', 'delete_article', 'view_article',
+            'add_category', 'change_category', 'delete_category',
+            'view_category', 'manage_all_articles', 'add_comment',
+            'change_comment', 'delete_comment', 'view_comment',
         ],
     )
     editor_permissions = Permission.objects.filter(
         content_type__app_label='wiki',
         codename__in=[
-            'add_article',
-            'change_article',
-            'delete_article',
-            'view_article',
-            'view_category',
-            'add_comment',
-            'change_comment',
-            'delete_comment',
-            'view_comment',
+            'add_article', 'change_article', 'delete_article', 'view_article',
+            'view_category', 'add_comment', 'change_comment',
+            'delete_comment', 'view_comment',
         ],
     )
     contributor_permissions = Permission.objects.filter(
         content_type__app_label='wiki',
         codename__in=[
-            'add_article',
-            'change_article',
-            'delete_article',
-            'view_article',
-            'view_category',
-            'add_comment',
-            'view_comment',
+            'add_article', 'change_article', 'delete_article', 'view_article',
+            'view_category', 'add_comment', 'view_comment',
         ],
     )
     user_permissions = Permission.objects.filter(
         content_type__app_label='wiki',
-        codename__in=['view_article', 'view_category', 'add_comment', 'view_comment'],
+        codename__in=[
+            'view_article', 'view_category', 'add_comment', 'view_comment'
+        ],
     )
 
     admin_group.permissions.set(admin_permissions)
