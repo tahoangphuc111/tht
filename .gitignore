@@ -1,10 +1,39 @@
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+venv/
+.venv/
+pyvenv.cfg
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# django
+db.sqlite3
+media/
+static/
+local_settings.py
+.pylintrc
+.flake8
+
+# system/ide
 .vscode/
 .idea/
-.venv/
-venv/
-.env
-__pycache__/
-local_settings.py
-local_urls.py
-static/
-node_modules/
+.DS_Store
+Thumbs.db
