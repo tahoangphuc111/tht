@@ -80,4 +80,5 @@ def build_profile_stats(user, viewer=None):
         .count(),
         "comment_count": user.comments.count(),
         "total_users": User.objects.count(),
+        "badges": user.badges.select_related("badge").all(),
     }

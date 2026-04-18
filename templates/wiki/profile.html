@@ -140,6 +140,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                 </div>
                 <hr>
+                <div class="section-eyebrow mb-2">Huy hiệu đạt được</div>
+                <div class="d-flex gap-3 flex-wrap mb-4">
+                    {% for ub in badges %}
+                        <div class="text-center" title="{{ ub.badge.description }}">
+                            <div class="badge-icon mb-1" style="width: 48px; height: 48px; line-height: 48px; background: rgba(0, 113, 227, 0.1); color: #0071e3; border-radius: 12px; font-size: 1.25rem;">
+                                <i class="fa-solid {{ ub.badge.icon }}"></i>
+                            </div>
+                            <div class="small fw-bold">{{ ub.badge.name }}</div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted small">Chưa đạt được huy hiệu nào.</p>
+                    {% endfor %}
+                </div>
+                <hr>
                 <h2 class="h6">Vai trò</h2>
                 <div class="d-flex gap-2 flex-wrap">
                     {% for role in role_names %}

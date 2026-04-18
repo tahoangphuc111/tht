@@ -10,8 +10,11 @@ from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db.models import Count
+from django.http import JsonResponse
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from ..models import Article, Category, Comment
+from ..models import Article, Category, Comment, Bookmark, Notification
 from ..forms import SignUpForm
 from ..utils import can_publish_articles
 
@@ -75,3 +78,64 @@ def dismiss_guide_view(request):
     profile.save(update_fields=["guide_seen"])
     next_url = request.POST.get("next") or reverse_lazy("wiki:article-list")
     return HttpResponseRedirect(next_url)
+
+
+@login_required
+def toggle_bookmark_view(request, pk):
+    """AJAX view to bookmark or unbookmark an article."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    article = get_object_or_404(Article, pk=pk)
+    bookmark, created = Bookmark.objects.get_or_create(user=request.user, article=article)
+
+    if not created:
+        bookmark.delete()
+        is_bookmarked = False
+    else:
+        is_bookmarked = True
+
+    return JsonResponse(
+        {"is_bookmarked": is_bookmarked, "count": request.user.bookmarks.count()}
+    )
+
+
+@login_required
+def saved_articles_view(request):
+    """View returning a user's bookmarked articles as JSON."""
+    bookmarks = Bookmark.objects.filter(user=request.user).select_related("article")
+    data = [
+        {
+            "id": b.article.id,
+            "title": b.article.title,
+            "url": b.article.get_absolute_url(),
+            "category": b.article.category.name if b.article.category else "N/A",
+        }
+        for b in bookmarks
+    ]
+    return JsonResponse({"bookmarks": data})
+
+
+class NotificationListView(LoginRequiredMixin, ListView):
+    """View to display all in-app notifications for the current user."""
+
+    model = Notification
+    template_name = "wiki/notification_list.html"
+    context_object_name = "notifications"
+    paginate_by = 20
+
+    def get_queryset(self):
+        """Filter notifications for the logged-in user."""
+        return Notification.objects.filter(recipient=self.request.user)
+
+
+@login_required
+def mark_notification_read(request, pk):
+    """AJAX view to mark a specific notification as read."""
+    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    notification.is_read = True
+    notification.save(update_fields=["is_read"])
+    return JsonResponse({"success": True})
+
+
+from django.shortcuts import get_object_or_404

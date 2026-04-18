@@ -30,6 +30,16 @@
             
             <h1 class="display-4 fw-bolder text-dark mb-4 lh-tight" style="letter-spacing: -1px;">{{ article.title }}</h1>
             
+            {% if article.tags.exists %}
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    {% for tag in article.tags.all %}
+                        <a href="{% url 'wiki:article-list' %}?tag={{ tag.slug }}" class="btn btn-soft btn-sm rounded-pill px-3 py-1" style="font-size: 0.75rem;">
+                            <i class="fa-solid fa-tag me-1 opacity-50"></i>{{ tag.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <div class="d-flex align-items-center flex-wrap gap-4 mb-4">
                 <!-- User Info -->
                 <div class="d-flex align-items-center gap-2 text-secondary">
@@ -68,8 +78,8 @@
                         <button class="tool-btn article-copy-link" type="button" data-copy-url="{{ request.build_absolute_uri }}" title="Sao chép">
                             <i class="fa-solid fa-link"></i>
                         </button>
-                        <button class="tool-btn article-save-toggle" type="button" data-article-key="article-{{ article.pk }}" title="Lưu">
-                            <i class="fa-regular fa-bookmark"></i>
+                        <button class="tool-btn article-save-toggle {% if is_bookmarked %}text-primary{% endif %}" type="button" data-article-id="{{ article.pk }}" title="Lưu">
+                            <i class="{% if is_bookmarked %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
                         </button>
                         <button class="tool-btn article-focus-toggle" type="button" title="Tập trung">
                             <i class="fa-solid fa-eye"></i>

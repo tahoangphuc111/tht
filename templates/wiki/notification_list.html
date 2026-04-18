@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Thông báo | CP Wiki{% endblock %}
+
+{% block content %}
+<section class="app-card mb-4">
+    <div class="section-eyebrow mb-1">Activity</div>
+    <h1 class="hero-title-sm mb-0">Thông báo của bạn</h1>
+</section>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="app-card page-card p-4">
+            <div class="notification-list">
+                {% for note in notifications %}
+                    <div class="activity-item p-3 mb-2 rounded-3 {% if not note.is_read %}bg-light border-primary{% else %}border{% endif %}" style="border-left: 4px solid {% if not note.is_read %}var(--primary){% else %}transparent{% endif %};">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex gap-3">
+                                <div class="activity-icon bg-white">
+                                    <i class="fa-solid {% if 'bình luận' in note.message %}fa-comment-dots{% elif 'upvote' in note.message %}fa-circle-up{% else %}fa-bell{% endif %}"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">{{ note.message }}</div>
+                                    <div class="text-muted small">{{ note.created_at|date:"d/m/Y H:i" }} ({{ note.created_at|timesince }} trước)</div>
+                                    {% if note.link %}
+                                        <a href="{{ note.link }}" class="btn btn-sm btn-soft mt-2 rounded-pill px-3" onclick="markAsRead({{ note.id }})">Xem chi tiết</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if not note.is_read %}
+                                <button class="btn btn-sm btn-link text-decoration-none" onclick="markReadInline(this, {{ note.id }})">Đánh dấu đã đọc</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state centered">Bạn không có thông báo nào.</div>
+                {% endfor %}
+            </div>
+
+            {% if is_paginated %}
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Trước</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Sau</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+async function markReadInline(btn, id) {
+    try {
+        const r = await fetch(`/notification/${id}/read/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const d = await r.json();
+        if (d.success) {
+            const item = btn.closest('.activity-item');
+            item.style.borderLeftColor = 'transparent';
+            item.classList.remove('bg-light', 'border-primary');
+            item.classList.add('border');
+            btn.remove();
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+</script>
+{% endblock %}

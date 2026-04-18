@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils.text import slugify
 from martor.models import MartorField
+from taggit.managers import TaggableManager
 
 
 def get_uncategorized_category():
@@ -130,6 +131,7 @@ class Article(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    tags = TaggableManager(blank=True)
 
     class Meta:
         """Metadata for Article."""
@@ -437,3 +439,84 @@ class UserAnswer(models.Model):
 
     def __str__(self):
         return f"Answer by {self.user} for {self.question}"
+
+
+class Bookmark(models.Model):
+    """Model for articles bookmarked by users."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bookmarks"
+    )
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name="bookmarked_by"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Metadata for Bookmark."""
+
+        unique_together = (("user", "article"),)
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} bookmarked {self.article}"
+
+
+class Notification(models.Model):
+    """Model for in-app notifications."""
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
+    )
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_notifications",
+        null=True,
+        blank=True,
+    )
+    message = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Metadata for Notification."""
+
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Notification for {self.recipient}: {self.message}"
+
+
+class Badge(models.Model):
+    """Model for achievements/badges."""
+
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=120, unique=True)
+    description = models.TextField()
+    icon = models.CharField(
+        max_length=50, help_text="FontAwesome class, e.g., 'fa-trophy'"
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class UserBadge(models.Model):
+    """Link between users and badges they have earned."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="badges"
+    )
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name="awarded_to")
+    awarded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Metadata for UserBadge."""
+
+        unique_together = (("user", "badge"),)
+        ordering = ["-awarded_at"]
+
+    def __str__(self):
+        return f"{self.user} earned {self.badge}"

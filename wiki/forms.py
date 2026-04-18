@@ -181,6 +181,7 @@ class ArticleForm(forms.ModelForm):
             "title",
             "slug",
             "category",
+            "tags",
             "allow_comments",
             "content",
             "change_summary",
@@ -188,6 +189,13 @@ class ArticleForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["tags"].widget.attrs.update(
+            {
+                "class": "form-control",
+                "placeholder": "Gắn thẻ (ví dụ: segment-tree, dp, math)",
+            }
+        )
+        self.fields["tags"].help_text = "Các thẻ cách nhau bằng dấu phẩy."
         self.fields["title"].widget.attrs.update(
             {
                 "class": "form-control form-control-lg",

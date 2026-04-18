@@ -41,6 +41,33 @@
                     {% endif %}
                 </ul>
                 <div class="d-flex gap-2 align-items-center flex-wrap">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-soft btn-sm rounded-pill px-3 position-relative" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-bell"></i>
+                                {% if unread_notifications_count > 0 %}
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                        {{ unread_notifications_count }}
+                                    </span>
+                                {% endif %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius: 12px; width: 300px;">
+                                <li class="px-2 py-1"><h6 class="dropdown-header px-0">Thông báo mới nhất</h6></li>
+                                {% for note in latest_notifications %}
+                                    <li>
+                                        <a class="dropdown-item rounded-2 py-2 {% if not note.is_read %}fw-bold{% endif %}" href="{% if note.link %}{{ note.link }}{% else %}#{% endif %}" onclick="markAsRead({{ note.id }})">
+                                            <div class="small text-wrap">{{ note.message }}</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;">{{ note.created_at|timesince }} trước</div>
+                                        </a>
+                                    </li>
+                                {% empty %}
+                                    <li class="px-3 py-2 text-muted small">Không có thông báo nào.</li>
+                                {% endfor %}
+                                <li><hr class="dropdown-divider opacity-50"></li>
+                                <li><a class="dropdown-item rounded-2 text-center small text-primary" href="{% url 'wiki:notification-list' %}">Xem tất cả</a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
                     <button class="btn btn-soft btn-sm rounded-pill px-3 saved-articles-trigger" type="button" data-bs-toggle="modal" data-bs-target="#savedArticlesModal">
                         <i class="fa-solid fa-bookmark me-1"></i>
                         Đã lưu

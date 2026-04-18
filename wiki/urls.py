@@ -14,6 +14,10 @@ urlpatterns = [
     path("getting-started/", base.getting_started_view, name="getting-started"),
     path("dismiss-guide/", base.dismiss_guide_view, name="dismiss-guide"),
     path("signup/", base.signup_view, name="signup"),
+    path("toggle-bookmark/<int:pk>/", base.toggle_bookmark_view, name="toggle-bookmark"),
+    path("saved-articles/", base.saved_articles_view, name="saved-articles-json"),
+    path("notifications/", base.NotificationListView.as_view(), name="notification-list"),
+    path("notification/<int:pk>/read/", base.mark_notification_read, name="notification-read"),
     # Articles (Specific routes first)
     path("articles/", articles.ArticleListView.as_view(), name="article-list"),
     path(

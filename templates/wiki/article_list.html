@@ -122,6 +122,17 @@
                             <i class="fa-solid fa-lock text-muted me-1"></i> Đã khóa
                         {% endif %}
                     </div>
+                    
+                    {% if article.tags.exists %}
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {% for tag in article.tags.all %}
+                                <a href="?tag={{ tag.slug }}" class="btn btn-soft btn-sm rounded-pill px-2 py-0 border-0" style="font-size: 0.7rem;">
+                                    <i class="fa-solid fa-tag me-1 opacity-50"></i>{{ tag.name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
                     <p class="mb-3 text-dark opacity-75 fs-5">{{ article.content|striptags|truncatechars:240 }}</p>
                     
                     {% if is_moderation_view %}

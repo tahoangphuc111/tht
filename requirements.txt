@@ -6,3 +6,4 @@ python-docx
 PyPDF2
 python-dotenv
 django-dotenv
+django-taggit

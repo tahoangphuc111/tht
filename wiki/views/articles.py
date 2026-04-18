@@ -19,7 +19,7 @@ from django.views.generic import (
 )
 from xhtml2pdf import pisa
 
-from ..models import Article, Category, ArticleRevision
+from ..models import Article, Category, ArticleRevision, Bookmark
 from ..forms import ArticleForm, CommentForm
 from ..utils import save_article_revision, can_publish_articles
 
@@ -56,6 +56,7 @@ class ArticleListView(ListView):
         q = self.request.GET.get("q", "")
         auth = self.request.GET.get("author", "")
         cat = self.request.GET.get("category", "")
+        tag = self.request.GET.get("tag", "")
         sort = self.request.GET.get("sort", "newest")
         status = self.request.GET.get("status", "")
 
@@ -65,6 +66,8 @@ class ArticleListView(ListView):
             qs = qs.filter(author__username__icontains=auth)
         if cat:
             qs = qs.filter(category__slug=cat)
+        if tag:
+            qs = qs.filter(tags__slug=tag)
         if status and can_manage:
             qs = qs.filter(status=status)
 
@@ -151,6 +154,7 @@ class ArticleDetailView(DetailView):
                     f"{random.randint(1, 8)} + {random.randint(1, 8)} = ?"
                 ),
                 "article_vote_score": article.vote_score,
+                "is_bookmarked": user.is_authenticated and Bookmark.objects.filter(user=user, article=article).exists(),
             }
         )
         return context
