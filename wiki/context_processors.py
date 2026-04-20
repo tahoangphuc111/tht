@@ -4,6 +4,7 @@ Context processors for the wiki application.
 
 from .models import Notification
 
+
 def notifications_count(request):
     """Return the count of unread notifications for the current user."""
     if request.user.is_authenticated:

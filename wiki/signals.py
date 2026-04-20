@@ -11,11 +11,13 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """Automatically create a profile when a new user is created."""
     if created:
         Profile.objects.create(user=instance)
+
 
 @receiver(post_save, sender=Comment)
 def notify_on_new_comment(sender, instance, created, **kwargs):

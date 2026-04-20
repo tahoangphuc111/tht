@@ -2,7 +2,7 @@
 Base views for the wiki application.
 """
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -136,6 +136,3 @@ def mark_notification_read(request, pk):
     notification.is_read = True
     notification.save(update_fields=["is_read"])
     return JsonResponse({"success": True})
-
-
-from django.shortcuts import get_object_or_404
