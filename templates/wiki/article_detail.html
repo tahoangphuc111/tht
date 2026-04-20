@@ -81,6 +81,9 @@
                         <button class="tool-btn article-save-toggle {% if is_bookmarked %}text-primary{% endif %}" type="button" data-article-id="{{ article.pk }}" title="Lưu">
                             <i class="{% if is_bookmarked %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
                         </button>
+                        <button class="tool-btn text-danger report-btn" type="button" data-bs-toggle="modal" data-bs-target="#reportModal" data-article-id="{{ article.pk }}" title="Báo cáo">
+                            <i class="fa-solid fa-flag"></i>
+                        </button>
                         <button class="tool-btn article-focus-toggle" type="button" title="Tập trung">
                             <i class="fa-solid fa-eye"></i>
                         </button>
@@ -320,4 +323,144 @@
     </div>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="reportModalLabel">Báo cáo nội dung</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="report-form">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Lý do báo cáo</label>
+                        <select class="form-select rounded-3 border-light bg-light" id="report-reason" required>
+                            <option value="" selected disabled>Chọn lý do...</option>
+                            <option value="spam">Spam / Quảng cáo</option>
+                            <option value="inappropriate">Nội dung không phù hợp</option>
+                            <option value="copyright">Vi phạm bản quyền</option>
+                            <option value="error">Lỗi nội dung / Thông tin sai lệch</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả chi tiết (tùy chọn)</label>
+                        <textarea class="form-control rounded-3 border-light bg-light" id="report-description" rows="3" placeholder="Nhập thêm chi tiết nếu cần..."></textarea>
+                    </div>
+                    <input type="hidden" id="report-article-id" value="{{ article.pk }}">
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold" id="submit-report-btn">Gửi báo cáo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Apple-style UI Enhancements */
+.choice-wrapper {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+.choice-wrapper:hover {
+    background-color: rgba(0, 122, 255, 0.05);
+    transform: translateX(5px);
+}
+.form-check-input:checked + .form-check-label {
+    font-weight: 600;
+}
+.bg-success {
+    background-color: #34c759 !important;
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2);
+}
+.bg-danger {
+    background-color: #ff3b30 !important;
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.2);
+}
+.explanation-box {
+    border-radius: 12px;
+    border: none;
+    animation: slideDown 0.4s ease-out;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Reporting Logic
+    const reportForm = document.getElementById("report-form");
+    const submitReportBtn = document.getElementById("submit-report-btn");
+
+    if (reportForm) {
+        reportForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            
+            const reason = document.getElementById("report-reason").value;
+            const description = document.getElementById("report-description").value;
+            const articleId = document.getElementById("report-article-id").value;
+
+            submitReportBtn.disabled = true;
+            submitReportBtn.innerText = "Đang gửi...";
+
+            fetch("{% url 'wiki:report-content' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                },
+                body: JSON.stringify({
+                    reason: reason,
+                    description: description,
+                    article_id: articleId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
+                    reportForm.reset();
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Có lỗi xảy ra khi gửi báo cáo.");
+            })
+            .finally(() => {
+                submitReportBtn.disabled = false;
+                submitReportBtn.innerText = "Gửi báo cáo";
+            });
+        });
+    }
+
+    // Enhance Quiz Interaction
+    const choiceWrappers = document.querySelectorAll(".choice-wrapper");
+    choiceWrappers.forEach(wrapper => {
+        wrapper.addEventListener("click", function() {
+            const input = this.querySelector("input");
+            if (!input.disabled) {
+                input.checked = true;
+                // Add temporary focus effect
+                choiceWrappers.forEach(w => w.classList.remove('border-primary'));
+                this.classList.add('border-primary');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

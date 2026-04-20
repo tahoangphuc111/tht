@@ -489,6 +489,40 @@ class Notification(models.Model):
         return f"Notification for {self.recipient}: {self.message}"
 
 
+class Report(models.Model):
+    """Model for tracking user reports for articles and comments."""
+
+    REPORT_REASONS = (
+        ("spam", "Spam / Quảng cáo"),
+        ("inappropriate", "Nội dung không phù hợp"),
+        ("copyright", "Vi phạm bản quyền"),
+        ("error", "Lỗi nội dung / Thông tin sai lệch"),
+        ("other", "Khác"),
+    )
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reports"
+    )
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, related_name="reports", null=True, blank=True
+    )
+    comment = models.ForeignKey(
+        Comment, on_delete=models.CASCADE, related_name="reports", null=True, blank=True
+    )
+    reason = models.CharField(max_length=20, choices=REPORT_REASONS)
+    description = models.TextField(blank=True)
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        """Metadata for Report."""
+
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        target = self.article or self.comment
+        return f"Report by {self.reporter} on {target}"
+
+
 class Badge(models.Model):
     """Model for achievements/badges."""
 

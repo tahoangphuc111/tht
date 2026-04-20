@@ -4,13 +4,14 @@ URL configuration for the wiki application.
 
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from .views import base, articles, users, voting, files, categories, quiz
+from .views import base, articles, users, voting, files, categories, quiz, moderation
 
 app_name = "wiki"
 
 urlpatterns = [
     # Base
     path("", base.home_view, name="home"),
+    path("report-content/", moderation.report_content_view, name="report-content"),
     path("getting-started/", base.getting_started_view, name="getting-started"),
     path("dismiss-guide/", base.dismiss_guide_view, name="dismiss-guide"),
     path("signup/", base.signup_view, name="signup"),
