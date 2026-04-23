@@ -71,6 +71,7 @@ class UserListView(ListView):
             User.objects.select_related("profile")
             .annotate(
                 article_count=Count("articles", distinct=True),
+                comment_count=Count("comments", distinct=True),
                 vote_score=(
                     Count("user_votes", filter=Q(user_votes__value=1))
                     - Count("user_votes", filter=Q(user_votes__value=-1))
@@ -84,3 +85,9 @@ class UserListView(ListView):
                 Q(username__icontains=query) | Q(profile__display_name__icontains=query)
             )
         return qs
+
+    def get_context_data(self, **kwargs):
+        """Keep the current search term in the UI."""
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get("q", "").strip()
+        return context

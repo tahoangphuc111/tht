@@ -2,7 +2,7 @@
 Base views for the wiki application.
 """
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -21,8 +21,9 @@ from ..utils import can_publish_articles
 
 def home_view(request):
     """Homepage view showing featured, latest and top items."""
+    visible_articles = Article.objects.filter(status="published")
     featured = (
-        Article.objects.select_related("author", "category")
+        visible_articles.select_related("author", "category")
         .annotate(comment_count=Count("comments"))
         .order_by("-updated_at")
         .first()
@@ -30,7 +31,7 @@ def home_view(request):
 
     context = {
         "featured_article": featured,
-        "latest_articles": Article.objects.select_related(
+        "latest_articles": visible_articles.select_related(
             "author", "category"
         ).order_by("-created_at")[:4],
         "recent_comments": Comment.objects.select_related("author", "article")
@@ -39,8 +40,9 @@ def home_view(request):
         "top_categories": Category.objects.annotate(
             article_total=Count("articles")
         ).order_by("-article_total")[:6],
-        "total_articles": Article.objects.count(),
+        "total_articles": visible_articles.count(),
         "total_comments": Comment.objects.filter(is_approved=True).count(),
+        "open_comment_articles": visible_articles.filter(allow_comments=True).count(),
         "can_publish": can_publish_articles(request.user),
     }
     return render(request, "wiki/home.html", context)
@@ -136,6 +138,3 @@ def mark_notification_read(request, pk):
     notification.is_read = True
     notification.save(update_fields=["is_read"])
     return JsonResponse({"success": True})
-
-
-from django.shortcuts import get_object_or_404

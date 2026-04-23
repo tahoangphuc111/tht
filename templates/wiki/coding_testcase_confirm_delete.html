@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}xóa testcase | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row confirm-shell">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-sm mt-5 app-card confirm-card">
+            <div class="card-body p-4 p-md-5 text-center">
+                <div class="section-eyebrow mb-2">Danger Zone</div>
+                <h1 class="hero-title-sm mb-3">Xóa testcase?</h1>
+                <p class="text-secondary mb-4">Bạn có chắc muốn xóa testcase <strong>{{ object.name }}</strong> khỏi mini OJ của bài viết này?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-row justify-content-center">
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Xóa</button>
+                        <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

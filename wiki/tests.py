@@ -259,3 +259,29 @@ class WikiFlowTests(TestCase):
         self.assertRedirects(
             response, reverse("wiki:public-profile", args=[self.author.pk])
         )
+
+    def test_non_author_cannot_create_quiz_question_by_direct_url(self):
+        """Quiz question create must be restricted to the article owner."""
+        self.client.login(username="other", password="StrongPass123")
+        response = self.client.get(
+            reverse("wiki:question-create", args=[self.article.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            reverse("wiki:article-detail", args=[self.article.pk, self.article.slug]),
+        )
+
+    def test_profile_page_has_required_context(self):
+        """Profile page should receive the data its template depends on."""
+        self.client.login(username="author", password="StrongPass123")
+        response = self.client.get(reverse("wiki:profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("profile", response.context)
+        self.assertIn("chart_labels", response.context)
+        self.assertIn("recent_comments", response.context)
+
+    def test_guest_saved_articles_endpoint_redirects_to_login(self):
+        """Saved articles endpoint should stay protected for guests."""
+        response = self.client.get(reverse("wiki:saved-articles-json"))
+        self.assertEqual(response.status_code, 302)

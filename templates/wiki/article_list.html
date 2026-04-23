@@ -6,31 +6,31 @@
 <section class="hero-panel mb-5">
     <div class="row g-4 align-items-center">
         <div class="col-lg-7">
-            <div class="section-eyebrow mb-2">Competitive Programming Notebook</div>
+            <div class="ui-eyebrow mb-2">Competitive Programming Notebook</div>
             <h1 class="hero-title mb-3">Tra cứu kiến thức thuật toán & Cấu trúc dữ liệu</h1>
             <p class="hero-copy mb-4">Lưu lại pattern, cấu trúc dữ liệu, chiến thuật contest và ghi chú tối ưu. Thảo luận và chia sẻ kinh nghiệm cùng cộng đồng CP Wiki.</p>
             <div class="d-flex gap-2 flex-wrap">
                 {% if can_publish %}
-                    <a class="btn btn-primary rounded-pill px-4 shadow-sm" href="{% url 'wiki:article-create' %}">
+                    <a class="btn btn-primary px-4" href="{% url 'wiki:article-create' %}">
                         <i class="fa-solid fa-plus me-2"></i>Tạo bài viết
                     </a>
                 {% else %}
-                    <a class="btn btn-primary rounded-pill px-4 shadow-sm" href="{% url 'wiki:signup' %}">
+                    <a class="btn btn-primary px-4" href="{% url 'wiki:signup' %}">
                         <i class="fa-solid fa-rocket me-2"></i>Bắt đầu ngay
                     </a>
                 {% endif %}
-                <a class="btn btn-soft rounded-pill px-4" href="{% url 'wiki:getting-started' %}">
+                <a class="btn btn-soft px-4" href="{% url 'wiki:getting-started' %}">
                     <i class="fa-solid fa-book me-2"></i>Xem hướng dẫn
                 </a>
             </div>
         </div>
         <div class="col-lg-5">
             <div class="stat-grid">
-                <div class="stat-card app-card">
+                <div class="stat-card">
                     <div class="stat-value">{{ articles.paginator.count }}</div>
                     <div class="stat-label"><i class="fa-solid fa-newspaper me-1"></i> Bài viết</div>
                 </div>
-                <div class="stat-card app-card">
+                <div class="stat-card">
                     <div class="stat-value">{{ categories|length }}</div>
                     <div class="stat-label"><i class="fa-solid fa-tags me-1"></i> Danh mục</div>
                 </div>
@@ -59,7 +59,7 @@
     </div>
 {% endif %}
 
-<div class="card shadow-sm border-0 mb-5 app-card overflow-hidden">
+<div class="ui-card mb-5 overflow-hidden">
     <div class="card-body p-4">
         <form method="get" class="row g-3">
             <div class="col-lg-4 col-md-6">
@@ -97,13 +97,13 @@
 <div class="row g-4">
     {% for article in articles %}
         <div class="col-12">
-            <div class="card border-0 shadow-sm h-100 app-card article-card overflow-hidden">
+            <div class="ui-card article-card overflow-hidden">
                 <div class="card-body p-4 p-lg-5">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <div>
-                            <span class="pill-badge bg-primary text-white border-0">{{ article.category.name }}</span>
+                            <span class="ui-badge ui-badge--primary">{{ article.category.name }}</span>
                             {% if article.status != 'published' %}
-                                <span class="pill-badge bg-warning text-dark border-0 ms-2">{{ article.get_status_display }}</span>
+                                <span class="ui-badge ui-badge--warning ms-2">{{ article.get_status_display }}</span>
                             {% endif %}
                         </div>
                         <span class="text-secondary small"><i class="fa-solid fa-calendar-day me-1"></i>{{ article.created_at|date:"d/m/Y" }}</span>
@@ -135,14 +135,26 @@
 
                     <p class="mb-3 text-dark opacity-75 fs-5">{{ article.content|striptags|truncatechars:240 }}</p>
                     
-                    {% if is_moderation_view %}
-                        <div class="d-flex gap-2 mt-4">
-                            <a href="{% url 'wiki:article-approve' article.pk %}" class="btn btn-success rounded-pill px-4 shadow-sm">
-                                <i class="fa-solid fa-check me-2"></i>Duyệt bài
-                            </a>
-                            <a href="{% url 'wiki:article-reject' article.pk %}" class="btn btn-danger rounded-pill px-4 shadow-sm">
-                                <i class="fa-solid fa-xmark me-2"></i>Từ chối
-                            </a>
+                    {% if article.status == 'pending' and user.is_authenticated and user.is_superuser %}
+                        <div class="d-flex flex-wrap gap-2 mt-4">
+                            <form method="post" action="{% url 'wiki:article-approve' article.pk %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
+                                    <i class="fa-solid fa-check me-2"></i>Duyệt bài
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'wiki:article-request-changes' article.pk %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning rounded-pill px-4 shadow-sm">
+                                    <i class="fa-solid fa-pen-nib me-2"></i>Yêu cầu sửa
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'wiki:article-reject' article.pk %}" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm">
+                                    <i class="fa-solid fa-xmark me-2"></i>Từ chối
+                                </button>
+                            </form>
                         </div>
                     {% endif %}
                 </div>
@@ -150,7 +162,7 @@
         </div>
     {% empty %}
         <div class="col-12">
-            <div class="empty-state centered p-5 app-card">
+            <div class="ui-empty-state">
                 <i class="fa-solid fa-box-open fs-1 text-muted mb-3 d-block"></i>
                 <span class="fs-5">Chưa có bài viết phù hợp với bộ lọc hiện tại.</span>
                 {% if query or selected_author or selected_category or selected_discussion or selected_sort != 'newest' %}
@@ -165,13 +177,13 @@
 
 {% if is_paginated %}
     <nav class="mt-5">
-        <ul class="pagination justify-content-center gap-2">
+        <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link rounded-pill px-4 border-0 shadow-sm" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-chevron-left me-1"></i> Trước</a></li>
+                <li class="page-item"><a class="page-link px-4" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-chevron-left me-1"></i> Trước</a></li>
             {% endif %}
-            <li class="page-item active"><span class="page-link rounded-pill border-0 shadow-sm px-4 bg-primary">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+            <li class="page-item active"><span class="page-link px-4">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
             {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link rounded-pill px-4 border-0 shadow-sm" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}">Sau <i class="fa-solid fa-chevron-right ms-1"></i></a></li>
+                <li class="page-item"><a class="page-link px-4" href="?q={{ query }}&author={{ selected_author }}&category={{ selected_category }}&discussion={{ selected_discussion }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}">Sau <i class="fa-solid fa-chevron-right ms-1"></i></a></li>
             {% endif %}
         </ul>
     </nav>

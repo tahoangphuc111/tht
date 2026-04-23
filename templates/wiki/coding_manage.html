@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}bài tập code - {{ article.title }} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm app-card">
+            <div class="card-body p-4 p-lg-5">
+                <a href="{{ article.get_absolute_url }}" class="back-link mb-3">&larr; Quay lại bài viết</a>
+                <div class="section-eyebrow mb-2">Mini OJ</div>
+                <h1 class="hero-title-sm mb-3">Cấu hình bài tập code</h1>
+                <p class="text-secondary mb-4">Bật/tắt Monaco, chọn ngôn ngữ, giới hạn chấm và starter code cho từng language.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                        <div class="mb-4">
+                            {% if field.name == 'is_enabled' %}
+                                <div class="form-check">
+                                    {{ field }}
+                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                </div>
+                            {% else %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="action-row">
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">Lưu cấu hình</button>
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm app-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <div class="section-eyebrow mb-1">Testcases</div>
+                        <h2 class="h4 mb-0">Bộ test hiện có</h2>
+                    </div>
+                    <a href="{% url 'wiki:coding-testcase-create' exercise.pk %}" class="btn btn-primary rounded-pill px-3">Thêm test</a>
+                </div>
+                <div class="stack-list">
+                    {% for testcase in testcases %}
+                        <div class="stack-item">
+                            <div>
+                                <div class="fw-semibold">{{ testcase.name }}</div>
+                                <div class="stack-item__meta">
+                                    {% if testcase.is_sample %}sample{% else %}hidden{% endif %}
+                                    • order {{ testcase.order }}
+                                    • {{ testcase.score }} điểm
+                                </div>
+                            </div>
+                            <div class="stack-item__actions">
+                                <a href="{% url 'wiki:coding-testcase-edit' testcase.pk %}" class="btn btn-sm btn-outline-secondary px-3">Sửa</a>
+                                <a href="{% url 'wiki:coding-testcase-delete' testcase.pk %}" class="btn btn-sm btn-outline-danger px-3">Xóa</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="empty-state centered">Chưa có testcase nào.</div>
+                    {% endfor %}
+                </div>
+
+                <hr>
+                <div class="section-eyebrow mb-1">Enabled</div>
+                <div class="d-flex gap-2 flex-wrap">
+                    {% for language in enabled_languages %}
+                        <span class="pill-badge">{{ language.label }}</span>
+                    {% empty %}
+                        <span class="text-secondary small">Chưa có runtime nào sẵn sàng trên máy chủ.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

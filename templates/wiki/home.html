@@ -6,7 +6,7 @@
 <section class="hero-panel mb-5">
     <div class="row g-4 align-items-center">
         <div class="col-lg-7">
-            <div class="section-eyebrow mb-2">Home Dashboard</div>
+            <div class="ui-eyebrow mb-2">Home Dashboard</div>
             <h1 class="hero-title mb-3">Ghi chú thuật toán & Thảo luận cộng đồng</h1>
             <p class="hero-copy mb-4">Không gian trung tâm cho ghi chú contest, bài viết và thảo luận của nhóm. Vào là thấy ngay bài nổi bật, danh mục nhiều nội dung và toàn cảnh hoạt động của wiki.</p>
             <div class="d-flex gap-3 flex-wrap">
@@ -14,11 +14,11 @@
                     <i class="fa-solid fa-compass me-2"></i>Khám phá bài viết
                 </a>
                 {% if can_publish %}
-                    <a class="btn btn-soft btn-lg rounded-pill px-4" href="{% url 'wiki:article-create' %}">
+                    <a class="btn btn-soft btn-lg px-4" href="{% url 'wiki:article-create' %}">
                         <i class="fa-solid fa-plus me-2"></i>Viết bài mới
                     </a>
                 {% elif not user.is_authenticated %}
-                    <a class="btn btn-soft btn-lg rounded-pill px-4" href="{% url 'wiki:signup' %}">
+                    <a class="btn btn-soft btn-lg px-4" href="{% url 'wiki:signup' %}">
                         <i class="fa-solid fa-user-plus me-2"></i>Tạo tài khoản
                     </a>
                 {% endif %}
@@ -26,11 +26,11 @@
         </div>
         <div class="col-lg-5">
             <div class="stat-grid">
-                <div class="stat-card app-card">
+                <div class="stat-card">
                     <div class="stat-value">{{ total_articles }}</div>
                     <div class="stat-label"><i class="fa-solid fa-file-lines me-1"></i> Bài viết</div>
                 </div>
-                <div class="stat-card app-card">
+                <div class="stat-card">
                     <div class="stat-value">{{ total_comments }}</div>
                     <div class="stat-label"><i class="fa-solid fa-comment-dots me-1"></i> Bình luận</div>
                 </div>
@@ -41,48 +41,71 @@
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm app-card h-100">
+        <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4 p-lg-5">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                     <div>
-                        <div class="section-eyebrow mb-1">Featured</div>
-                        <h2 class="hero-title-sm mb-0"><i class="fa-solid fa-star text-warning me-2"></i>Bài viết nổi bật</h2>
+                        <div class="featured-label">Featured</div>
+                        <div class="featured-title-row">
+                            <i class="fa-solid fa-star star-icon"></i>
+                            <h1>Bài viết nổi bật</h1>
+                        </div>
                     </div>
-                    <span class="pill-badge">{{ open_comment_articles }} bài đang mở bình luận</span>
+                    <span class="featured-comment-status">{{ open_comment_articles|default:"0" }} bài đang mở bình luận</span>
                 </div>
+
                 {% if featured_article %}
-                    <article class="featured-article p-4 rounded-4 bg-white bg-opacity-50 border border-white">
-                        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
-                            <span class="pill-badge bg-primary text-white border-0">{{ featured_article.category.name }}</span>
-                            <span class="text-secondary small"><i class="fa-solid fa-clock me-1"></i> {{ featured_article.updated_at|date:"d/m/Y" }}</span>
+                    <article class="featured-card">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <a href="{{ featured_article.category.get_absolute_url }}" class="category-badge-square">{{ featured_article.category.name }}</a>
+                                <span class="text-secondary small d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-clock opacity-50"></i> {{ featured_article.updated_at|date:"d/m/Y" }}
+                                </span>
+                            </div>
+                            
+                            <h3 class="mb-3">
+                                <a class="article-title-link" href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a>
+                            </h3>
+
+                            <div class="meta-info mb-3">
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-user-pen"></i> 
+                                    <a class="author-link" href="{% url 'wiki:public-profile' featured_article.author.username %}">{{ featured_article.author.username }}</a>
+                                </span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-comment"></i> {{ featured_article.comment_count }}
+                                </span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-book-open"></i> {{ featured_article.reading_time_minutes }} phút
+                                </span>
+                                <span class="ms-2 text-muted opacity-75">{{ featured_article.content|striptags|truncatechars:50 }}</span>
+                            </div>
+
+                            <p class="text-secondary mb-0 d-none d-md-block">{{ featured_article.content|striptags|truncatechars:120 }}</p>
                         </div>
-                        <h3 class="h2 mb-3"><a class="text-decoration-none article-link fw-bold" href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a></h3>
-                        <div class="item-meta mb-3">
-                            <i class="fa-solid fa-user-pen me-1"></i> <a class="article-link text-decoration-none fw-semibold" href="{% url 'wiki:public-profile' featured_article.author.username %}">{{ featured_article.author.username }}</a>
-                            <span class="mx-2">•</span>
-                            <i class="fa-solid fa-comment me-1"></i> {{ featured_article.comment_count }}
-                            <span class="mx-2">•</span>
-                            <i class="fa-solid fa-book-open me-1"></i> {{ featured_article.reading_time_minutes }} phút
-                        </div>
-                        <p class="text-secondary mb-4 fs-5">{{ featured_article.content|striptags|truncatechars:260 }}</p>
-                        <a class="btn btn-dark rounded-pill px-4" href="{{ featured_article.get_absolute_url }}">Đọc bài tiếp <i class="fa-solid fa-arrow-right ms-2"></i></a>
+
+                        <a href="{{ featured_article.get_absolute_url }}" class="read-next-circle">
+                            <span>Đọc bài tiếp</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
                     </article>
                 {% else %}
-                    <div class="empty-state">Chưa có bài viết nào để hiển thị nổi bật.</div>
+                    <div class="empty-state">Chưa có bài viết nổi bật.</div>
                 {% endif %}
             </div>
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm app-card h-100">
+        <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
-                <div class="section-eyebrow mb-1">Top Categories</div>
+                <div class="ui-eyebrow mb-1">Top Categories</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-tags text-primary me-2"></i>Danh mục</h2>
                 <div class="sidebar-stack">
                     {% for category in top_categories %}
-                        <a class="sidebar-link-item app-card p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-center" href="{{ category.get_absolute_url }}">
+                        <a class="sidebar-link-item ui-card p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-center" href="{{ category.get_absolute_url }}">
                             <span class="fw-semibold">{{ category.name }}</span>
-                            <span class="pill-badge border-0 shadow-sm">{{ category.article_total }}</span>
+                            <span class="ui-badge ui-badge--primary">{{ category.article_total }}</span>
                         </a>
                     {% empty %}
                         <div class="empty-state">Chưa có danh mục nào.</div>
@@ -95,9 +118,9 @@
 
 <div class="row g-4 mt-2">
     <div class="col-lg-7">
-        <div class="card border-0 shadow-sm app-card h-100">
+        <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
-                <div class="section-eyebrow mb-1">Latest Articles</div>
+                <div class="ui-eyebrow mb-1">Latest Articles</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-newspaper text-info me-2"></i>Bài mới đăng</h2>
                 <div class="sidebar-stack">
                     {% for article in latest_articles %}
@@ -120,9 +143,9 @@
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm app-card h-100">
+        <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
-                <div class="section-eyebrow mb-1">Recent Discussion</div>
+                <div class="ui-eyebrow mb-1">Recent Discussion</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-comments text-success me-2"></i>Bình luận mới</h2>
                 <div class="sidebar-stack">
                     {% for comment in recent_comments %}

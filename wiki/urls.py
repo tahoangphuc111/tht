@@ -2,15 +2,26 @@
 URL configuration for the wiki application.
 """
 
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
-from .views import base, articles, users, voting, files, categories, quiz
+from .views import (
+    articles,
+    base,
+    categories,
+    coding,
+    files,
+    moderation,
+    quiz,
+    users,
+    voting,
+)
 
 app_name = "wiki"
 
 urlpatterns = [
     # Base
     path("", base.home_view, name="home"),
+    path("report-content/", moderation.report_content_view, name="report-content"),
     path("getting-started/", base.getting_started_view, name="getting-started"),
     path("dismiss-guide/", base.dismiss_guide_view, name="dismiss-guide"),
     path("signup/", base.signup_view, name="signup"),
@@ -56,6 +67,10 @@ urlpatterns = [
     path("moderation/", articles.ModerationListView.as_view(), name="moderation-list"),
     path("article/<int:pk>/approve/", articles.approve_article, name="article-approve"),
     path("article/<int:pk>/reject/", articles.reject_article, name="article-reject"),
+    path("article/<int:pk>/request-changes/", articles.request_changes_article, name="article-request-changes"),
+
+
+
     path(
         "article/<int:pk>/<slug:slug>/",
         articles.ArticleDetailView.as_view(),
@@ -89,6 +104,57 @@ urlpatterns = [
         quiz.submit_quiz_view,
         name="submit-quiz",
     ),
+    path(
+        "article/<int:article_pk>/quiz/upload/",
+        quiz.upload_quiz_file_view,
+        name="upload-quiz-file",
+    ),
+    path(
+        "article/<int:article_pk>/quiz/question/create/",
+        quiz.QuestionCreateView.as_view(),
+        name="question-create",
+    ),
+    path(
+        "question/<int:pk>/edit/",
+        quiz.QuestionUpdateView.as_view(),
+        name="question-edit",
+    ),
+    path(
+        "question/<int:pk>/delete/",
+        quiz.QuestionDeleteView.as_view(),
+        name="question-delete",
+    ),
+    # Coding exercise
+    path(
+        "article/<int:article_pk>/coding/manage/",
+        coding.article_coding_manage_view,
+        name="article-coding-manage",
+    ),
+    path(
+        "exercise/<int:exercise_pk>/testcase/create/",
+        coding.CodingTestCaseCreateView.as_view(),
+        name="coding-testcase-create",
+    ),
+    path(
+        "coding-testcase/<int:pk>/edit/",
+        coding.CodingTestCaseUpdateView.as_view(),
+        name="coding-testcase-edit",
+    ),
+    path(
+        "coding-testcase/<int:pk>/delete/",
+        coding.CodingTestCaseDeleteView.as_view(),
+        name="coding-testcase-delete",
+    ),
+    path(
+        "article/<int:article_pk>/coding/run/",
+        coding.run_code_view,
+        name="run-code",
+    ),
+    path(
+        "article/<int:article_pk>/coding/submit/",
+        coding.submit_code_view,
+        name="submit-code",
+    ),
     # Files
     path("upload-files/", files.upload_file_view, name="upload-files"),
     # Voting
@@ -107,6 +173,21 @@ urlpatterns = [
             template_name="registration/login.html", redirect_authenticated_user=True
         ),
         name="login",
+    ),
+    path(
+        "password-change/",
+        auth_views.PasswordChangeView.as_view(
+            template_name="registration/password_change_form.html",
+            success_url=reverse_lazy("wiki:password_change_done"),
+        ),
+        name="password-change",
+    ),
+    path(
+        "password-change/done/",
+        auth_views.PasswordChangeDoneView.as_view(
+            template_name="registration/password_change_done.html"
+        ),
+        name="password_change_done",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
 ]

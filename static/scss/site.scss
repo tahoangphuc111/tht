@@ -1,9 +1,7 @@
-@use "fonts";
-@use "navbar";
-@use "theme";
-@use "layout";
-@use "forms";
-@use "content";
-@use "profile";
-@use "editor";
-@use "responsive";
+@import "theme";
+@import "ui-components";
+@import "content";
+@import "featured";
+@import "editor";
+@import "profile";
+@import "responsive";

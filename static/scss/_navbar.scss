@@ -1,47 +1,174 @@
 .app-navbar {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
   border-bottom: 1px solid var(--line);
-  padding: 0.75rem 0;
+  padding: 0.6rem 0;
   position: sticky;
   top: 0;
-  z-index: 1000;
-}
+  z-index: 1030;
+  transition: background 0.3s var(--ease);
 
-.navbar-brand {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--ink) !important;
-}
+  .navbar-brand {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
 
-.nav-link {
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem !important;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    i { color: var(--brand); }
 
-  &:hover {
-    color: var(--brand);
-    background: var(--brand-soft);
-    border-radius: var(--radius-sm);
+    &:hover { color: var(--ink); }
+  }
+
+  .nav-link {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    transition: all 0.2s var(--ease);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+    border: none;
+    background: transparent;
+
+    i { font-size: 0.78rem; }
+
+    &:hover {
+      color: var(--ink);
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    &.is-active {
+      background: var(--ink);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
   }
 }
 
-.nav-pill {
-  border-radius: var(--radius-sm);
-}
-
 .user-chip {
-  background: var(--brand-soft);
-  border-radius: 20px;
-  color: var(--brand);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.4rem 1rem;
+  transition: all 0.2s var(--ease);
+  outline: none;
+
+  &:hover {
+    background: var(--panel-hover);
+    border-color: var(--line-strong);
+  }
 }
 
+.navbar-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.nav-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.9rem;
+  transition: all 0.2s var(--ease);
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+
+  &:hover {
+    background: var(--panel-hover);
+    color: var(--ink);
+    border-color: var(--line-strong);
+  }
+
+  &:focus {
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.nav-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 38px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink-light);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s var(--ease);
+  cursor: pointer;
+  text-decoration: none;
+  outline: none;
+
+  i { opacity: 0.5; font-size: 0.85rem; }
+
+  &:hover {
+    background: var(--panel-hover);
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+  
+  &.dropdown-toggle::after {
+    margin-left: 0.5rem;
+    vertical-align: 0.15em;
+    border-top: 0.35em solid;
+    border-right: 0.35em solid transparent;
+    border-bottom: 0;
+    border-left: 0.35em solid transparent;
+    opacity: 0.5;
+  }
+}
+
+.dropdown-menu {
+  border: none !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  padding: 0.5rem !important;
+  margin-top: 0.5rem !important;
+
+  .dropdown-item {
+    border-radius: var(--radius-xs) !important;
+    padding: 0.6rem 0.85rem !important;
+    font-size: 0.88rem !important;
+    transition: background 0.15s var(--ease) !important;
+    color: var(--ink-light) !important;
+
+    &:hover {
+      background: var(--panel-strong) !important;
+      color: var(--ink) !important;
+    }
+    
+    i {
+      width: 1.25rem;
+      opacity: 0.6;
+    }
+  }
+
+  .dropdown-divider {
+    opacity: 0.08;
+    margin: 0.4rem 0;
+  }
+}

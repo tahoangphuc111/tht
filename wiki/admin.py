@@ -10,6 +10,9 @@ from .models import (
     Profile,
     UploadedFile,
     ArticleVote,
+    CodingExercise,
+    CodingSubmission,
+    CodingTestCase,
     CommentVote,
     UserVote,
 )
@@ -87,3 +90,30 @@ class UploadedFileAdmin(admin.ModelAdmin):
     list_display = ("file", "user", "description", "created_at")
     search_fields = ("user__username", "description", "file")
     list_filter = ("user", "created_at")
+
+
+@admin.register(CodingExercise)
+class CodingExerciseAdmin(admin.ModelAdmin):
+    """Admin interface for coding exercises."""
+
+    list_display = ("title", "article", "is_enabled", "default_language", "updated_at")
+    list_filter = ("is_enabled", "default_language")
+    search_fields = ("title", "article__title")
+
+
+@admin.register(CodingTestCase)
+class CodingTestCaseAdmin(admin.ModelAdmin):
+    """Admin interface for coding testcases."""
+
+    list_display = ("name", "exercise", "is_sample", "order", "score")
+    list_filter = ("is_sample",)
+    search_fields = ("name", "exercise__article__title")
+
+
+@admin.register(CodingSubmission)
+class CodingSubmissionAdmin(admin.ModelAdmin):
+    """Admin interface for coding submissions."""
+
+    list_display = ("exercise", "user", "language", "status", "created_at")
+    list_filter = ("language", "status", "created_at")
+    search_fields = ("exercise__article__title", "user__username", "language")
