@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}bài tập code - {{ article.title }} | CP Wiki{% endblock %}
+{% block title %}Cấu hình bài tập · {{ article.title }} | CP Wiki{% endblock %}
 
 {% block content %}
 <div class="row g-4">
@@ -8,23 +8,31 @@
             <div class="card-body p-4 p-lg-5">
                 <a href="{{ article.get_absolute_url }}" class="back-link mb-3">&larr; Quay lại bài viết</a>
                 <div class="section-eyebrow mb-2">Mini OJ</div>
-                <h1 class="hero-title-sm mb-3">Cấu hình bài tập code</h1>
-                <p class="text-secondary mb-4">Bật/tắt Monaco, chọn ngôn ngữ, giới hạn chấm và starter code cho từng language.</p>
+                <h1 class="hero-title-sm mb-2">Cấu hình bài tập</h1>
+                <p class="text-secondary mb-4">Bật chế độ chấm bài, chọn ngôn ngữ cho phép, cài đặt giới hạn và code mẫu.</p>
 
                 <form method="post">
                     {% csrf_token %}
                     {% for field in form.visible_fields %}
                         <div class="mb-4">
                             {% if field.name == 'is_enabled' %}
-                                <div class="form-check">
+                                <div class="form-check form-switch">
                                     {{ field }}
                                     <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 </div>
+                            {% elif 'starter_code_' in field.name %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                                    <i class="fa-solid fa-code me-1 text-muted"></i>{{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
                             {% else %}
                                 <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
                             {% endif %}
-                            {% if field.help_text %}
+                            {% if field.help_text and 'starter_code_' not in field.name %}
                                 <div class="form-text">{{ field.help_text }}</div>
                             {% endif %}
                             {% for error in field.errors %}
@@ -32,8 +40,10 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <div class="action-row">
-                        <button type="submit" class="btn btn-dark rounded-pill px-4">Lưu cấu hình</button>
+                    <div class="action-row mt-4">
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu cấu hình
+                        </button>
                         <a href="{{ article.get_absolute_url }}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
                     </div>
                 </form>
@@ -46,9 +56,11 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                     <div>
                         <div class="section-eyebrow mb-1">Testcases</div>
-                        <h2 class="h4 mb-0">Bộ test hiện có</h2>
+                        <h2 class="h4 mb-0">Bộ test</h2>
                     </div>
-                    <a href="{% url 'wiki:coding-testcase-create' exercise.pk %}" class="btn btn-primary rounded-pill px-3">Thêm test</a>
+                    <a href="{% url 'wiki:coding-testcase-create' exercise.pk %}" class="btn btn-primary rounded-pill px-3">
+                        <i class="fa-solid fa-plus me-1"></i>Thêm test
+                    </a>
                 </div>
                 <div class="stack-list">
                     {% for testcase in testcases %}
@@ -56,9 +68,12 @@
                             <div>
                                 <div class="fw-semibold">{{ testcase.name }}</div>
                                 <div class="stack-item__meta">
-                                    {% if testcase.is_sample %}sample{% else %}hidden{% endif %}
-                                    • order {{ testcase.order }}
-                                    • {{ testcase.score }} điểm
+                                    {% if testcase.is_sample %}
+                                        <span class="ui-badge ui-badge--primary me-1">sample</span>
+                                    {% else %}
+                                        <span class="ui-badge me-1">hidden</span>
+                                    {% endif %}
+                                    order {{ testcase.order }} · {{ testcase.score }} điểm
                                 </div>
                             </div>
                             <div class="stack-item__actions">
@@ -67,17 +82,20 @@
                             </div>
                         </div>
                     {% empty %}
-                        <div class="empty-state centered">Chưa có testcase nào.</div>
+                        <div class="empty-state">
+                            <div class="ui-empty-state__icon"><i class="fa-solid fa-flask-vial"></i></div>
+                            <div class="ui-empty-state__text">Chưa có testcase nào. Thêm test đầu tiên để bắt đầu chấm bài.</div>
+                        </div>
                     {% endfor %}
                 </div>
 
-                <hr>
-                <div class="section-eyebrow mb-1">Enabled</div>
+                <hr class="my-4">
+                <div class="section-eyebrow mb-2">Ngôn ngữ khả dụng</div>
                 <div class="d-flex gap-2 flex-wrap">
                     {% for language in enabled_languages %}
                         <span class="pill-badge">{{ language.label }}</span>
                     {% empty %}
-                        <span class="text-secondary small">Chưa có runtime nào sẵn sàng trên máy chủ.</span>
+                        <span class="text-secondary small">Chưa có runtime nào trên server.</span>
                     {% endfor %}
                 </div>
             </div>

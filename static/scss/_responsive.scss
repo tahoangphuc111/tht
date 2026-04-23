@@ -4,8 +4,8 @@
 
 @media (max-width: 991px) {
   .hero-panel { padding: 1.5rem; }
-  
-  .hero-title { font-size: 2.2rem; }
+
+  .hero-title { font-size: 2rem; }
 
   .stat-grid {
     grid-template-columns: 1fr 1fr;
@@ -20,7 +20,7 @@
 
 @media (max-width: 767px) {
   .hero-title {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
   }
 
   .stat-grid,
@@ -51,17 +51,25 @@
   .stack-item__actions {
     margin-top: 0.5rem;
     width: 100%;
-    
+
     .btn { flex: 1; }
   }
-  
+
   .app-navbar {
     .nav-link span { display: none; }
     .nav-link i { font-size: 1.1rem; }
+  }
+
+  // Reduce orb intensity on mobile for perf
+  .page-gradient {
+    &::before { width: 300px; height: 300px; }
+    &::after { width: 250px; height: 250px; }
   }
 }
 
 @media (max-width: 480px) {
   .hero-panel { padding: 1.25rem; }
   .article-shell .card-body { padding: 1.25rem !important; }
+
+  .featured-title-row h1 { font-size: 1.6rem; }
 }

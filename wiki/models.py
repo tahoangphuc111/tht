@@ -487,9 +487,9 @@ class CodingExercise(models.Model):
     """A mini online-judge style coding exercise attached to an article."""
 
     COMPARE_MODE_CHOICES = (
-        ("exact", "Khá»›p tuyá»‡t Ä‘á»‘i"),
-        ("trim_lines", "Bá» khoáº£ng tráº¯ng Ä‘áº§u/cuá»‘i má»—i dÃ²ng"),
-        ("tokenized", "So sá»›p theo token"),
+        ("exact", "Exact match"),
+        ("trim_lines", "Trim whitespace"),
+        ("tokenized", "Token-based"),
     )
 
     article = models.OneToOneField(

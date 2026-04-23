@@ -1,3 +1,4 @@
+{% load martortags %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,32 +9,89 @@
             margin: 2cm;
         }
         body {
-            font-family: "DejaVu Sans", sans-serif;
-            font-size: 12pt;
-            line-height: 1.5;
+            font-family: "Noto Sans", "DejaVu Sans", sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
             color: #1d1d1f;
         }
         .header {
-            border-bottom: 1px solid #e5e5e7;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            border-bottom: 2px solid #0071e3;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
         }
         .title {
-            font-size: 24pt;
+            font-size: 22pt;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            color: #111;
         }
         .meta {
-            color: #86868b;
-            font-size: 10pt;
+            color: #666;
+            font-size: 9pt;
         }
         .content {
             text-align: justify;
         }
-        .footer {
-            margin-top: 50px;
+        .content h1 { font-size: 18pt; margin-top: 24px; margin-bottom: 8px; }
+        .content h2 { font-size: 15pt; margin-top: 20px; margin-bottom: 8px; }
+        .content h3 { font-size: 13pt; margin-top: 16px; margin-bottom: 6px; }
+        .content pre {
+            background-color: #f5f5f7;
+            border: 1px solid #e5e5e7;
+            padding: 10px 14px;
+            font-family: "DejaVu Sans Mono", "Courier New", monospace;
             font-size: 9pt;
-            color: #86868b;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .content code {
+            font-family: "DejaVu Sans Mono", "Courier New", monospace;
+            font-size: 9pt;
+            background-color: #f0f0f5;
+            padding: 1px 4px;
+        }
+        .content blockquote {
+            border-left: 3px solid #0071e3;
+            padding-left: 12px;
+            color: #444;
+            margin: 12px 0;
+        }
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        .content th, .content td {
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            text-align: left;
+            font-size: 10pt;
+        }
+        .content th {
+            background-color: #f5f5f7;
+            font-weight: bold;
+        }
+        .content img {
+            max-width: 100%;
+        }
+        .math-inline {
+            font-family: "DejaVu Serif", "Times New Roman", serif;
+            font-style: italic;
+        }
+        .math-block {
+            font-family: "DejaVu Serif", "Times New Roman", serif;
+            font-style: italic;
+            text-align: center;
+            margin: 12px 0;
+            font-size: 12pt;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e5e7;
+            font-size: 8pt;
+            color: #999;
             text-align: center;
         }
     </style>
@@ -42,18 +100,16 @@
     <div class="header">
         <div class="title">{{ article.title }}</div>
         <div class="meta">
-            Tác giả: {{ article.author.username }} | 
-            Danh mục: {{ article.category.name }} | 
-            Ngày: {{ article.created_at|date:"d/m/Y" }}
+            {{ article.author.username }} · {{ article.category.name }} · {{ article.created_at|date:"d/m/Y" }}
         </div>
     </div>
-    
+
     <div class="content">
-        {{ article.content|safe }}
+        {{ rendered_content|safe }}
     </div>
 
     <div class="footer">
-        Được xuất từ CP Wiki vào ngày {% now "d/m/Y" %}
+        CP Wiki · {% now "d/m/Y" %}
     </div>
 </body>
 </html>

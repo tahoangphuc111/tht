@@ -1,6 +1,4 @@
-"""
-Views for handling articles in the wiki app.
-"""
+import re
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -370,6 +368,24 @@ class ArticleRevisionDetailView(DetailView):
         return revision
 
 
+def _latex_to_html(html_content):
+    """Convert LaTeX $...$ and $$...$$ to styled HTML for PDF rendering."""
+    # Display math $$...$$ → centered block
+    html_content = re.sub(
+        r'\$\$(.+?)\$\$',
+        r'<div class="math-block">\1</div>',
+        html_content,
+        flags=re.DOTALL,
+    )
+    # Inline math $...$ → italic serif span
+    html_content = re.sub(
+        r'\$(.+?)\$',
+        r'<span class="math-inline">\1</span>',
+        html_content,
+    )
+    return html_content
+
+
 @login_required
 def export_article_pdf(request, pk):
     """Export an article to PDF format."""
@@ -380,13 +396,21 @@ def export_article_pdf(request, pk):
         and article.author != request.user
     ):
         raise Http404
+
+    # Render markdown to HTML, then convert LaTeX to styled spans
+    from martor.utils import markdownify
+    rendered = markdownify(article.content)
+    rendered = _latex_to_html(rendered)
+
     html = render_to_string(
-        "wiki/article_pdf.html", {"article": article, "request": request}
+        "wiki/article_pdf.html",
+        {"article": article, "rendered_content": rendered, "request": request},
     )
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{article.slug}.pdf"'
-    if pisa.CreatePDF(html, dest=response).err:
-        return HttpResponse("Lỗi PDF", status=500)
+    result = pisa.CreatePDF(html.encode("utf-8"), dest=response, encoding="UTF-8")
+    if result.err:
+        return HttpResponse("PDF export failed", status=500)
     return response
 
 

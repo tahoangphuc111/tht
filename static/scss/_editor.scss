@@ -1,3 +1,4 @@
+// ─── Editor (Martor Markdown Editor) ───
 .main-martor {
   margin: 0;
 
@@ -7,7 +8,7 @@
 
   .martor-field,
   .ace_editor {
-    border: 1px solid var(--line-strong) !important;
+    border: 1.5px solid var(--line-strong) !important;
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     font-family: var(--font-mono) !important;
     font-size: 14px !important;
@@ -16,7 +17,7 @@
   .nav-tabs {
     align-items: center;
     background: var(--panel-strong);
-    border: 1px solid var(--line-strong);
+    border: 1.5px solid var(--line-strong);
     border-bottom: 0;
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     padding: 0.4rem 0.5rem 0;
@@ -25,12 +26,12 @@
 
   .nav-tabs .nav-link {
     border: none !important;
-    border-radius: 6px 6px 0 0 !important;
+    border-radius: 8px 8px 0 0 !important;
     color: var(--muted);
     font-weight: 600;
     font-size: 0.82rem;
     padding: 0.4rem 1rem;
-    transition: all 0.2s var(--ease);
+    transition: all 0.25s var(--ease);
 
     &:hover {
       background: rgba(0, 0, 0, 0.04);
@@ -46,22 +47,22 @@
 
   .martor-preview {
     background: var(--panel);
-    border: 1px solid var(--line-strong);
+    border: 1.5px solid var(--line-strong);
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     min-height: 300px;
     padding: 2rem;
     @extend .article-content;
   }
-  
+
   .martor-toolbar {
     background: var(--panel-strong);
-    border: 1px solid var(--line-strong);
+    border: 1.5px solid var(--line-strong);
     border-top: none;
     padding: 0.5rem;
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    
+
     .martor-toolbar-item {
       color: var(--muted);
       width: 32px;
@@ -69,12 +70,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
-      transition: all 0.15s var(--ease);
-      
+      border-radius: 6px;
+      transition: all 0.2s var(--ease);
+
       &:hover {
         background: var(--line);
         color: var(--ink);
+        transform: scale(1.05);
       }
     }
   }
@@ -85,3 +87,31 @@
   overflow-y: hidden;
   padding: 0.5rem 0;
 }
+
+// Dark-themed code textareas (starter code fields in coding_manage)
+textarea.font-monospace {
+  background: #1a1b26 !important;
+  color: #c0caf5 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.65;
+  padding: 1.15rem 1.25rem;
+  tab-size: 4;
+  resize: vertical;
+  box-shadow: var(--shadow) inset;
+
+  &::placeholder {
+    color: rgba(255,255,255,0.2);
+  }
+
+  &:focus {
+    border-color: var(--brand) !important;
+    box-shadow:
+      var(--shadow-focus),
+      inset 0 0 0 1px rgba(0, 113, 227, 0.1) !important;
+    outline: none;
+  }
+}
+

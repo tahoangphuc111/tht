@@ -372,12 +372,17 @@ class CodingExerciseForm(forms.ModelForm):
             "memory_limit_mb",
             "compare_mode",
         )
+        labels = {
+            "compare_mode": "Checker",
+            "time_limit_ms": "Time limit (ms)",
+            "memory_limit_mb": "Memory limit (MB)",
+        }
         widgets = {
             "description": forms.Textarea(
                 attrs={
                     "rows": 5,
                     "class": "form-control",
-                    "placeholder": "Mo ta bai tap code, yeu cau input/output...",
+                    "placeholder": "Mô tả bài tập, yêu cầu input/output...",
                 }
             ),
             "is_enabled": forms.CheckboxInput(attrs={"class": "form-check-input"}),
@@ -392,13 +397,13 @@ class CodingExerciseForm(forms.ModelForm):
         language_choices = get_code_language_choices()
         self.fields["allowed_languages"].choices = language_choices
         self.fields["allowed_languages"].help_text = (
-            "Chi cac ngon ngu duoc chon moi hien ra o Monaco."
+            "Chỉ các ngôn ngữ được chọn mới hiện ra ở Monaco editor."
         )
         self.fields["default_language"].choices = [
-            ("", "Chon ngon ngu mac dinh")
+            ("", "-- Chọn ngôn ngữ mặc định --")
         ] + language_choices
         self.fields["title"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Vi du: In ra tong 2 so"}
+            {"class": "form-control", "placeholder": "VD: In ra tổng 2 số"}
         )
 
         starter_map = self.instance.starter_code_map if self.instance.pk else {}
@@ -412,7 +417,7 @@ class CodingExerciseForm(forms.ModelForm):
                     attrs={
                         "rows": 8,
                         "class": "form-control font-monospace",
-                        "placeholder": "Starter code cho ngon ngu nay",
+                        "placeholder": "Code mẫu cho ngôn ngữ này...",
                     }
                 ),
                 initial=starter_map.get(
@@ -427,11 +432,11 @@ class CodingExerciseForm(forms.ModelForm):
         default_language = cleaned_data.get("default_language")
         if default_language and default_language not in allowed_languages:
             self.add_error(
-                "default_language", "Ngon ngu mac dinh phai nam trong danh sach cho phep."
+                "default_language", "Ngôn ngữ mặc định phải nằm trong danh sách cho phép."
             )
         if cleaned_data.get("is_enabled") and not allowed_languages:
             self.add_error(
-                "allowed_languages", "Can chon it nhat mot ngon ngu khi bat bai tap code."
+                "allowed_languages", "Cần chọn ít nhất một ngôn ngữ khi bật bài tập code."
             )
         return cleaned_data
 
