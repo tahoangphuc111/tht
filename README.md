@@ -143,12 +143,36 @@ python manage.py runserver
 ```
 
 ### asgi for websockets
-for production or full websocket support use daphne
+for production or full websocket support use uvicorn or daphne
 ```bash
-daphne config.asgi:application
+uvicorn config.asgi:application --port 8001
 ```
 
-access the application at `http://127.0.0.1:8000`
+## production deployment
+for production environments use the following setup with **nginx** and **uwsgi**
+
+### 1 set up uwsgi
+ensure uwsgi is installed (`pip install uwsgi`) and use the provided config:
+```bash
+uwsgi --ini deployment/uwsgi.ini
+```
+
+### 2 set up uvicorn (for websockets)
+run the asgi server alongside uwsgi:
+```bash
+uvicorn config.asgi:application --port 8001 --workers 4
+```
+
+### 3 configure nginx
+copy `deployment/nginx.conf` to your nginx `sites-available` folder and update the `<absolute-path-to-site>` and `<your-domain-or-ip>` placeholders
+```bash
+sudo cp deployment/nginx.conf /etc/nginx/sites-available/cp-wiki
+sudo ln -s /etc/nginx/sites-available/cp-wiki /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+access the application at `http://your-domain-or-ip`
 
 ## contribution
 all pull requests must pass automated ci tests please use the provided template when submitting your contributions

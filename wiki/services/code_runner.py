@@ -418,19 +418,49 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
 
 def serialize_submission(submission):
     """Turn a submission into a JSON-friendly payload for the frontend."""
+    status_map = {
+        "accepted": "Accepted",
+        "wrong_answer": "Wrong Answer",
+        "time_limit_exceeded": "Time Limit Exceeded",
+        "runtime_error": "Runtime Error",
+        "compile_error": "Compile Error",
+        "internal_error": "Internal Error",
+        "running": "Running",
+    }
+
+    status_label = status_map.get(submission.status, submission.status.replace("_", " ").title())
+    
+    if submission.status == "accepted":
+        if submission.is_sample_run:
+            message = f"Tất cả sample tests đã vượt qua ({submission.runtime_ms}ms)."
+        else:
+            message = f"Chấp nhận! Vượt qua {submission.passed_tests}/{submission.total_tests} test cases trong {submission.runtime_ms}ms."
+    elif submission.status == "compile_error":
+        message = "Lỗi biên dịch. Vui lòng kiểm tra lại cú pháp."
+    elif submission.status == "wrong_answer":
+        message = f"Sai kết quả tại test case thứ {submission.passed_tests + 1}."
+    elif submission.status == "time_limit_exceeded":
+        message = f"Vượt quá giới hạn thời gian ({submission.runtime_ms}ms)."
+    else:
+        message = status_label
+
     return {
         "success": True,
         "submission_id": submission.pk,
         "status": submission.status,
+        "status_label": status_label,
+        "message": message,
         "compile_output": submission.compile_output,
         "stdout_preview": submission.stdout_preview,
         "stderr_preview": submission.stderr_preview,
         "passed_tests": submission.passed_tests,
         "total_tests": submission.total_tests,
+        "runtime_ms": submission.runtime_ms,
         "results": [
             {
                 "case_name": result.case_name,
                 "status": result.status,
+                "status_label": status_map.get(result.status, result.status.replace("_", " ").title()),
                 "runtime_ms": result.runtime_ms,
                 "stdout_preview": result.stdout_preview,
                 "stderr_preview": result.stderr_preview,

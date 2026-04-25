@@ -19,10 +19,16 @@
   --line-strong: rgba(0, 0, 0, 0.12);
 
   // Brand palette
-  --brand: #0071e3;
-  --brand-soft: rgba(0, 113, 227, 0.08);
-  --brand-dark: #0058b0;
-  --brand-hover: #0077ed;
+  // Brand palette - Premium Indigo
+  --brand: #4338ca;
+  --brand-soft: rgba(67, 56, 202, 0.08);
+  --brand-dark: #3730a3;
+  --brand-hover: #4f46e5;
+
+  // Accents
+  --accent-teal: #0d9488;
+  --accent-purple: #7c3aed;
+  --accent-indigo: #4338ca;
 
   // Semantic colors
   --success: #30d158;
