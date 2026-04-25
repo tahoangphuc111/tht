@@ -88,7 +88,7 @@ class ArticleDetailView(DetailView):
         user = self.request.user
         qs = Article.objects.select_related("author", "category").annotate(
             comment_count=Count("comments", distinct=True),
-            vote_score=(
+            vote_balance=(
                 Count("article_votes", filter=Q(article_votes__value=1), distinct=True)
                 - Count("article_votes", filter=Q(article_votes__value=-1), distinct=True)
             ),
@@ -137,7 +137,6 @@ class ArticleDetailView(DetailView):
             "related_articles": Article.objects.filter(
                 category=article.category, status="published"
             ).exclude(pk=article.pk).annotate(comment_count=Count("comments", distinct=True))[:3],
-
             "comment_form": kwargs.get("comment_form", CommentForm()),
             "can_comment": (article.allow_comments and user.is_authenticated and user.has_perm("wiki.add_comment")),
             "commenting_locked": not article.allow_comments,
@@ -145,7 +144,7 @@ class ArticleDetailView(DetailView):
                                                 and user.has_perm("wiki.change_article"))),
             "can_delete_article": (can_manage or (user.is_authenticated and article.author == user
                                                   and user.has_perm("wiki.delete_article"))),
-            "article_vote_score": article.vote_score,
+            "article_vote_score": getattr(article, "vote_balance", article.vote_score),
             "is_bookmarked": user.is_authenticated and Bookmark.objects.filter(user=user, article=article).exists(),
             "coding_exercise": coding_exercise if coding_exercise and coding_exercise.is_enabled else None,
             "coding_language_choices": coding_language_choices,
