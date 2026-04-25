@@ -33,6 +33,7 @@ static/*
 !static/js/
 static/js/*
 !static/js/coding_exercise.js
+!static/js/interactions.js
 !static/scss/
 static/scss/*
 !static/scss/*.scss

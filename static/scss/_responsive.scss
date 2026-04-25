@@ -1,11 +1,17 @@
 @media (max-width: 1200px) {
-  .hero-panel { padding: 2rem; }
+  .hero-panel {
+    padding: 2rem;
+  }
 }
 
 @media (max-width: 991px) {
-  .hero-panel { padding: 1.5rem; }
+  .hero-panel {
+    padding: 1.5rem;
+  }
 
-  .hero-title { font-size: 2rem; }
+  .hero-title {
+    font-size: 2rem;
+  }
 
   .stat-grid {
     grid-template-columns: 1fr 1fr;
@@ -52,32 +58,68 @@
     margin-top: 0.5rem;
     width: 100%;
 
-    .btn { flex: 1; }
+    .btn {
+      flex: 1;
+    }
   }
 
   .app-navbar {
-    .nav-link span { display: none; }
-    .nav-link i { font-size: 1.1rem; }
+    .nav-link span {
+      display: none;
+    }
+
+    .nav-link i {
+      font-size: 1.1rem;
+    }
   }
 
-  // Reduce orb intensity on mobile for perf
   .page-gradient {
-    &::before { width: 300px; height: 300px; }
-    &::after { width: 250px; height: 250px; }
+    &::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    &::after {
+      width: 250px;
+      height: 250px;
+    }
   }
 }
 
 @media (max-width: 480px) {
-  .hero-panel { padding: 1.25rem; }
-  .article-shell .card-body { padding: 1.25rem !important; }
+  .hero-panel {
+    padding: 1.25rem;
+  }
 
-  .featured-title-row h1 { font-size: 1.6rem; }
+  .article-shell .card-body {
+    padding: 1.25rem !important;
+  }
+
+  .featured-title-row h1 {
+    font-size: 1.6rem;
+  }
 }
 
-// ─── UI Fixes & Utilities ───
-.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .text-truncate-2 {
   overflow: hidden;
@@ -90,7 +132,6 @@
   transition: all 0.3s var(--ease) !important;
 }
 
-// Fix for images overflow in articles
 .article-content img {
   max-width: 100%;
   height: auto;
