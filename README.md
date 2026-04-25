@@ -31,6 +31,14 @@ source venv/bin/activate
 ```
 
 ### 3 install dependencies
+
+**linux (ubuntu/debian)**
+```bash
+sudo apt-get update
+sudo apt-get install -y libcairo2-dev pkg-config
+```
+
+**python & node**
 ```bash
 pip install -r requirements.txt
 npm install
@@ -93,6 +101,11 @@ real time updates for voting and notifications using asgi
 
 source files are located in `static/scss` to compile them to css
 
+**cross-platform (recommended)**
+```bash
+npm run build:css
+```
+
 **windows cmd/ps**
 ```powershell
 .\scripts\build_styles.bat
@@ -102,11 +115,6 @@ source files are located in `static/scss` to compile them to css
 ```bash
 chmod +x scripts/build_styles.sh
 ./scripts/build_styles.sh
-```
-
-**npm cross-platform**
-```bash
-npm run build:css
 ```
 
 ## running the application
