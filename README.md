@@ -5,8 +5,26 @@ cp wiki is a knowledge base platform designed for the competitive programming co
 ## requirements
 
 - python 3.10+
-- nodejs for scss builds
+- nodejs 18+
 - git
+
+### 0 install prerequisites
+
+**windows**
+- [python 3.10+](https://www.python.org/downloads/windows/) (ensure "add python to path" is checked)
+- [nodejs](https://nodejs.org/en/download/)
+- [git](https://git-scm.com/download/win)
+
+**linux (ubuntu)**
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv nodejs npm git
+```
+
+**macos**
+```bash
+brew install python@3.10 node git
+```
 
 ## installation guide
 
