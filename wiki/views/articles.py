@@ -14,6 +14,7 @@ from ..forms import ArticleForm, CommentForm
 from ..services.code_runner import get_enabled_language_choices, get_language_config
 from ..utils import save_article_revision, can_publish_articles, can_manage_wiki
 
+
 class ArticleListView(ListView):
     model = Article
     template_name = "wiki/article_list.html"
@@ -76,6 +77,7 @@ class ArticleListView(ListView):
         })
         return context
 
+
 class ArticleDetailView(DetailView):
     model = Article
     template_name = "wiki/article_detail.html"
@@ -86,7 +88,7 @@ class ArticleDetailView(DetailView):
         user = self.request.user
         qs = Article.objects.select_related("author", "category").annotate(
             comment_count=Count("comments", distinct=True),
-            vote_score=(
+            vote_balance=(
                 Count("article_votes", filter=Q(article_votes__value=1), distinct=True)
                 - Count("article_votes", filter=Q(article_votes__value=-1), distinct=True)
             ),
@@ -132,14 +134,17 @@ class ArticleDetailView(DetailView):
             }
         context.update({
             "comments": article.comments.select_related("author").filter(is_approved=True),
-            "related_articles": Article.objects.filter(category=article.category, status="published")
-                .exclude(pk=article.pk).annotate(comment_count=Count("comments", distinct=True))[:3],
+            "related_articles": Article.objects.filter(
+                category=article.category, status="published"
+            ).exclude(pk=article.pk).annotate(comment_count=Count("comments", distinct=True))[:3],
             "comment_form": kwargs.get("comment_form", CommentForm()),
             "can_comment": (article.allow_comments and user.is_authenticated and user.has_perm("wiki.add_comment")),
             "commenting_locked": not article.allow_comments,
-            "can_edit_article": (can_manage or (user.is_authenticated and article.author == user and user.has_perm("wiki.change_article"))),
-            "can_delete_article": (can_manage or (user.is_authenticated and article.author == user and user.has_perm("wiki.delete_article"))),
-            "article_vote_score": article.vote_score,
+            "can_edit_article": (can_manage or (user.is_authenticated and article.author == user
+                                                and user.has_perm("wiki.change_article"))),
+            "can_delete_article": (can_manage or (user.is_authenticated and article.author == user
+                                                  and user.has_perm("wiki.delete_article"))),
+            "article_vote_score": getattr(article, "vote_balance", article.vote_score),
             "is_bookmarked": user.is_authenticated and Bookmark.objects.filter(user=user, article=article).exists(),
             "coding_exercise": coding_exercise if coding_exercise and coding_exercise.is_enabled else None,
             "coding_language_choices": coding_language_choices,
@@ -163,34 +168,44 @@ class ArticleDetailView(DetailView):
             return redirect(self.object.get_absolute_url())
         return self.render_to_response(self.get_context_data(comment_form=form))
 
+
 class ArticleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Article
     form_class = ArticleForm
     template_name = "wiki/article_form.html"
+
     def test_func(self):
         return can_publish_articles(self.request.user)
+
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
             return redirect("wiki:article-list")
         return super().handle_no_permission()
+
     def form_valid(self, form):
         form.instance.author = self.request.user
         response = super().form_valid(form)
         save_article_revision(self.object, self.request.user, form.cleaned_data.get("change_summary", "Initial"))
         return response
 
+
 class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Article
     form_class = ArticleForm
     template_name = "wiki/article_form.html"
+
     def get_object(self, queryset=None):
         return get_object_or_404(Article, pk=self.kwargs.get("pk"))
+
     def test_func(self):
         article = self.get_object()
         user = self.request.user
-        return (user.is_superuser or user.has_perm("wiki.manage_all_articles") or (article.author == user and user.has_perm("wiki.change_article")))
+        return (user.is_superuser or user.has_perm("wiki.manage_all_articles")
+                or (article.author == user and user.has_perm("wiki.change_article")))
+
     def handle_no_permission(self):
         return redirect("wiki:article-list")
+
     def form_valid(self, form):
         article_fields = ["title", "slug", "content", "category", "tags", "allow_comments"]
         if not any(f in form.changed_data for f in article_fields):
@@ -200,59 +215,76 @@ class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         save_article_revision(self.object, self.request.user, form.cleaned_data.get("change_summary", "Cập nhật"))
         return response
 
+
 class ArticleDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Article
     template_name = "wiki/article_confirm_delete.html"
     success_url = reverse_lazy("wiki:article-list")
+
     def get_object(self, queryset=None):
         return get_object_or_404(Article, pk=self.kwargs.get("pk"))
+
     def test_func(self):
         article = self.get_object()
         user = self.request.user
-        return (user.is_superuser or user.has_perm("wiki.manage_all_articles") or (article.author == user and user.has_perm("wiki.delete_article")))
+        return (user.is_superuser or user.has_perm("wiki.manage_all_articles")
+                or (article.author == user and user.has_perm("wiki.delete_article")))
+
     def handle_no_permission(self):
         return redirect("wiki:article-list")
+
 
 class ArticleHistoryView(DetailView):
     model = Article
     template_name = "wiki/article_history.html"
     context_object_name = "article"
+
     def get_object(self, queryset=None):
         article = get_object_or_404(Article, pk=self.kwargs.get("pk"))
         user = self.request.user
-        if (article.status != "published" and not can_manage_wiki(user) and (not user.is_authenticated or article.author != user)):
+        if (article.status != "published" and not can_manage_wiki(user)
+                and (not user.is_authenticated or article.author != user)):
             raise Http404
         return article
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["revisions"] = self.object.revisions.select_related("author").all()
         return context
 
+
 class ArticleRevisionDetailView(DetailView):
     model = ArticleRevision
     template_name = "wiki/article_revision_detail.html"
     context_object_name = "revision"
+
     def get_object(self, queryset=None):
         revision = get_object_or_404(ArticleRevision, pk=self.kwargs.get("pk"))
         article = revision.article
         user = self.request.user
-        if (article.status != "published" and not can_manage_wiki(user) and (not user.is_authenticated or article.author != user)):
+        if (article.status != "published" and not can_manage_wiki(user)
+                and (not user.is_authenticated or article.author != user)):
             raise Http404
         return revision
+
 
 class ModerationListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Article
     template_name = "wiki/article_list.html"
     context_object_name = "articles"
     paginate_by = 20
+
     def test_func(self):
         return can_manage_wiki(self.request.user)
+
     def get_queryset(self):
         return Article.objects.filter(status="pending").select_related("author", "category").order_by("created_at")
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["is_moderation_view"] = True
         return context
+
 
 @require_POST
 @login_required
@@ -264,6 +296,7 @@ def approve_article(request, pk):
     article.save()
     return redirect("wiki:article-list")
 
+
 @require_POST
 @login_required
 def reject_article(request, pk):
@@ -273,6 +306,7 @@ def reject_article(request, pk):
     article.status = "rejected"
     article.save()
     return redirect("wiki:article-list")
+
 
 @require_POST
 @login_required

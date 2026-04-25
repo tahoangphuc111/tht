@@ -38,10 +38,10 @@ urlpatterns = [
     path("article/<int:pk>/edit/", articles.ArticleUpdateView.as_view(), name="article-edit"),
     path("article/<int:pk>/delete/", articles.ArticleDeleteView.as_view(), name="article-delete"),
     path("article/<int:pk>/history/", articles.ArticleHistoryView.as_view(), name="article-history"),
-    
+
     path("revision/<int:pk>/", articles.ArticleRevisionDetailView.as_view(), name="revision-detail"),
     path("revision/<int:pk>/detail/", articles.ArticleRevisionDetailView.as_view(), name="article-revision-detail"),
-    
+
     path("moderation/", articles.ModerationListView.as_view(), name="moderation-list"),
     path("article/<int:pk>/approve/", articles.approve_article, name="article-approve"),
     path("article/<int:pk>/reject/", articles.reject_article, name="article-reject"),

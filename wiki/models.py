@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from martor.models import MartorField
 from taggit.managers import TaggableManager
 
+
 def get_uncategorized_category():
     category, _ = Category.objects.get_or_create(
         slug="chua-phan-loai",
@@ -17,6 +18,7 @@ def get_uncategorized_category():
         },
     )
     return category.pk
+
 
 class Profile(models.Model):
     user = models.OneToOneField(
@@ -74,6 +76,7 @@ class Profile(models.Model):
     def downvotes(self):
         return self.user.user_votes.filter(value=-1).count()
 
+
 class Category(models.Model):
     name = models.CharField(max_length=120, unique=True)
     slug = models.SlugField(max_length=140, unique=True)
@@ -89,6 +92,7 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse("wiki:article-list") + f"?category={self.slug}"
+
 
 class Article(models.Model):
     STATUS_CHOICES = (
@@ -187,6 +191,7 @@ class Article(models.Model):
             self.category_id = get_uncategorized_category()
         super().save(*args, **kwargs)
 
+
 class Comment(models.Model):
     article = models.ForeignKey(
         Article,
@@ -228,6 +233,7 @@ class Comment(models.Model):
     def get_absolute_url(self):
         return self.article.get_absolute_url() + f"#comment-{self.pk}"
 
+
 def upload_file_validator(value):
     allowed = [
         "application/pdf",
@@ -238,6 +244,7 @@ def upload_file_validator(value):
     ]
     if value.file.content_type not in allowed:
         raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
+
 
 def testcase_file_validator(value):
     allowed_extensions = {
@@ -253,15 +260,19 @@ def testcase_file_validator(value):
         allowed = ", ".join(sorted(allowed_extensions))
         raise ValidationError(f"Chỉ hỗ trợ file testcase: {allowed}.")
 
+
 def coding_case_upload_to(instance, filename):
     article_id = instance.exercise.article_id if instance.exercise_id else "unassigned"
     return f"coding_cases/{article_id}/{filename}"
 
+
 def default_coding_time_limit():
     return getattr(settings, "CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS", 2000)
 
+
 def default_coding_memory_limit():
     return getattr(settings, "CODE_EXECUTION_DEFAULT_MEMORY_MB", 128)
+
 
 class UploadedFile(models.Model):
     user = models.ForeignKey(
@@ -288,6 +299,7 @@ class UploadedFile(models.Model):
     def __str__(self):
         return f"{self.file.name} by {self.user.username}"
 
+
 class ArticleRevision(models.Model):
     article = models.ForeignKey(
         Article,
@@ -310,6 +322,7 @@ class ArticleRevision(models.Model):
     def __str__(self):
         return f"Revision of {self.article.title} at {self.created_at}"
 
+
 class ArticleVote(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="article_votes"
@@ -327,6 +340,7 @@ class ArticleVote(models.Model):
     def __str__(self):
         return f"ArticleVote({self.user}, {self.article}, {self.value})"
 
+
 class CommentVote(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comment_votes"
@@ -343,6 +357,7 @@ class CommentVote(models.Model):
 
     def __str__(self):
         return f"CommentVote({self.user}, {self.comment}, {self.value})"
+
 
 class UserVote(models.Model):
     voter = models.ForeignKey(
@@ -363,6 +378,7 @@ class UserVote(models.Model):
     def __str__(self):
         return f"UserVote({self.voter}, {self.target}, {self.value})"
 
+
 class Question(models.Model):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="questions"
@@ -379,6 +395,7 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.content[:50]}..."
 
+
 class Choice(models.Model):
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name="choices"
@@ -391,6 +408,7 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.content
+
 
 class CodingExercise(models.Model):
     COMPARE_MODE_CHOICES = (
@@ -420,6 +438,7 @@ class CodingExercise(models.Model):
 
     def __str__(self):
         return f"CodingExercise({self.article.title})"
+
 
 class CodingTestCase(models.Model):
     exercise = models.ForeignKey(
@@ -471,6 +490,7 @@ class CodingTestCase(models.Model):
             return self.expected_output_file.read().decode("utf-8")
         return self.expected_output_text or ""
 
+
 class CodingSubmission(models.Model):
     STATUS_CHOICES = (
         ("accepted", "Accepted"),
@@ -509,6 +529,7 @@ class CodingSubmission(models.Model):
     def __str__(self):
         return f"{self.exercise.article.title} - {self.user} - {self.status}"
 
+
 class CodingSubmissionResult(models.Model):
     submission = models.ForeignKey(
         CodingSubmission, on_delete=models.CASCADE, related_name="results"
@@ -534,6 +555,7 @@ class CodingSubmissionResult(models.Model):
     def __str__(self):
         return f"{self.case_name}: {self.status}"
 
+
 class UserAnswer(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_answers"
@@ -550,6 +572,7 @@ class UserAnswer(models.Model):
     def __str__(self):
         return f"Answer by {self.user} for {self.question}"
 
+
 class Bookmark(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bookmarks"
@@ -565,6 +588,7 @@ class Bookmark(models.Model):
 
     def __str__(self):
         return f"{self.user} bookmarked {self.article}"
+
 
 class Notification(models.Model):
     recipient = models.ForeignKey(
@@ -587,6 +611,7 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.recipient}: {self.message}"
+
 
 class Report(models.Model):
     REPORT_REASONS = (
@@ -617,6 +642,7 @@ class Report(models.Model):
         target = self.article or self.comment
         return f"Report by {self.reporter} on {target}"
 
+
 class Badge(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True)
@@ -627,6 +653,7 @@ class Badge(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class UserBadge(models.Model):
     user = models.ForeignKey(
