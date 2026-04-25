@@ -1,3 +1,13 @@
+@charset "UTF-8";
+/* ─── Local Font Face Definitions ─── */
+@font-face {
+  font-family: "Lucida Grande Custom";
+  src: url("../fonts/Lucida-Grande.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+/* You can add more font-face definitions here if you upload font files to static/fonts/ */
 :root {
   --bg: #f2f2f7;
   --bg-warm: #fafafa;
@@ -51,7 +61,7 @@
   --radius-lg: 28px;
   --radius-xl: 36px;
   --glass: saturate(180%) blur(20px);
-  --font-sans: "Nunito", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Nunito", "Inter", "Lucida Grande Custom", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -86,6 +96,11 @@ body.app-shell {
   line-height: 1.6;
   margin: 0;
   letter-spacing: -0.011em;
+}
+
+::-moz-selection {
+  background: rgba(0, 113, 227, 0.18);
+  color: var(--ink);
 }
 
 ::selection {
@@ -229,7 +244,7 @@ a {
   transition: color 0.2s var(--ease);
 }
 
-.ui-card, .profile-edit-form, .profile-hero, .ui-card--glass, .ui-card--strong {
+.ui-card, .profile-hero, .profile-edit-form, .ui-card--glass, .ui-card--strong {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -238,7 +253,7 @@ a {
   overflow: hidden;
   position: relative;
 }
-.ui-card.is-interactive:hover, .is-interactive.profile-edit-form:hover, .is-interactive.profile-hero:hover, .is-interactive.ui-card--glass:hover, .is-interactive.ui-card--strong:hover {
+.ui-card.is-interactive:hover, .is-interactive.profile-hero:hover, .is-interactive.profile-edit-form:hover, .is-interactive.ui-card--glass:hover, .is-interactive.ui-card--strong:hover {
   transform: translateY(-4px) scale(1.005);
   box-shadow: var(--shadow-lg);
   border-color: var(--line-strong);
@@ -259,7 +274,7 @@ a {
   border-radius: var(--radius);
   overflow: hidden;
 }
-.ui-card::before, .profile-edit-form::before, .profile-hero::before, .ui-card--strong::before, .ui-card--glass::before {
+.ui-card::before, .profile-hero::before, .profile-edit-form::before, .ui-card--strong::before, .ui-card--glass::before {
   content: "";
   position: absolute;
   top: 0;
@@ -581,6 +596,21 @@ a {
   max-width: 320px;
 }
 
+.hover-float {
+  transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease) !important;
+}
+.hover-float:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.glass-effect {
+  background: var(--panel-glass);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
 .article-shell {
   background: var(--panel) !important;
   border: 1px solid var(--line) !important;
@@ -832,7 +862,8 @@ a {
   width: 38px;
   height: 38px;
   border-radius: 999px;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
   border: 2px solid rgba(0, 0, 0, 0.06);
   box-shadow: var(--shadow-sm);
 }
@@ -900,6 +931,26 @@ a {
   border-color: var(--brand) !important;
   background: var(--brand-soft);
   box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.08);
+}
+
+.toc-nav .nav-link {
+  color: var(--muted);
+  font-size: 0.82rem;
+  transition: all 0.2s var(--ease);
+  border-radius: 6px;
+  padding: 4px 8px !important;
+}
+.toc-nav .nav-link:hover {
+  color: var(--brand);
+  background: var(--brand-soft);
+  transform: translateX(4px);
+}
+.toc-nav .nav-link.fw-semibold {
+  font-size: 0.88rem;
+}
+.toc-nav ul {
+  list-style: none;
+  padding-left: 0;
 }
 
 .featured-label {
@@ -1140,9 +1191,14 @@ textarea.font-monospace {
   font-size: 0.88rem !important;
   line-height: 1.65;
   padding: 1.15rem 1.25rem;
-  tab-size: 4;
+  -moz-tab-size: 4;
+    -o-tab-size: 4;
+       tab-size: 4;
   resize: vertical;
   box-shadow: var(--shadow) inset;
+}
+textarea.font-monospace::-moz-placeholder {
+  color: rgba(255, 255, 255, 0.2);
 }
 textarea.font-monospace::placeholder {
   color: rgba(255, 255, 255, 0.2);
@@ -1351,4 +1407,42 @@ textarea.font-monospace:focus {
   .featured-title-row h1 {
     font-size: 1.6rem;
   }
+}
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-truncate-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.transition-all {
+  transition: all 0.3s var(--ease) !important;
+}
+
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  -o-object-fit: contain;
+     object-fit: contain;
 }

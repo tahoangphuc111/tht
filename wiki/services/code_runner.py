@@ -151,14 +151,12 @@ def _run_process(command, workdir, input_data="", timeout_ms=None):
     stdout_path = workdir / "stdout.txt"
     stderr_path = workdir / "stderr.txt"
     stdin_path.write_text(input_data or "", encoding="utf-8")
-    
     import os
     run_env = os.environ.copy()
     run_env["PYTHONIOENCODING"] = "utf-8"
     run_env["PYTHONUTF8"] = "1"
     run_env["LANG"] = "en_US.UTF-8"
     run_env["LC_ALL"] = "en_US.UTF-8"
-    
     started_at = time.perf_counter()
     with open(stdin_path, "rb") as stdin_handle, open(stdout_path, "wb") as stdout_handle, open(stderr_path, "wb") as stderr_handle:
         try:
@@ -352,7 +350,6 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
 
         submission.status = final_status
         submission.compile_output = compile_result["stderr"] or compile_result["stdout"]
-        
         preview_item = next(
             (item for item in testcase_results if item["status"] != "accepted"),
             testcase_results[0] if testcase_results else None,

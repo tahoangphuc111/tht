@@ -33,6 +33,14 @@ static/*
 !static/js/
 static/js/*
 !static/js/coding_exercise.js
+!static/scss/
+static/scss/*
+!static/scss/*.scss
+!static/fonts/
+static/fonts/*
+!static/fonts/*.ttf
+!static/fonts/*.woff
+!static/fonts/*.woff2
 local_settings.py
 .pylintrc
 .flake8

@@ -12,7 +12,9 @@ from .views import (
     files,
     moderation,
     quiz,
+    search,
     users,
+
     voting,
 )
 
@@ -21,6 +23,7 @@ app_name = "wiki"
 urlpatterns = [
     # Base
     path("", base.home_view, name="home"),
+    path("search/", search.search_view, name="search"),
     path("report-content/", moderation.report_content_view, name="report-content"),
     path("getting-started/", base.getting_started_view, name="getting-started"),
     path("dismiss-guide/", base.dismiss_guide_view, name="dismiss-guide"),
@@ -59,11 +62,11 @@ urlpatterns = [
         articles.ArticleRevisionDetailView.as_view(),
         name="article-revision-detail",
     ),
-    path(
-        "article/<int:pk>/export-pdf/",
-        articles.export_article_pdf,
-        name="export-article-pdf",
-    ),
+
+
+
+
+
     path("moderation/", articles.ModerationListView.as_view(), name="moderation-list"),
     path("article/<int:pk>/approve/", articles.approve_article, name="article-approve"),
     path("article/<int:pk>/reject/", articles.reject_article, name="article-reject"),

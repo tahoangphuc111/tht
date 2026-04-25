@@ -359,3 +359,28 @@
     }
   }
 }
+// ─── Table of Contents ───
+.toc-nav {
+  .nav-link {
+    color: var(--muted);
+    font-size: 0.82rem;
+    transition: all 0.2s var(--ease);
+    border-radius: 6px;
+    padding: 4px 8px !important;
+
+    &:hover {
+      color: var(--brand);
+      background: var(--brand-soft);
+      transform: translateX(4px);
+    }
+
+    &.fw-semibold {
+      font-size: 0.88rem;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+}

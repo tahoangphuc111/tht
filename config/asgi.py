@@ -37,10 +37,12 @@ async def websocket_app(scope, receive, send):
         while True:
             event = await receive()
             if event["type"] == "websocket.receive":
-                # Security: We do NOT broadcast messages received from clients.
-                # This prevents spoofing of vote updates.
-                # We only keep the connection alive or handle client-to-server pings if needed.
-                pass
+                try:
+                    data = json.loads(event.get("text", "{}"))
+                    if data.get("type") == "ping":
+                        await send({"type": "websocket.send", "text": json.dumps({"type": "pong"})})
+                except json.JSONDecodeError:
+                    pass
             elif event["type"] == "websocket.disconnect":
                 break
     finally:

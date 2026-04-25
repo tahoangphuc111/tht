@@ -1,1 +1,11 @@
-// Moved to _theme.scss
+/* ─── Local Font Face Definitions ─── */
+
+@font-face {
+  font-family: 'Lucida Grande Custom';
+  src: url('../fonts/Lucida-Grande.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* You can add more font-face definitions here if you upload font files to static/fonts/ */

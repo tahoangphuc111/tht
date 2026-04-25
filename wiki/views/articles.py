@@ -1,4 +1,4 @@
-import re
+
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -17,7 +17,7 @@ from django.views.generic import (
     ListView,
     UpdateView,
 )
-from xhtml2pdf import pisa
+
 
 from ..models import Article, Category, ArticleRevision, Bookmark
 from ..forms import ArticleForm, CommentForm
@@ -368,54 +368,7 @@ class ArticleRevisionDetailView(DetailView):
         return revision
 
 
-def _latex_to_html(html_content):
-    """Convert LaTeX $...$ and $$...$$ to styled HTML for PDF rendering."""
-    # Display math $$...$$ → centered block
-    html_content = re.sub(
-        r'\$\$(.+?)\$\$',
-        r'<div class="math-block">\1</div>',
-        html_content,
-        flags=re.DOTALL,
-    )
-    # Inline math $...$ → italic serif span
-    html_content = re.sub(
-        r'\$(.+?)\$',
-        r'<span class="math-inline">\1</span>',
-        html_content,
-    )
-    return html_content
-
-
-@login_required
-def export_article_pdf(request, pk):
-    """Export an article to PDF format."""
-    article = get_object_or_404(Article, pk=pk)
-    if (
-        article.status != "published"
-        and not can_manage_wiki(request.user)
-        and article.author != request.user
-    ):
-        raise Http404
-
-    # Render markdown to HTML, then convert LaTeX to styled spans
-    from martor.utils import markdownify
-    rendered = markdownify(article.content)
-    rendered = _latex_to_html(rendered)
-
-    html = render_to_string(
-        "wiki/article_pdf.html",
-        {"article": article, "rendered_content": rendered, "request": request},
-    )
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{article.slug}.pdf"'
-    result = pisa.CreatePDF(html.encode("utf-8"), dest=response, encoding="UTF-8")
-    if result.err:
-        return HttpResponse("PDF export failed", status=500)
-    return response
-
-
 class ModerationListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    """View for admins to see articles pending moderation."""
 
     model = Article
     template_name = "wiki/article_list.html"  # Reuse list template

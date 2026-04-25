@@ -1,0 +1,426 @@
+// ─── Cards with 3D depth ───
+.ui-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.35s var(--ease),
+    transform 0.35s var(--ease-spring),
+    border-color 0.25s var(--ease);
+  overflow: hidden;
+  position: relative;
+
+  &.is-interactive:hover {
+    transform: translateY(-4px) scale(1.005);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--line-strong);
+  }
+
+  &--strong {
+    @extend .ui-card;
+    background: var(--panel-strong);
+    box-shadow: var(--shadow);
+  }
+
+  &--glass {
+    @extend .ui-card;
+    background: var(--panel-glass);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.5);
+  }
+
+  &--flat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  // subtle inner highlight for 3D look
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.8) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Targeted reset for custom icon/vote buttons only
+.nav-icon-btn, .nav-pill-btn, .tool-btn, .vote-button {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+// ─── Stack layouts ───
+.ui-stack {
+  display: grid;
+  gap: 1rem;
+  &--tight { gap: 0.5rem; }
+  &--loose { gap: 1.5rem; }
+}
+
+.ui-stack-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.35rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s var(--ease);
+
+  &.is-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--panel-hover);
+      border-color: rgba(0, 113, 227, 0.15);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  &__meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Section headers ───
+.ui-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  &__title {
+    margin-bottom: 0;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+}
+
+.ui-eyebrow {
+  color: var(--brand);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+// ─── Badges ───
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--panel-strong);
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  transition: all 0.2s var(--ease);
+
+  &--primary {
+    background: var(--brand-soft);
+    color: var(--brand);
+    border-color: transparent;
+  }
+
+  &--success {
+    background: var(--success-soft);
+    color: #1a8d47;
+    border-color: transparent;
+  }
+
+  &--danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: transparent;
+  }
+
+  &--warning {
+    background: var(--warning-soft);
+    color: #b37000;
+    border-color: transparent;
+  }
+
+  &--outline {
+    background: transparent;
+    border: 1px solid var(--line-strong);
+  }
+}
+
+.pill-badge {
+  @extend .ui-badge;
+}
+
+// ─── Buttons — 3D bubbly style ───
+.btn-soft {
+  background: var(--brand-soft);
+  color: var(--brand);
+  border: none !important;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.55rem 1.35rem;
+  transition: all 0.3s var(--ease-spring);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--brand);
+    color: #fff;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+      0 4px 14px rgba(0, 113, 227, 0.25),
+      0 2px 6px rgba(0, 113, 227, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &.btn-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+    &:hover {
+      background: var(--danger);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255, 69, 58, 0.3);
+    }
+  }
+
+  &.btn-sm {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+  }
+}
+
+.btn-primary {
+  background: var(--brand) !important;
+  border: none !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  font-weight: 600;
+  padding: 0.65rem 1.6rem;
+  transition: all 0.3s var(--ease-spring);
+  position: relative;
+
+  &:hover {
+    background: var(--brand-hover) !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+      0 6px 20px rgba(0, 113, 227, 0.3),
+      0 2px 8px rgba(0, 113, 227, 0.2) !important;
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--shadow-focus) !important;
+  }
+}
+
+.btn-success {
+  border-radius: 999px !important;
+  font-weight: 600;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(48, 209, 88, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+.btn-warning {
+  border-radius: 999px !important;
+  font-weight: 600;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 159, 10, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+.btn-danger {
+  border-radius: 999px !important;
+  font-weight: 600;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 69, 58, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+.btn-outline-secondary {
+  border: 1px solid var(--line-strong) !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  border-radius: 999px !important;
+  font-weight: 500;
+  padding: 0.55rem 1.35rem;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    background: var(--panel-strong) !important;
+    color: var(--ink) !important;
+    border-color: var(--ink-light) !important;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-outline-primary {
+  border: 1.5px solid var(--brand) !important;
+  background: transparent !important;
+  color: var(--brand) !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+  padding: 0.55rem 1.35rem;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    background: var(--brand) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
+  }
+}
+
+.btn-outline-danger {
+  border: 1.5px solid var(--danger) !important;
+  background: transparent !important;
+  color: var(--danger) !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+  padding: 0.55rem 1.35rem;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    background: var(--danger) !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(255, 69, 58, 0.25);
+  }
+}
+
+.btn-dark {
+  background: var(--ink) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+  padding: 0.65rem 1.6rem;
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    background: #000 !important;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-float);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+// ─── Empty State ───
+.ui-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--panel-strong);
+  border: 1.5px dashed rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius);
+  color: var(--muted);
+
+  &__icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.35;
+  }
+
+  &__text {
+    font-size: 0.95rem;
+    max-width: 320px;
+  }
+}
+// ─── Utility: Hover Float ───
+.hover-float {
+  transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease) !important;
+  &:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: var(--shadow-lg) !important;
+  }
+}
+
+// ─── Glassmorphism helper ───
+.glass-effect {
+  background: var(--panel-glass);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}

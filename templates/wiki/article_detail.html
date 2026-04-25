@@ -19,8 +19,10 @@
     <div class="reading-progress__bar" id="reading-progress-bar"></div>
 </div>
 
-<article class="card border-0 shadow-lg app-card article-shell" id="article-shell">
-    <div class="card-body p-4 p-lg-5">
+<div class="row g-4">
+    <div class="col-lg-9">
+        <article class="card border-0 shadow-lg app-card article-shell" id="article-shell">
+            <div class="card-body p-4 p-lg-5">
         <div class="mb-5 border-bottom pb-4">
             <div class="article-meta-row mb-3">
                 <span class="ui-badge ui-badge--primary">{{ article.category.name }}</span>
@@ -112,9 +114,7 @@
                         <button class="tool-btn article-focus-toggle" type="button" title="Tập trung">
                             <i class="fa-solid fa-eye"></i>
                         </button>
-                        <a class="tool-btn text-decoration-none" href="{% url 'wiki:export-article-pdf' article.pk %}" title="PDF">
-                            <i class="fa-solid fa-file-pdf"></i>
-                        </a>
+
                     </div>
                 </div>
             </div>
@@ -263,7 +263,21 @@
         </script>
         {% endif %}
     </div>
-</article>
+        </article>
+    </div>
+
+    <div class="col-lg-3 d-none d-lg-block">
+        <div class="sticky-top" style="top: 100px; z-index: 10;">
+            <div class="card border-0 shadow-sm app-card">
+                <div class="card-body p-4">
+                    <div class="section-eyebrow mb-3">Mục lục</div>
+                    <nav id="toc" class="toc-nav"></nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {% if coding_exercise %}
 <section class="card border-0 shadow-sm app-card mt-4" id="coding-exercise-section">
@@ -554,6 +568,45 @@ document.addEventListener("DOMContentLoaded", function () {
                 minimumResultsForSearch: Infinity
             });
         });
+    }
+
+    // Table of Contents Generation
+    const content = document.querySelector('.article-content');
+    const toc = document.getElementById('toc');
+    
+    if (content && toc) {
+        const headings = content.querySelectorAll('h2, h3, h4');
+        if (headings.length > 0) {
+            const tocList = document.createElement('ul');
+            tocList.className = 'nav flex-column gap-2';
+            
+            headings.forEach((heading, index) => {
+                const id = `heading-${index}`;
+                heading.setAttribute('id', id);
+                
+                const item = document.createElement('li');
+                item.className = 'nav-item';
+                
+                const link = document.createElement('a');
+                link.className = `nav-link p-0 small ${heading.tagName === 'H3' ? 'ms-3' : heading.tagName === 'H4' ? 'ms-4' : 'fw-semibold text-dark'}`;
+                link.href = `#${id}`;
+                link.textContent = heading.textContent;
+                
+                item.appendChild(link);
+                tocList.appendChild(item);
+            });
+            
+            toc.appendChild(tocList);
+        } else {
+            // Hide ToC column if no headings
+            const tocCol = toc.closest('.col-lg-3');
+            if (tocCol) tocCol.classList.add('d-none');
+            const mainCol = document.querySelector('.col-lg-9');
+            if (mainCol) {
+                mainCol.classList.remove('col-lg-9');
+                mainCol.classList.add('col-lg-12');
+            }
+        }
     }
 });
 </script>

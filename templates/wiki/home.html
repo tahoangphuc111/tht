@@ -2,12 +2,27 @@
 
 {% block title %}Trang chủ | CP Wiki{% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.1.0/dist/typed.umd.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        new Typed('#typed-hero-title', {
+            strings: ['Ghi chú thuật toán', 'Thảo luận cộng đồng', 'Kiến thức lập trình'],
+            typeSpeed: 50,
+            backSpeed: 30,
+            backDelay: 2000,
+            loop: true
+        });
+    });
+</script>
+{% endblock %}
+
 {% block content %}
-<section class="hero-panel mb-5">
+<section class="hero-panel mb-5" data-aos="fade-up">
     <div class="row g-4 align-items-center">
         <div class="col-lg-7">
             <div class="ui-eyebrow mb-2">Home Dashboard</div>
-            <h1 class="hero-title mb-3">Ghi chú thuật toán & Thảo luận cộng đồng</h1>
+            <h1 class="hero-title mb-3" style="min-height: 1.2em;"><span id="typed-hero-title"></span></h1>
             <p class="hero-copy mb-4">Không gian trung tâm cho ghi chú contest, bài viết và thảo luận của nhóm. Vào là thấy ngay bài nổi bật, danh mục nhiều nội dung và toàn cảnh hoạt động của wiki.</p>
             <div class="d-flex gap-3 flex-wrap">
                 <a class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm" href="{% url 'wiki:article-list' %}">
@@ -25,7 +40,7 @@
             </div>
         </div>
         <div class="col-lg-5">
-            <div class="stat-grid">
+            <div class="stat-grid" data-aos="zoom-in" data-aos-delay="200">
                 <div class="stat-card">
                     <div class="stat-value">{{ total_articles }}</div>
                     <div class="stat-label"><i class="fa-solid fa-file-lines me-1"></i> Bài viết</div>
@@ -40,7 +55,7 @@
 </section>
 
 <div class="row g-4">
-    <div class="col-lg-8">
+    <div class="col-lg-8" data-aos="fade-right">
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4 p-lg-5">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
@@ -96,7 +111,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-4" data-aos="fade-left">
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Top Categories</div>
@@ -117,14 +132,14 @@
 </div>
 
 <div class="row g-4 mt-2">
-    <div class="col-lg-7">
+    <div class="col-lg-7" data-aos="fade-up">
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Latest Articles</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-newspaper text-info me-2"></i>Bài mới đăng</h2>
                 <div class="sidebar-stack">
                     {% for article in latest_articles %}
-                        <div class="sidebar-link-item p-3 mb-2 rounded-3 border border-light">
+                        <div class="sidebar-link-item p-3 mb-2 rounded-3 border border-light transition-all hover-float">
                             <div class="item-content">
                                 <a href="{{ article.get_absolute_url }}" class="item-title text-decoration-none fw-bold text-dark d-block mb-1">{{ article.title }}</a>
                                 <div class="item-meta small">
@@ -142,14 +157,14 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-5">
+    <div class="col-lg-5" data-aos="fade-up" data-aos-delay="100">
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Recent Discussion</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-comments text-success me-2"></i>Bình luận mới</h2>
                 <div class="sidebar-stack">
                     {% for comment in recent_comments %}
-                        <a class="sidebar-link-item p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-start border border-light rounded-3" href="{{ comment.article.get_absolute_url }}">
+                        <a class="sidebar-link-item p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-start border border-light rounded-3 transition-all hover-float" href="{{ comment.article.get_absolute_url }}">
                             <div>
                                 <div class="fw-bold text-dark"><i class="fa-solid fa-circle-user me-1 opacity-50"></i>{{ comment.author.username }}</div>
                                 <div class="text-secondary small mt-1">{{ comment.content|truncatechars:80 }}</div>

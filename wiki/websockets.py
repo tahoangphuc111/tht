@@ -17,24 +17,23 @@ async def _send_message(send_callable, text):
 def broadcast_vote_update(payload):
     """
     Broadcast vote updates to all connected websocket clients.
-    Uses an event loop if available to avoid blocking the caller.
+    Thread-safe and process-local.
     """
     message = {"type": "vote_update", "payload": payload}
     text_data = json.dumps(message)
 
     try:
         loop = asyncio.get_event_loop()
-        if loop.is_running():
-            for send_callable in list(connected_websockets):
-                loop.create_task(_send_message(send_callable, text_data))
-            return
     except RuntimeError:
-        pass
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
-    for send_callable in list(connected_websockets):
-        try:
-            async_to_sync(send_callable)(
-                {"type": "websocket.send", "text": text_data}
-            )
-        except Exception:
-            connected_websockets.discard(send_callable)
+    if loop.is_running():
+        for send_callable in list(connected_websockets):
+            loop.create_task(_send_message(send_callable, text_data))
+    else:
+        async def _run_all():
+            tasks = [_send_message(s, text_data) for s in list(connected_websockets)]
+            if tasks:
+                await asyncio.gather(*tasks)
+        loop.run_until_complete(_run_all())
