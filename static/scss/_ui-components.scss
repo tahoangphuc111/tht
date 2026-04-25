@@ -3,24 +3,24 @@
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
-    box-shadow 0.35s var(--ease),
-    transform 0.35s var(--ease-spring),
+    box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
     border-color 0.25s var(--ease);
   overflow: hidden;
   position: relative;
 
   &.is-interactive:hover {
-    transform: translateY(-4px) scale(1.005);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
     border-color: var(--line-strong);
   }
 
   &--strong {
     @extend .ui-card;
     background: var(--panel-strong);
-    box-shadow: var(--shadow);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
   }
 
   &--glass {

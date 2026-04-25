@@ -1,5 +1,3 @@
-@charset "UTF-8";
-/* ─── Local Font Face Definitions ─── */
 @font-face {
   font-family: "Lucida Grande Custom";
   src: url("../fonts/Lucida-Grande.ttf") format("truetype");
@@ -7,7 +5,6 @@
   font-style: normal;
   font-display: swap;
 }
-/* You can add more font-face definitions here if you upload font files to static/fonts/ */
 :root {
   --bg: #f2f2f7;
   --bg-warm: #fafafa;
@@ -251,19 +248,19 @@ a {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.35s var(--ease), transform 0.35s var(--ease-spring), border-color 0.25s var(--ease);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.25s var(--ease);
   overflow: hidden;
   position: relative;
 }
 .ui-card.is-interactive:hover, .is-interactive.ui-card--glass:hover, .is-interactive.ui-card--strong:hover {
-  transform: translateY(-4px) scale(1.005);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
   border-color: var(--line-strong);
 }
 .ui-card--strong {
   background: var(--panel-strong);
-  box-shadow: var(--shadow);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
 }
 .ui-card--glass {
   background: var(--panel-glass);
