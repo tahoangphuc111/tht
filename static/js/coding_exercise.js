@@ -51,41 +51,51 @@
 
     const renderResult = (data, actionLabel) => {
         resultNode.classList.remove("d-none");
-        statusNode.textContent = `${actionLabel}: ${data.status}`;
+        resultNode.classList.add("fade-in");
+        
+        const statusClass = data.status === "accepted" ? "text-success" : (data.status === "running" ? "text-primary" : "text-danger");
+        const statusIcon = data.status === "accepted" ? '<i class="fa-solid fa-circle-check me-2"></i>' : (data.status === "running" ? '<i class="fa-solid fa-spinner fa-spin me-2"></i>' : '<i class="fa-solid fa-circle-xmark me-2"></i>');
+
+        statusNode.innerHTML = `<div class="d-flex align-items-center ${statusClass}">${statusIcon}<span>${data.message || data.status_label || data.status}</span></div>`;
 
         const parts = [];
-        if (data.compile_output) {
-            parts.push(`<div><strong>compile:</strong><pre class="mb-0">${escapeHtml(data.compile_output)}</pre></div>`);
+        if (data.compile_output && data.status === "compile_error") {
+            parts.push(`<div class="mb-3"><strong>Lỗi biên dịch:</strong><pre class="bg-dark text-light p-3 rounded-3 mt-2 small shadow-inner">${escapeHtml(data.compile_output)}</pre></div>`);
         }
-        if (data.stdout_preview) {
-            parts.push(`<div><strong>stdout:</strong><pre class="mb-0">${escapeHtml(data.stdout_preview)}</pre></div>`);
-        }
-        if (data.stderr_preview) {
-            parts.push(`<div><strong>stderr:</strong><pre class="mb-0">${escapeHtml(data.stderr_preview)}</pre></div>`);
-        }
-        if (typeof data.passed_tests !== "undefined") {
-            parts.push(`<div><strong>tests:</strong> ${data.passed_tests} / ${data.total_tests}</div>`);
-        }
+        
         if (Array.isArray(data.results) && data.results.length) {
-            const rows = data.results.map((item) => `
+            const rows = data.results.map((item) => {
+                const itemStatusClass = item.status === "accepted" ? "badge bg-success-soft text-success" : "badge bg-danger-soft text-danger";
+                return `
                 <tr>
-                    <td>${escapeHtml(item.case_name)}</td>
-                    <td>${escapeHtml(item.status)}</td>
-                    <td><pre class="mb-0">${escapeHtml(item.actual_preview || "")}</pre></td>
-                    <td><pre class="mb-0">${escapeHtml(item.expected_preview || "")}</pre></td>
+                    <td class="fw-medium">${escapeHtml(item.case_name)}</td>
+                    <td><span class="${itemStatusClass}">${escapeHtml(item.status_label || item.status)}</span></td>
+                    <td class="text-muted small">${item.runtime_ms}ms</td>
+                    <td><pre class="mb-0 bg-light p-1 rounded small">${escapeHtml(item.actual_preview || "")}</pre></td>
+                    <td><pre class="mb-0 bg-light p-1 rounded small">${escapeHtml(item.expected_preview || "")}</pre></td>
                 </tr>
-            `).join("");
+                `;
+            }).join("");
+            
             parts.push(`
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle mt-3">
-                        <thead><tr><th>case</th><th>status</th><th>actual</th><th>expected</th></tr></thead>
+                    <table class="table table-hover align-middle mt-2 border-top">
+                        <thead class="table-light"><tr><th>Test case</th><th>Trạng thái</th><th>Thời gian</th><th>Kết quả</th><th>Kỳ vọng</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
             `);
+        } else if (data.stdout_preview || data.stderr_preview) {
+            if (data.stdout_preview) {
+                parts.push(`<div class="mb-2"><strong>stdout:</strong><pre class="bg-light p-2 rounded mt-1 small">${escapeHtml(data.stdout_preview)}</pre></div>`);
+            }
+            if (data.stderr_preview && data.status !== "compile_error") {
+                parts.push(`<div class="mb-2"><strong>stderr:</strong><pre class="bg-light p-2 rounded mt-1 small text-danger">${escapeHtml(data.stderr_preview)}</pre></div>`);
+            }
         }
 
         detailNode.innerHTML = parts.join("");
+        resultNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
     const escapeHtml = (value) => {
@@ -95,11 +105,11 @@
             .replaceAll(">", "&gt;");
     };
 
-    const requestJudge = async (url, actionLabel) => {
+    const requestJudge = async (url, actionLabel, button) => {
         const language = languageSelect.value;
         const source = getEditorValue();
         writeStoredSource(language, source);
-        setBusy(true);
+        setBusy(true, button);
         try {
             const response = await fetch(url, {
                 method: "POST",
@@ -120,13 +130,15 @@
             renderResult(
                 {
                     status: "error",
+                    status_label: "Error",
+                    message: error.message || "Có lỗi xảy ra.",
                     stderr_preview: error.message || "Có lỗi xảy ra.",
                     results: [],
                 },
                 actionLabel
             );
         } finally {
-            setBusy(false);
+            setBusy(false, button);
         }
     };
 
@@ -177,10 +189,10 @@
         });
     }
     if (runButton) {
-        runButton.addEventListener("click", () => requestJudge(config.runUrl, "run"));
+        runButton.addEventListener("click", function() { requestJudge(config.runUrl, "run", this); });
     }
     if (submitButton) {
-        submitButton.addEventListener("click", () => requestJudge(config.submitUrl, "submit"));
+        submitButton.addEventListener("click", function() { requestJudge(config.submitUrl, "submit", this); });
     }
 
     updateSamples();

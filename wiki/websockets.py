@@ -7,7 +7,6 @@ connected_websockets: Set[Any] = set()
 
 
 async def _send_message(send_callable, text):
-    """Internal helper to send a message and handle cleanup."""
     try:
         await send_callable({"type": "websocket.send", "text": text})
     except Exception:
@@ -15,10 +14,6 @@ async def _send_message(send_callable, text):
 
 
 def broadcast_vote_update(payload):
-    """
-    Broadcast vote updates to all connected websocket clients.
-    Thread-safe and process-local.
-    """
     message = {"type": "vote_update", "payload": payload}
     text_data = json.dumps(message)
 

@@ -76,16 +76,21 @@ const initAjaxVotes = () => {
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
                 body: new FormData(f)
             });
-            const d = await r.json();
-            if (!d.success) throw new Error(d.message);
-
-            const scoreEl = document.getElementById('article-score');
-            if (scoreEl && d.article_vote_score !== undefined) scoreEl.textContent = d.article_vote_score;
-
-            const cScoreEl = document.getElementById(`comment-${d.comment_pk}-score`);
-            if (cScoreEl && d.comment_vote_score !== undefined) cScoreEl.textContent = d.comment_vote_score;
-            const userScoreEl = document.getElementById(`user-${d.target_user_pk}-score`);
-            if (userScoreEl && d.target_user_score !== undefined) userScoreEl.textContent = d.target_user_score;
+            
+            const contentType = r.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const d = await r.json();
+                if (!d.success) throw new Error(d.message || "Thao tác không thành công.");
+                
+                const scoreEl = document.getElementById('article-score');
+                if (scoreEl && d.article_vote_score !== undefined) scoreEl.textContent = d.article_vote_score;
+                const cScoreEl = document.getElementById(`comment-${d.comment_pk}-score`);
+                if (cScoreEl && d.comment_vote_score !== undefined) cScoreEl.textContent = d.comment_vote_score;
+                const userScoreEl = document.getElementById(`user-${d.target_user_pk}-score`);
+                if (userScoreEl && d.target_user_score !== undefined) userScoreEl.textContent = d.target_user_score;
+            } else {
+                throw new Error("Lỗi máy chủ hoặc trang không tìm thấy (404/500).");
+            }
 
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, timer: 2000 });

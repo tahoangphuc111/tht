@@ -190,7 +190,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
                     <div>
-                        <div class="section-eyebrow mb-1">Chart.js</div>
                         <h2 class="h4 mb-0">Contribution theo tháng</h2>
                     </div>
                     <span class="text-secondary small">Đăng bài và chỉnh sửa trong 6 tháng gần đây</span>
@@ -230,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="activity-stack">
                     {% for article in recent_articles %}
                         <div class="activity-item">
-                            <div class="activity-icon"><i class="bi bi-file-earmark-text"></i></div>
+                            <div class="activity-icon"><i class="fa-solid fa-file-lines"></i></div>
                             <div>
                                 <div class="activity-title"><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></div>
                                 <div class="activity-meta">Cập nhật {{ article.updated_at|date:"d/m/Y H:i" }}</div>
@@ -241,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     {% endfor %}
                     {% for comment in recent_comments %}
                         <div class="activity-item">
-                            <div class="activity-icon"><i class="bi bi-chat-left-text"></i></div>
+                            <div class="activity-icon"><i class="fa-solid fa-comment-dots"></i></div>
                             <div>
                                 <div class="activity-title">Bình luận trên <a href="{{ comment.article.get_absolute_url }}">{{ comment.article.title }}</a></div>
                                 <div class="activity-meta">{{ comment.created_at|date:"d/m/Y H:i" }}</div>

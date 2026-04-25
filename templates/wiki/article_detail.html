@@ -15,12 +15,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="reading-progress" aria-hidden="true">
-    <div class="reading-progress__bar" id="reading-progress-bar"></div>
-</div>
 
 <div class="row g-4">
-    <div class="col-lg-9">
+    <div class="col-12">
         <article class="card border-0 shadow-lg app-card article-shell" id="article-shell">
             <div class="card-body p-4 p-lg-5">
         <div class="mb-5 border-bottom pb-4">
@@ -265,17 +262,6 @@
     </div>
         </article>
     </div>
-
-    <div class="col-lg-3 d-none d-lg-block">
-        <div class="sticky-top" style="top: 100px; z-index: 10;">
-            <div class="card border-0 shadow-sm app-card">
-                <div class="card-body p-4">
-                    <div class="section-eyebrow mb-3">Mục lục</div>
-                    <nav id="toc" class="toc-nav"></nav>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 
@@ -310,8 +296,12 @@
                     </div>
                     <div id="coding-editor" style="height: 420px; border: 1px solid rgba(0,0,0,.08); border-radius: 1rem;"></div>
                     <div class="d-flex gap-2 flex-wrap mt-3">
-                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="coding-run-btn">run</button>
-                        <button type="button" class="btn btn-dark rounded-pill px-4" id="coding-submit-btn">submit</button>
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="coding-run-btn">
+                            <i class="fa-solid fa-play me-2"></i>Chạy
+                        </button>
+                        <button type="button" class="btn btn-premium rounded-pill px-4" id="coding-submit-btn">
+                            <i class="fa-solid fa-cloud-arrow-up me-2"></i>Nộp bài giải
+                        </button>
                     </div>
                 </div>
                 <div class="col-lg-4">
@@ -335,7 +325,7 @@
             </div>
         {% else %}
             <div class="alert alert-secondary glass-alert mb-0">
-                Bạn cần <a href="{% url 'wiki:login' %}?next={{ request.path }}">đăng nhập</a> để dùng Monaco editor và nộp bài.
+                Bạn cần <a href="{% url 'wiki:login' %}?next={{ request.path }}">đăng nhập</a> để nộp bài.
             </div>
         {% endif %}
     </div>
@@ -570,43 +560,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Table of Contents Generation
-    const content = document.querySelector('.article-content');
-    const toc = document.getElementById('toc');
-    
-    if (content && toc) {
-        const headings = content.querySelectorAll('h2, h3, h4');
-        if (headings.length > 0) {
-            const tocList = document.createElement('ul');
-            tocList.className = 'nav flex-column gap-2';
-            
-            headings.forEach((heading, index) => {
-                const id = `heading-${index}`;
-                heading.setAttribute('id', id);
-                
-                const item = document.createElement('li');
-                item.className = 'nav-item';
-                
-                const link = document.createElement('a');
-                link.className = `nav-link p-0 small ${heading.tagName === 'H3' ? 'ms-3' : heading.tagName === 'H4' ? 'ms-4' : 'fw-semibold text-dark'}`;
-                link.href = `#${id}`;
-                link.textContent = heading.textContent;
-                
-                item.appendChild(link);
-                tocList.appendChild(item);
-            });
-            
-            toc.appendChild(tocList);
-        } else {
-            // Hide ToC column if no headings
-            const tocCol = toc.closest('.col-lg-3');
-            if (tocCol) tocCol.classList.add('d-none');
-            const mainCol = document.querySelector('.col-lg-9');
-            if (mainCol) {
-                mainCol.classList.remove('col-lg-9');
-                mainCol.classList.add('col-lg-12');
-            }
-        }
     }
 });
 </script>

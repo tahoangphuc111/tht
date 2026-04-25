@@ -46,10 +46,10 @@
                     {% endif %}
                 </ul>
 
-                <form class="d-flex mx-lg-auto mb-3 mb-lg-0" action="{% url 'wiki:search' %}" method="get" style="max-width: 300px; width: 100%;">
+                <form class="d-flex mx-lg-auto mb-3 mb-lg-0 search-form-nav" action="{% url 'wiki:search' %}" method="get">
                     <div class="position-relative w-100">
-                        <i class="fa-solid fa-magnifying-glass position-absolute top-50 start-0 translate-middle-y ms-3 text-muted small"></i>
-                        <input class="form-control rounded-pill border-0 bg-light ps-5 py-2" type="search" name="q" placeholder="Tìm kiếm..." aria-label="Search" style="font-size: 0.85rem;" value="{{ query|default:'' }}">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input class="form-control search-input" type="search" name="q" placeholder="Tìm kiếm kiến thức..." aria-label="Search" value="{{ query|default:'' }}">
                     </div>
                 </form>
 
@@ -82,10 +82,10 @@
                         </div>
                     {% endif %}
                     
-                    <button class="nav-pill-btn" type="button" {% if user.is_authenticated %}data-bs-toggle="modal" data-bs-target="#savedArticlesModal"{% else %}onclick="window.location.href='{% url 'wiki:login' %}?next={{ request.path }}'"{% endif %}>
-                        <i class="fa-solid fa-bookmark opacity-50"></i>
-                        <span>Đã lưu</span>
-                        <span class="badge rounded-pill bg-dark text-white ms-1" style="font-size: 0.65rem; padding: 0.4em 0.6em;" id="saved-articles-count">0</span>
+                    <button class="nav-pill-btn bookmark-btn" type="button" {% if user.is_authenticated %}data-bs-toggle="modal" data-bs-target="#savedArticlesModal"{% else %}onclick="window.location.href='{% url 'wiki:login' %}?next={{ request.path }}'"{% endif %}>
+                        <i class="fa-solid fa-bookmark"></i>
+                        <span class="d-none d-xl-inline">Đã lưu</span>
+                        <span class="badge rounded-pill" id="saved-articles-count">0</span>
                     </button>
 
                     {% if user.is_authenticated %}
@@ -192,11 +192,12 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
     <script>
-        // AOS Initialization
+        // AOS Initialization - optimized
         AOS.init({
-            duration: 800,
+            duration: 600,
             once: true,
-            offset: 100
+            offset: 50,
+            disable: 'mobile' // Save CPU on mobile devices
         });
 
         // NProgress for page transitions
