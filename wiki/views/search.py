@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.db.models import Q, Case, When, IntegerField
 from ..models import Article
 
+
 def search_view(request):
     query = request.GET.get('q', '').strip()
     results = []
