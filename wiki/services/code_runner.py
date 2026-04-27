@@ -73,6 +73,7 @@ def get_all_language_status():
         results.append({
             "key": key,
             "label": cfg.get("label", key),
+            "monaco_language": cfg.get("monaco_language", "plaintext"),
             "enabled": bool(cfg.get("enabled")),
             "detected": bool(found),
             "binary_path": found,

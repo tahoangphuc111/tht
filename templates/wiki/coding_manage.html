@@ -121,8 +121,15 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ all_languages|json_script:"all-languages-data" }}
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 <script>
+    const allLanguages = JSON.parse(document.getElementById('all-languages-data').textContent);
+    const monacoMap = {};
+    allLanguages.forEach(lang => {
+        monacoMap[lang.key] = lang.monaco_language;
+    });
+
     require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         const textareas = document.querySelectorAll('textarea[name^="starter_code_"]');
@@ -139,9 +146,7 @@
             textarea.style.display = 'none';
             
             const langKey = textarea.name.replace('starter_code_', '');
-            let monacoLang = langKey;
-            if (langKey === 'cpp') monacoLang = 'cpp';
-            if (langKey === 'python') monacoLang = 'python';
+            let monacoLang = monacoMap[langKey] || 'plaintext';
             
             const editor = monaco.editor.create(container, {
                 value: textarea.value,
