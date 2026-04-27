@@ -212,41 +212,6 @@ def _run_process(command, workdir, input_data="", timeout_ms=None):
     run_env["LANG"] = "en_US.UTF-8"
     run_env["LC_ALL"] = "en_US.UTF-8"
 
-    use_docker = getattr(settings, "CODE_EXECUTION_USE_DOCKER", True)
-    mem_limit = getattr(settings, "CODE_EXECUTION_DEFAULT_MEMORY_MB", 128)
-    
-    if use_docker and command:
-        cmd_str = str(command[0]).lower()
-        if "python" in cmd_str or "py" in cmd_str: image = "python:3.10-slim"
-        elif "g++" in cmd_str or "gcc" in cmd_str: image = "gcc:latest"
-        elif "java" in cmd_str or "javac" in cmd_str: image = "openjdk:17-slim"
-        elif "node" in cmd_str: image = "node:18-slim"
-        elif "go" in cmd_str: image = "golang:1.20-alpine"
-        elif "rust" in cmd_str: image = "rust:slim"
-        elif "dotnet" in cmd_str: image = "mcr.microsoft.com/dotnet/sdk:8.0"
-        else: image = "python:3.10-slim"
-        
-        new_cmd = []
-        for arg in command:
-            arg_str = str(arg)
-            if str(workdir) in arg_str:
-                arg_str = arg_str.replace(str(workdir), "/app")
-            arg_str = arg_str.replace("\\", "/")
-            # Also replace any resolved python paths to just python
-            if "python" in arg_str.lower() and (".exe" in arg_str.lower() or "venv" in arg_str.lower()):
-                arg_str = "python"
-            new_cmd.append(arg_str)
-            
-        command = [
-            "docker", "run", "--rm", 
-            "--network", "none",
-            "--memory", f"{mem_limit}m",
-            "-v", f"{workdir}:/app",
-            "-w", "/app",
-            "-i",
-            image
-        ] + new_cmd
-
     started_at = time.perf_counter()
     with open(stdin_path, "rb") as stdin_handle, \
          open(stdout_path, "wb") as stdout_handle, \
