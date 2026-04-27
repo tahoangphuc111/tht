@@ -71,6 +71,16 @@ def build_profile_stats(user, viewer=None):
         r_day = timezone.localtime(revision.created_at).date()
         if r_day >= start_date:
             contribution_edits[r_day] += 1
+            
+    try:
+        from .models import CodingSubmission
+        coding_submissions = CodingSubmission.objects.filter(user=user)
+        for sub in coding_submissions:
+            s_day = timezone.localtime(sub.created_at).date()
+            if s_day >= start_date:
+                contribution_posts[s_day] += 1
+    except ImportError:
+        pass
 
     contribution_days = []
     curr = start_date

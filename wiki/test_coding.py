@@ -33,6 +33,8 @@ TEST_LANGUAGE_CONFIG = {
     CODE_EXECUTION_LANGUAGE_CONFIGS=TEST_LANGUAGE_CONFIG,
     CODE_EXECUTION_TMP_ROOT=Path(tempfile.gettempdir()) / "cpwiki_judge_tests",
     CODE_EXECUTION_MAX_TESTCASES=10,
+    CELERY_TASK_ALWAYS_EAGER=True,
+    CODE_EXECUTION_USE_DOCKER=False,
 )
 class CodingExerciseTests(TestCase):
     """Exercise management and judging tests."""
