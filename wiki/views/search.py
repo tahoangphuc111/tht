@@ -2,19 +2,20 @@ from django.shortcuts import render
 from django.db.models import Q
 from ..models import Article
 
+
 def search_view(request):
     """Global search view for articles."""
     query = request.GET.get('q', '').strip()
     results = []
-    
+
     if query:
         results = Article.objects.filter(
-            Q(title__icontains=query) | 
-            Q(content__icontains=query) |
-            Q(tags__name__icontains=query),
+            Q(title__icontains=query)
+            | Q(content__icontains=query)
+            | Q(tags__name__icontains=query),
             status='published'
         ).distinct().select_related('author', 'category')
-        
+
     context = {
         'query': query,
         'results': results,

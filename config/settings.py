@@ -123,6 +123,7 @@ LOCAL_MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_ROOT = LOCAL_MEDIA_ROOT
 MEDIA_URL = "/media/"
 
+
 def _load_languages(base_dir):
     json_path = base_dir / "config" / "languages.json"
     if not json_path.exists():

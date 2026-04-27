@@ -227,7 +227,8 @@ def print_status(results):
     print(f"  OS: {platform.system()} {platform.release()}")
     print()
 
-    icon = lambda ok: f"{GREEN}OK{RESET}" if ok else f"{RED}--{RESET}"
+    def icon(ok):
+        return f"{GREEN}OK{RESET}" if ok else f"{RED}--{RESET}"
 
     print(f"{BOLD}  Core:{RESET}")
     print(f"  {'-' * 46}")
