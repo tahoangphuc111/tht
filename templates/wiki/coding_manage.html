@@ -90,14 +90,30 @@
                 </div>
 
                 <hr class="my-4">
-                <div class="section-eyebrow mb-2">Ngôn ngữ khả dụng</div>
-                <div class="d-flex gap-2 flex-wrap">
-                    {% for language in enabled_languages %}
-                        <span class="pill-badge">{{ language.label }}</span>
+                <div class="section-eyebrow mb-2">Runtime Status</div>
+                <div class="d-flex gap-2 flex-wrap mb-3">
+                    {% for lang in all_languages %}
+                        {% if lang.detected %}
+                            <span class="pill-badge" title="{{ lang.binary_path }}">
+                                <i class="fa-solid fa-circle-check text-success me-1" style="font-size:.7em"></i>{{ lang.label }}
+                            </span>
+                        {% else %}
+                            <span class="pill-badge" style="opacity:.45" title="Not installed">
+                                <i class="fa-solid fa-circle-xmark text-danger me-1" style="font-size:.7em"></i>{{ lang.label }}
+                            </span>
+                        {% endif %}
                     {% empty %}
-                        <span class="text-secondary small">Chưa có runtime nào trên server.</span>
+                        <span class="text-secondary small">No languages configured.</span>
                     {% endfor %}
                 </div>
+                {% if all_languages %}
+                    <div class="form-text">
+                        <i class="fa-solid fa-terminal me-1"></i>
+                        <code>python scripts/scan.py</code> &mdash; scan &amp; install guide<br>
+                        <i class="fa-solid fa-download me-1"></i>
+                        <code>scripts/install.bat</code> (Win) &middot; <code>scripts/install.sh</code> (Linux/Mac)
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,0 +1,74 @@
+{
+  "python": {
+    "label": "Python 3",
+    "monaco": "python",
+    "source": "main.py",
+    "compile": [],
+    "run": ["{python}", "{source_path}"],
+    "binaries": ["python3", "python", "py"],
+    "starter": "def solve() -> None:\n    data = input().strip()\n    print(data)\n\nif __name__ == '__main__':\n    solve()\n"
+  },
+  "cpp": {
+    "label": "C++17",
+    "monaco": "cpp",
+    "source": "main.cpp",
+    "compile": ["{g++}", "-O2", "-std=c++17", "{source_path}", "-o", "{executable_path}"],
+    "run": ["{executable_path}"],
+    "binaries": ["g++"],
+    "starter": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    string s;\n    if (getline(cin, s)) cout << s << '\\n';\n    return 0;\n}\n"
+  },
+  "c": {
+    "label": "C11",
+    "monaco": "c",
+    "source": "main.c",
+    "compile": ["{gcc}", "-O2", "-std=c11", "{source_path}", "-o", "{executable_path}"],
+    "run": ["{executable_path}"],
+    "binaries": ["gcc"],
+    "starter": "#include <stdio.h>\n\nint main(void) {\n    char s[1005];\n    if (fgets(s, sizeof(s), stdin)) {\n        printf(\"%s\", s);\n    }\n    return 0;\n}\n"
+  },
+  "java": {
+    "label": "Java",
+    "monaco": "java",
+    "source": "Main.java",
+    "compile": ["{javac}", "{source_path}"],
+    "run": ["{java}", "-cp", "{workdir}", "Main"],
+    "binaries": ["java", "javac"],
+    "starter": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line = br.readLine();\n        if (line != null) System.out.println(line);\n    }\n}\n"
+  },
+  "node": {
+    "label": "Node.js",
+    "monaco": "javascript",
+    "source": "main.js",
+    "compile": [],
+    "run": ["{node}", "{source_path}"],
+    "binaries": ["node"],
+    "starter": "const fs = require('fs');\nconst input = fs.readFileSync(0, 'utf8').trim();\nconsole.log(input);\n"
+  },
+  "go": {
+    "label": "Go",
+    "monaco": "go",
+    "source": "main.go",
+    "compile": ["{go}", "build", "-o", "{executable_path}", "{source_path}"],
+    "run": ["{executable_path}"],
+    "binaries": ["go"],
+    "starter": "package main\n\nimport (\n    \"bufio\"\n    \"fmt\"\n    \"os\"\n)\n\nfunc main() {\n    in := bufio.NewScanner(os.Stdin)\n    if in.Scan() {\n        fmt.Println(in.Text())\n    }\n}\n"
+  },
+  "rust": {
+    "label": "Rust",
+    "monaco": "rust",
+    "source": "main.rs",
+    "compile": ["{rustc}", "{source_path}", "-O", "-o", "{executable_path}"],
+    "run": ["{executable_path}"],
+    "binaries": ["rustc"],
+    "starter": "use std::io::{self, Read};\n\nfn main() {\n    let mut input = String::new();\n    io::stdin().read_to_string(&mut input).unwrap();\n    print!(\"{}\", input.trim());\n}\n"
+  },
+  "csharp": {
+    "label": "C#",
+    "monaco": "csharp",
+    "source": "Program.cs",
+    "compile": ["{dotnet}", "build", "{project_path}", "-c", "Release", "-o", "{build_dir}"],
+    "run": ["{dotnet}", "{dll_path}"],
+    "binaries": ["dotnet"],
+    "starter": "using System;\n\nclass Program {\n    static void Main() {\n        var line = Console.ReadLine();\n        if (line != null) Console.WriteLine(line);\n    }\n}\n"
+  }
+}

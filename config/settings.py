@@ -2,6 +2,7 @@
 Django settings for config project.
 """
 
+import json
 import shutil
 import tempfile
 from pathlib import Path
@@ -122,182 +123,56 @@ LOCAL_MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_ROOT = LOCAL_MEDIA_ROOT
 MEDIA_URL = "/media/"
 
+def _load_languages(base_dir):
+    json_path = base_dir / "config" / "languages.json"
+    if not json_path.exists():
+        return {}
 
-def _resolve_python_binary(base_dir):
-    """Return a reasonable default Python binary for code execution."""
-    venv_python = base_dir / "venv" / "Scripts" / "python.exe"
-    if venv_python.exists():
-        return str(venv_python)
-    return shutil.which("python") or shutil.which("py")
+    with open(json_path, "r", encoding="utf-8") as fh:
+        raw = json.load(fh)
 
-
-def _default_code_languages(base_dir):
-    """Build default language configs that local_settings can override."""
-    python_bin = _resolve_python_binary(base_dir)
-    node_bin = shutil.which("node")
-    java_bin = shutil.which("java")
-    javac_bin = shutil.which("javac")
-    gpp_bin = shutil.which("g++")
-    gcc_bin = shutil.which("gcc")
-    go_bin = shutil.which("go")
-    rustc_bin = shutil.which("rustc")
-    dotnet_bin = shutil.which("dotnet")
-
-    return {
-        "python": {
-            "label": "Python 3",
-            "monaco_language": "python",
-            "source_name": "main.py",
-            "compile": [],
-            "run": [python_bin, "{source_path}"],
-            "starter_code": (
-                "def solve() -> None:\n"
-                "    data = input().strip()\n"
-                "    print(data)\n\n"
-                "if __name__ == '__main__':\n"
-                "    solve()\n"
-            ),
-            "enabled": bool(python_bin),
-        },
-        "cpp": {
-            "label": "C++17",
-            "monaco_language": "cpp",
-            "source_name": "main.cpp",
-            "compile": [
-                gpp_bin,
-                "-O2",
-                "-std=c++17",
-                "{source_path}",
-                "-o",
-                "{executable_path}",
-            ],
-            "run": ["{executable_path}"],
-            "starter_code": (
-                "#include <bits/stdc++.h>\n"
-                "using namespace std;\n\n"
-                "int main() {\n"
-                "    ios::sync_with_stdio(false);\n"
-                "    cin.tie(nullptr);\n\n"
-                "    string s;\n"
-                "    if (getline(cin, s)) cout << s << '\\n';\n"
-                "    return 0;\n"
-                "}\n"
-            ),
-            "enabled": bool(gpp_bin),
-        },
-        "c": {
-            "label": "C11",
-            "monaco_language": "c",
-            "source_name": "main.c",
-            "compile": [
-                gcc_bin,
-                "-O2",
-                "-std=c11",
-                "{source_path}",
-                "-o",
-                "{executable_path}",
-            ],
-            "run": ["{executable_path}"],
-            "starter_code": (
-                "#include <stdio.h>\n\n"
-                "int main(void) {\n"
-                "    char s[1005];\n"
-                "    if (fgets(s, sizeof(s), stdin)) {\n"
-                "        printf(\"%s\", s);\n"
-                "    }\n"
-                "    return 0;\n"
-                "}\n"
-            ),
-            "enabled": bool(gcc_bin),
-        },
-        "java": {
-            "label": "Java 17",
-            "monaco_language": "java",
-            "source_name": "Main.java",
-            "compile": [javac_bin, "{source_path}"],
-            "run": [java_bin, "-cp", "{workdir}", "Main"],
-            "starter_code": (
-                "import java.io.*;\n"
-                "import java.util.*;\n\n"
-                "public class Main {\n"
-                "    public static void main(String[] args) throws Exception {\n"
-                "        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n"
-                "        String line = br.readLine();\n"
-                "        if (line != null) System.out.println(line);\n"
-                "    }\n"
-                "}\n"
-            ),
-            "enabled": bool(java_bin and javac_bin),
-        },
-        "node": {
-            "label": "Node.js",
-            "monaco_language": "javascript",
-            "source_name": "main.js",
-            "compile": [],
-            "run": [node_bin, "{source_path}"],
-            "starter_code": (
-                "const fs = require('fs');\n"
-                "const input = fs.readFileSync(0, 'utf8').trim();\n"
-                "console.log(input);\n"
-            ),
-            "enabled": bool(node_bin),
-        },
-        "go": {
-            "label": "Go",
-            "monaco_language": "go",
-            "source_name": "main.go",
-            "compile": [go_bin, "build", "-o", "{executable_path}", "{source_path}"],
-            "run": ["{executable_path}"],
-            "starter_code": (
-                "package main\n\n"
-                "import (\n"
-                "    \"bufio\"\n"
-                "    \"fmt\"\n"
-                "    \"os\"\n"
-                ")\n\n"
-                "func main() {\n"
-                "    in := bufio.NewScanner(os.Stdin)\n"
-                "    if in.Scan() {\n"
-                "        fmt.Println(in.Text())\n"
-                "    }\n"
-                "}\n"
-            ),
-            "enabled": bool(go_bin),
-        },
-        "rust": {
-            "label": "Rust",
-            "monaco_language": "rust",
-            "source_name": "main.rs",
-            "compile": [rustc_bin, "{source_path}", "-O", "-o", "{executable_path}"],
-            "run": ["{executable_path}"],
-            "starter_code": (
-                "use std::io::{self, Read};\n\n"
-                "fn main() {\n"
-                "    let mut input = String::new();\n"
-                "    io::stdin().read_to_string(&mut input).unwrap();\n"
-                "    print!(\"{}\", input.trim());\n"
-                "}\n"
-            ),
-            "enabled": bool(rustc_bin),
-        },
-        "csharp": {
-            "label": "C#",
-            "monaco_language": "csharp",
-            "source_name": "Program.cs",
-            "compile": [dotnet_bin, "build", "{project_path}", "-c", "Release", "-o", "{build_dir}"],
-            "run": [dotnet_bin, "{dll_path}"],
-            "starter_code": (
-                "using System;\n\n"
-                "class Program {\n"
-                "    static void Main() {\n"
-                "        var line = Console.ReadLine();\n"
-                "        if (line != null) Console.WriteLine(line);\n"
-                "    }\n"
-                "}\n"
-            ),
-            "enabled": bool(dotnet_bin),
-        },
+    venv_py = base_dir / "venv" / "Scripts" / "python.exe"
+    runtime_vars = {
+        "source_path", "executable_path", "workdir",
+        "project_path", "build_dir", "dll_path", "source_name",
     }
+    resolved = {}
+
+    for key, cfg in raw.items():
+        candidates = cfg.get("binaries", [])
+        bin_lookup = {}
+        for name in candidates:
+            if name in ("python", "python3", "py") and venv_py.exists():
+                bin_lookup.setdefault("python", str(venv_py))
+                bin_lookup.setdefault("python3", str(venv_py))
+                bin_lookup.setdefault("py", str(venv_py))
+            path = shutil.which(name)
+            if path:
+                bin_lookup.setdefault(name, path)
+
+        def resolve(part):
+            if not (part.startswith("{") and part.endswith("}")):
+                return part
+            bname = part[1:-1]
+            if bname in runtime_vars:
+                return part
+            return bin_lookup.get(bname) or shutil.which(bname)
+
+        compile_cmd = [resolve(p) for p in cfg.get("compile", [])]
+        run_cmd = [resolve(p) for p in cfg.get("run", [])]
+        has_missing = any(v is None for v in compile_cmd + run_cmd)
+
+        resolved[key] = {
+            "label": cfg.get("label", key),
+            "monaco_language": cfg.get("monaco", "plaintext"),
+            "source_name": cfg.get("source", f"main.{key}"),
+            "compile": compile_cmd,
+            "run": run_cmd,
+            "starter_code": cfg.get("starter", ""),
+            "enabled": not has_missing,
+        }
+
+    return resolved
 
 
 CODE_EXECUTION_ENABLED = True
@@ -306,10 +181,10 @@ CODE_EXECUTION_MAX_SOURCE_BYTES = 128 * 1024
 CODE_EXECUTION_MAX_OUTPUT_BYTES = 512 * 1024
 CODE_EXECUTION_MAX_TESTCASES = 30
 CODE_EXECUTION_MAX_CONCURRENT_JOBS = 2
-CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS = 2000
+CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS = 1000
 CODE_EXECUTION_DEFAULT_MEMORY_MB = 128
 CODE_EXECUTION_ALLOWED_TESTCASE_EXTENSIONS = [".inp", ".out", ".txt", ".ans", ".in"]
-CODE_EXECUTION_LANGUAGE_CONFIGS = _default_code_languages(BASE_DIR)
+CODE_EXECUTION_LANGUAGE_CONFIGS = _load_languages(BASE_DIR)
 
 try:
     # pylint: disable=unused-import

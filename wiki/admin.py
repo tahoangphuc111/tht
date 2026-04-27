@@ -7,6 +7,7 @@ from .models import (
     Article,
     Category,
     Comment,
+    LanguageRuntime,
     Profile,
     UploadedFile,
     ArticleVote,
@@ -90,6 +91,14 @@ class UploadedFileAdmin(admin.ModelAdmin):
     list_display = ("file", "user", "description", "created_at")
     search_fields = ("user__username", "description", "file")
     list_filter = ("user", "created_at")
+
+
+@admin.register(LanguageRuntime)
+class LanguageRuntimeAdmin(admin.ModelAdmin):
+    list_display = ("key", "label", "monaco", "enabled", "order")
+    list_filter = ("enabled",)
+    list_editable = ("enabled", "order")
+    search_fields = ("key", "label")
 
 
 @admin.register(CodingExercise)
