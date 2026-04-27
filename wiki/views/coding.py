@@ -87,7 +87,6 @@ def article_coding_manage_view(request, article_pk):
             "exercise": exercise,
             "form": form,
             "testcases": exercise.testcases.all(),
-            "enabled_languages": get_enabled_language_choices(),
             "all_languages": get_all_language_status(),
         },
     )
