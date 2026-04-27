@@ -77,6 +77,7 @@ urlpatterns = [
     path("coding-testcase/<int:pk>/delete/", coding.CodingTestCaseDeleteView.as_view(), name="coding-testcase-delete"),
     path("article/<int:article_pk>/coding/run/", coding.run_code_view, name="run-code"),
     path("article/<int:article_pk>/coding/submit/", coding.submit_code_view, name="submit-code"),
+    path("submission/<int:submission_pk>/status/", coding.submission_status_view, name="submission-status"),
 
     # Files
     path("upload-files/", files.upload_file_view, name="upload-files"),

@@ -128,6 +128,7 @@ class ArticleDetailView(DetailView):
                 "articleId": article.pk,
                 "runUrl": reverse("wiki:run-code", args=[article.pk]),
                 "submitUrl": reverse("wiki:submit-code", args=[article.pk]),
+                "statusUrl": reverse("wiki:submission-status", args=[0]),
                 "starterCodeMap": coding_starter_map,
                 "monacoMap": coding_monaco_map,
                 "samples": coding_samples,

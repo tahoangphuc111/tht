@@ -123,9 +123,33 @@
                     custom_input: customInput ? customInput.value : "",
                 }),
             });
-            const data = await response.json();
+            let data = await response.json();
             if (!data.success) throw new Error(data.message || "Không thể chấm bài.");
+            
             renderResult(data, actionLabel);
+
+            // Poll for results if the status is "running"
+            if (data.status === "running" && data.submission_id) {
+                const pollUrl = config.statusUrl.replace("0", data.submission_id);
+                const poll = async () => {
+                    try {
+                        const pollRes = await fetch(pollUrl);
+                        const pollData = await pollRes.json();
+                        renderResult(pollData, actionLabel);
+                        if (pollData.status === "running") {
+                            setTimeout(poll, 1000);
+                        } else {
+                            setBusy(false, button);
+                        }
+                    } catch (e) {
+                        console.error("Polling error:", e);
+                        setBusy(false, button);
+                    }
+                };
+                setTimeout(poll, 1000);
+            } else {
+                setBusy(false, button);
+            }
         } catch (error) {
             renderResult(
                 {
@@ -137,7 +161,6 @@
                 },
                 actionLabel
             );
-        } finally {
             setBusy(false, button);
         }
     };

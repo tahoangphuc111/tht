@@ -235,3 +235,10 @@ def submit_code_view(request, article_pk):
         return JsonResponse({"success": False, "message": str(error)}, status=400)
     except Exception as error:  # pylint: disable=broad-exception-caught
         return JsonResponse({"success": False, "message": str(error)}, status=500)
+
+
+@login_required
+def submission_status_view(request, submission_pk):
+    """Get the current status of a submission for polling."""
+    submission = get_object_or_404(CodingSubmission, pk=submission_pk, user=request.user)
+    return JsonResponse(serialize_submission(submission))
