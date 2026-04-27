@@ -103,6 +103,7 @@ class ArticleHistoryTests(TestCase):
             content="Content v1",
             category=self.category,
             author=self.author,
+            status="published",
         )
         ArticleRevision.objects.create(
             article=article,
@@ -132,6 +133,7 @@ class ArticleHistoryTests(TestCase):
             content="Latest content",
             category=self.category,
             author=self.author,
+            status="published",
         )
         rev = ArticleRevision.objects.create(
             article=article,
@@ -147,3 +149,28 @@ class ArticleHistoryTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Old content")
         self.assertContains(response, "Old revision")
+
+    def test_private_article_history_requires_owner(self):
+        """Unpublished article history should not be public."""
+        article = Article.objects.create(
+            title="Private History Article",
+            slug="private-history-article",
+            content="Content v1",
+            category=self.category,
+            author=self.author,
+            status="pending",
+        )
+        ArticleRevision.objects.create(
+            article=article,
+            title=article.title,
+            content="Content v1",
+            author=self.author,
+            change_summary="Rev 1",
+        )
+
+        response = self.client.get(reverse("wiki:article-history", args=[article.pk]))
+        self.assertEqual(response.status_code, 404)
+
+        self.client.login(username="author", password="StrongPass123")
+        response = self.client.get(reverse("wiki:article-history", args=[article.pk]))
+        self.assertEqual(response.status_code, 200)

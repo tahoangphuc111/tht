@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from config.asgi import broadcast_vote_update
-from ..models import Article, Comment, ArticleVote, CommentVote, UserVote
+from ..websockets import broadcast_vote_update
+from ..models import Article, Comment, ArticleVote, CommentVote, UserVote, Profile
 
 User = get_user_model()
 
@@ -30,30 +30,32 @@ def _handle_vote(request, model, target_field, target_obj, vote_attr):
             return redirect(target_obj.get_absolute_url())
         return redirect("wiki:home")
 
+    # Determine voter field name (voter for UserVote, user for others)
+    voter_field = "voter" if target_field == "target" else "user"
+
     model.objects.update_or_create(
         **{
-            "user" if target_field != "target" else "voter": request.user,
+            voter_field: request.user,
             target_field: target_obj,
         },
         defaults={"value": val},
     )
 
-    target_obj.refresh_from_db()
-
-    if hasattr(target_obj, "profile"):
-        score = target_obj.profile.vote_score
-        upvotes = target_obj.profile.upvotes
-        downvotes = target_obj.profile.downvotes
+    # If the target object is a User, we should actually be looking at its Profile for score
+    if isinstance(target_obj, get_user_model()):
+        target_obj = target_obj.profile
     else:
-        score = target_obj.vote_score
-        upvotes = target_obj.upvotes
-        downvotes = target_obj.downvotes
+        target_obj.refresh_from_db()
+
+    score = target_obj.vote_score
+    upvotes = target_obj.upvotes
+    downvotes = target_obj.downvotes
 
     payload = {
         f"{vote_attr}_score": score,
         f"{vote_attr}_upvotes": upvotes,
         f"{vote_attr}_downvotes": downvotes,
-        f"{vote_attr}_pk": target_obj.pk,
+        f"{vote_attr}_pk": target_obj.pk if not isinstance(target_obj, Profile) else target_obj.user.pk,
     }
 
     try:

@@ -1,7 +1,4 @@
-"""
-Models for the wiki application.
-"""
-
+from pathlib import Path
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -13,7 +10,6 @@ from taggit.managers import TaggableManager
 
 
 def get_uncategorized_category():
-    """Get or create the default 'Uncategorized' category."""
     category, _ = Category.objects.get_or_create(
         slug="chua-phan-loai",
         defaults={
@@ -25,8 +21,6 @@ def get_uncategorized_category():
 
 
 class Profile(models.Model):
-    """User profile model extending the base User."""
-
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -53,9 +47,17 @@ class Profile(models.Model):
     def __str__(self):
         return self.display_name or self.user.get_username()
 
+    def get_absolute_url(self):
+        return reverse("wiki:public-profile", kwargs={"username": self.user.username})
+
+    @property
+    def get_avatar_url(self):
+        if self.avatar and hasattr(self.avatar, "url"):
+            return self.avatar.url
+        return f"https://ui-avatars.com/api/?name={self.user.username}&background=random"
+
     @property
     def total_votes(self):
-        """Aggregate total upvotes and downvotes for the user."""
         return self.user.user_votes.aggregate(
             up=Count("value", filter=Q(value=1)),
             down=Count("value", filter=Q(value=-1)),
@@ -63,32 +65,25 @@ class Profile(models.Model):
 
     @property
     def vote_score(self):
-        """Calculate the net vote score."""
         vt = self.total_votes
         return (vt.get("up") or 0) - (vt.get("down") or 0)
 
     @property
     def upvotes(self):
-        """Count total upvotes."""
         return self.user.user_votes.filter(value=1).count()
 
     @property
     def downvotes(self):
-        """Count total downvotes."""
         return self.user.user_votes.filter(value=-1).count()
 
 
 class Category(models.Model):
-    """Category model for grouping articles."""
-
     name = models.CharField(max_length=120, unique=True)
     slug = models.SlugField(max_length=140, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for Category."""
-
         ordering = ["name"]
         verbose_name_plural = "categories"
 
@@ -96,18 +91,16 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        """Return the URL for the category's article list."""
         return reverse("wiki:article-list") + f"?category={self.slug}"
 
 
 class Article(models.Model):
-    """Wiki article model."""
-
     STATUS_CHOICES = (
         ("draft", "Bản nháp"),
         ("pending", "Chờ duyệt"),
         ("published", "Đã xuất bản"),
         ("rejected", "Bị từ chối"),
+        ("needs_edit", "Yêu cầu sửa đổi"),
     )
 
     title = models.CharField(max_length=220)
@@ -134,8 +127,6 @@ class Article(models.Model):
     tags = TaggableManager(blank=True)
 
     class Meta:
-        """Metadata for Article."""
-
         ordering = ["-created_at"]
         permissions = [
             ("manage_all_articles", "Can manage all articles"),
@@ -145,18 +136,15 @@ class Article(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        """Return the detail URL for the article."""
         return reverse("wiki:article-detail", kwargs={"pk": self.pk, "slug": self.slug})
 
     @property
     def reading_time_minutes(self):
-        """Estimate reading time in minutes."""
         word_count = len((self.content or "").split())
         return max(1, round(word_count / 200)) if word_count else 1
 
     @property
     def vote_score(self):
-        """Calculate net vote score for the article."""
         agg = self.article_votes.aggregate(
             up=Count("value", filter=Q(value=1)),
             down=Count("value", filter=Q(value=-1)),
@@ -165,41 +153,46 @@ class Article(models.Model):
 
     @property
     def upvotes(self):
-        """Count total upvotes for the article."""
         return self.article_votes.filter(value=1).count()
 
     @property
     def downvotes(self):
-        """Count total downvotes for the article."""
         return self.article_votes.filter(value=-1).count()
 
     def _build_unique_slug(self):
-        """Generate a unique slug based on the article title."""
         base_slug = slugify(self.title) or "article"
         current_slug = base_slug[:240]
-        counter = 1
-        while Article.objects.filter(slug=current_slug).exclude(pk=self.pk).exists():
-            suffix = f"-{counter}"
-            trimmed = base_slug[: max(0, 240 - len(suffix))]
-            current_slug = f"{trimmed}{suffix}"
-            counter += 1
-        return current_slug
+        if not Article.objects.filter(slug=current_slug).exclude(pk=self.pk).exists():
+            return current_slug
+        existing_slugs = Article.objects.filter(
+            slug__startswith=current_slug
+        ).exclude(pk=self.pk).values_list("slug", flat=True)
+        suffixes = []
+        for s in existing_slugs:
+            if s.startswith(f"{current_slug}-"):
+                try:
+                    suffixes.append(int(s.split("-")[-1]))
+                except (ValueError, IndexError):
+                    pass
+        if suffixes:
+            next_num = max(suffixes) + 1
+        else:
+            next_num = 1
+        suffix = f"-{next_num}"
+        trimmed = base_slug[: max(0, 240 - len(suffix))]
+        return f"{trimmed}{suffix}"
 
     def save(self, *args, **kwargs):
-        """Ensure slug and category are set before saving."""
         if not self.slug:
             self.slug = self._build_unique_slug()
         elif Article.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
             self.slug = self._build_unique_slug()
-
         if not self.category:
             self.category_id = get_uncategorized_category()
         super().save(*args, **kwargs)
 
 
 class Comment(models.Model):
-    """Comment model for articles."""
-
     article = models.ForeignKey(
         Article,
         on_delete=models.CASCADE,
@@ -216,13 +209,10 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
-        """Metadata for Comment."""
-
         ordering = ["created_at"]
 
     @property
     def vote_score(self):
-        """Calculate net vote score for the comment."""
         agg = self.comment_votes.aggregate(
             up=Count("value", filter=Q(value=1)),
             down=Count("value", filter=Q(value=-1)),
@@ -231,20 +221,20 @@ class Comment(models.Model):
 
     @property
     def upvotes(self):
-        """Count total upvotes for the comment."""
         return self.comment_votes.filter(value=1).count()
 
     @property
     def downvotes(self):
-        """Count total downvotes for the comment."""
         return self.comment_votes.filter(value=-1).count()
 
     def __str__(self):
         return f"Comment by {self.author} on {self.article}"
 
+    def get_absolute_url(self):
+        return self.article.get_absolute_url() + f"#comment-{self.pk}"
+
 
 def upload_file_validator(value):
-    """Validate that the uploaded file is of an allowed type."""
     allowed = [
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -256,9 +246,35 @@ def upload_file_validator(value):
         raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
 
 
-class UploadedFile(models.Model):
-    """Model for files uploaded by users."""
+def testcase_file_validator(value):
+    allowed_extensions = {
+        ext.lower()
+        for ext in getattr(
+            settings,
+            "CODE_EXECUTION_ALLOWED_TESTCASE_EXTENSIONS",
+            [".inp", ".out", ".txt", ".ans", ".in"],
+        )
+    }
+    file_ext = Path(value.name).suffix.lower()
+    if not file_ext or file_ext not in allowed_extensions:
+        allowed = ", ".join(sorted(allowed_extensions))
+        raise ValidationError(f"Chỉ hỗ trợ file testcase: {allowed}.")
 
+
+def coding_case_upload_to(instance, filename):
+    article_id = instance.exercise.article_id if instance.exercise_id else "unassigned"
+    return f"coding_cases/{article_id}/{filename}"
+
+
+def default_coding_time_limit():
+    return getattr(settings, "CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS", 2000)
+
+
+def default_coding_memory_limit():
+    return getattr(settings, "CODE_EXECUTION_DEFAULT_MEMORY_MB", 128)
+
+
+class UploadedFile(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -278,8 +294,6 @@ class UploadedFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for UploadedFile."""
-
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -287,8 +301,6 @@ class UploadedFile(models.Model):
 
 
 class ArticleRevision(models.Model):
-    """Model for tracking article revision history."""
-
     article = models.ForeignKey(
         Article,
         on_delete=models.CASCADE,
@@ -305,8 +317,6 @@ class ArticleRevision(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for ArticleRevision."""
-
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -314,8 +324,6 @@ class ArticleRevision(models.Model):
 
 
 class ArticleVote(models.Model):
-    """Voting model for articles."""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="article_votes"
     )
@@ -327,8 +335,6 @@ class ArticleVote(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Metadata for ArticleVote."""
-
         unique_together = (("user", "article"),)
 
     def __str__(self):
@@ -336,8 +342,6 @@ class ArticleVote(models.Model):
 
 
 class CommentVote(models.Model):
-    """Voting model for comments."""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comment_votes"
     )
@@ -349,8 +353,6 @@ class CommentVote(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Metadata for CommentVote."""
-
         unique_together = (("user", "comment"),)
 
     def __str__(self):
@@ -358,8 +360,6 @@ class CommentVote(models.Model):
 
 
 class UserVote(models.Model):
-    """Voting model for users (reputation)."""
-
     voter = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -373,8 +373,6 @@ class UserVote(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        """Metadata for UserVote."""
-
         unique_together = (("voter", "target"),)
 
     def __str__(self):
@@ -382,8 +380,6 @@ class UserVote(models.Model):
 
 
 class Question(models.Model):
-    """Quiz question model."""
-
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name="questions"
     )
@@ -394,8 +390,6 @@ class Question(models.Model):
     )
 
     class Meta:
-        """Metadata for Question."""
-
         ordering = ["order", "id"]
 
     def __str__(self):
@@ -403,8 +397,6 @@ class Question(models.Model):
 
 
 class Choice(models.Model):
-    """Quiz choice model for a question."""
-
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name="choices"
     )
@@ -412,17 +404,159 @@ class Choice(models.Model):
     is_correct = models.BooleanField(default=False)
 
     class Meta:
-        """Metadata for Choice."""
-
         ordering = ["id"]
 
     def __str__(self):
         return self.content
 
 
-class UserAnswer(models.Model):
-    """Model for tracking user answers to quiz questions."""
+class CodingExercise(models.Model):
+    COMPARE_MODE_CHOICES = (
+        ("exact", "Exact match"),
+        ("trim_lines", "Trim whitespace"),
+        ("tokenized", "Token-based"),
+    )
+    article = models.OneToOneField(
+        Article, on_delete=models.CASCADE, related_name="coding_exercise"
+    )
+    title = models.CharField(max_length=220)
+    description = models.TextField(blank=True)
+    is_enabled = models.BooleanField(default=False)
+    allowed_languages = models.JSONField(default=list, blank=True)
+    default_language = models.CharField(max_length=32, blank=True)
+    starter_code_map = models.JSONField(default=dict, blank=True)
+    time_limit_ms = models.PositiveIntegerField(default=default_coding_time_limit)
+    memory_limit_mb = models.PositiveIntegerField(default=default_coding_memory_limit)
+    compare_mode = models.CharField(
+        max_length=20, choices=COMPARE_MODE_CHOICES, default="trim_lines"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ["article_id"]
+
+    def __str__(self):
+        return f"CodingExercise({self.article.title})"
+
+
+class CodingTestCase(models.Model):
+    exercise = models.ForeignKey(
+        CodingExercise, on_delete=models.CASCADE, related_name="testcases"
+    )
+    name = models.CharField(max_length=120)
+    input_text = models.TextField(blank=True)
+    expected_output_text = models.TextField(blank=True)
+    input_file = models.FileField(
+        upload_to=coding_case_upload_to,
+        validators=[testcase_file_validator],
+        blank=True,
+        null=True,
+    )
+    expected_output_file = models.FileField(
+        upload_to=coding_case_upload_to,
+        validators=[testcase_file_validator],
+        blank=True,
+        null=True,
+    )
+    is_sample = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
+    score = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.exercise.article.title}: {self.name}"
+
+    def clean(self):
+        if not (self.input_text or self.input_file):
+            raise ValidationError({"input_text": "Cần input text hoặc file input."})
+        if not (self.expected_output_text or self.expected_output_file):
+            raise ValidationError(
+                {"expected_output_text": "Cần output text hoặc file output."}
+            )
+
+    def get_input_data(self):
+        if self.input_file:
+            self.input_file.seek(0)
+            return self.input_file.read().decode("utf-8")
+        return self.input_text or ""
+
+    def get_expected_output_data(self):
+        if self.expected_output_file:
+            self.expected_output_file.seek(0)
+            return self.expected_output_file.read().decode("utf-8")
+        return self.expected_output_text or ""
+
+
+class CodingSubmission(models.Model):
+    STATUS_CHOICES = (
+        ("accepted", "Accepted"),
+        ("wrong_answer", "Wrong Answer"),
+        ("compile_error", "Compile Error"),
+        ("runtime_error", "Runtime Error"),
+        ("time_limit_exceeded", "Time Limit Exceeded"),
+        ("internal_error", "Internal Error"),
+        ("running", "Running"),
+    )
+    exercise = models.ForeignKey(
+        CodingExercise, on_delete=models.CASCADE, related_name="submissions"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="coding_submissions",
+    )
+    language = models.CharField(max_length=32)
+    source_code = models.TextField()
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default="running")
+    compile_output = models.TextField(blank=True)
+    stdout_preview = models.TextField(blank=True)
+    stderr_preview = models.TextField(blank=True)
+    custom_input = models.TextField(blank=True)
+    is_sample_run = models.BooleanField(default=False)
+    total_tests = models.PositiveIntegerField(default=0)
+    passed_tests = models.PositiveIntegerField(default=0)
+    runtime_ms = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.exercise.article.title} - {self.user} - {self.status}"
+
+
+class CodingSubmissionResult(models.Model):
+    submission = models.ForeignKey(
+        CodingSubmission, on_delete=models.CASCADE, related_name="results"
+    )
+    test_case = models.ForeignKey(
+        CodingTestCase,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="submission_results",
+    )
+    case_name = models.CharField(max_length=120)
+    status = models.CharField(max_length=32)
+    runtime_ms = models.PositiveIntegerField(default=0)
+    stdout_preview = models.TextField(blank=True)
+    stderr_preview = models.TextField(blank=True)
+    expected_preview = models.TextField(blank=True)
+    actual_preview = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"{self.case_name}: {self.status}"
+
+
+class UserAnswer(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_answers"
     )
@@ -433,8 +567,6 @@ class UserAnswer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for UserAnswer."""
-
         unique_together = (("user", "question"),)
 
     def __str__(self):
@@ -442,8 +574,6 @@ class UserAnswer(models.Model):
 
 
 class Bookmark(models.Model):
-    """Model for articles bookmarked by users."""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bookmarks"
     )
@@ -453,8 +583,6 @@ class Bookmark(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for Bookmark."""
-
         unique_together = (("user", "article"),)
         ordering = ["-created_at"]
 
@@ -463,8 +591,6 @@ class Bookmark(models.Model):
 
 
 class Notification(models.Model):
-    """Model for in-app notifications."""
-
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
     )
@@ -481,8 +607,6 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for Notification."""
-
         ordering = ["-created_at"]
 
     def __str__(self):
@@ -490,8 +614,11 @@ class Notification(models.Model):
 
 
 class Report(models.Model):
+<<<<<<< HEAD
     """Model for tracking user reports for articles and comments."""
 
+=======
+>>>>>>> c4f25a998841fdbc0bbad7905fd090542a7a9957
     REPORT_REASONS = (
         ("spam", "Spam / Quảng cáo"),
         ("inappropriate", "Nội dung không phù hợp"),
@@ -512,6 +639,7 @@ class Report(models.Model):
     description = models.TextField(blank=True)
     is_resolved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+<<<<<<< HEAD
 
     class Meta:
         """Metadata for Report."""
@@ -525,7 +653,18 @@ class Report(models.Model):
 
 class Badge(models.Model):
     """Model for achievements/badges."""
+=======
+>>>>>>> c4f25a998841fdbc0bbad7905fd090542a7a9957
 
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        target = self.article or self.comment
+        return f"Report by {self.reporter} on {target}"
+
+
+class Badge(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=120, unique=True)
     description = models.TextField()
@@ -538,8 +677,6 @@ class Badge(models.Model):
 
 
 class UserBadge(models.Model):
-    """Link between users and badges they have earned."""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="badges"
     )
@@ -547,8 +684,6 @@ class UserBadge(models.Model):
     awarded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        """Metadata for UserBadge."""
-
         unique_together = (("user", "badge"),)
         ordering = ["-awarded_at"]
 

@@ -1,21 +1,45 @@
 {% extends 'base.html' %}
-{% load martortags %}
+{% load martortags static %}
 
 {% block title %}{{ article.title }} | CP Wiki{% endblock %}
-{% block extra_head %}{{ comment_form.media }}{% endblock %}
+{% block extra_head %}
+{{ comment_form.media }}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<style>
+    /* Add a little custom tweak for select2 to match bootstrap 5 inputs nicely */
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: 2.375rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="reading-progress" aria-hidden="true">
-    <div class="reading-progress__bar" id="reading-progress-bar"></div>
-</div>
 
-<article class="card border-0 shadow-lg app-card article-shell" id="article-shell">
-    <div class="card-body p-4 p-lg-5">
+<div class="row g-4">
+    <div class="col-12">
+        <article class="card border-0 shadow-lg app-card article-shell" id="article-shell">
+            <div class="card-body p-4 p-lg-5">
         <div class="mb-5 border-bottom pb-4">
             <div class="article-meta-row mb-3">
-                <span class="badge bg-primary px-3 py-2 text-uppercase">{{ article.category.name }}</span>
-                {% if can_edit_article or can_delete_article %}
-                    <div class="article-toolbar__group">
+                <span class="ui-badge ui-badge--primary">{{ article.category.name }}</span>
+                <div class="article-toolbar__group">
+                    {% if article.status == 'pending' and user.is_authenticated and user.is_superuser %}
+                        <form method="post" action="{% url 'wiki:article-approve' article.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 me-1">Duyệt</button>
+                        </form>
+                        <form method="post" action="{% url 'wiki:article-request-changes' article.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-warning rounded-pill px-3 me-1">Yêu cầu sửa</button>
+                        </form>
+                        <form method="post" action="{% url 'wiki:article-reject' article.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 me-3">Từ chối</button>
+                        </form>
+                    {% endif %}
+                    
+                    {% if can_edit_article or can_delete_article %}
                         <a class="btn btn-sm btn-outline-secondary rounded-pill px-3" href="{% url 'wiki:article-history' article.pk %}" title="Lịch sử"><i class="fa-solid fa-clock-rotate-left"></i></a>
                         {% if can_edit_article %}
                             <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{% url 'wiki:article-quiz-manage' article.pk %}" title="Sửa Quiz"><i class="fa-solid fa-list-check"></i></a>
@@ -24,16 +48,16 @@
                         {% if can_delete_article %}
                             <a class="btn btn-sm btn-outline-danger rounded-pill px-3" href="{% url 'wiki:article-delete' article.pk %}" title="Xóa"><i class="fa-solid fa-trash"></i></a>
                         {% endif %}
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
             
-            <h1 class="display-4 fw-bolder text-dark mb-4 lh-tight" style="letter-spacing: -1px;">{{ article.title }}</h1>
+            <h1 class="hero-title mb-4">{{ article.title }}</h1>
             
             {% if article.tags.exists %}
                 <div class="d-flex flex-wrap gap-2 mb-4">
                     {% for tag in article.tags.all %}
-                        <a href="{% url 'wiki:article-list' %}?tag={{ tag.slug }}" class="btn btn-soft btn-sm rounded-pill px-3 py-1" style="font-size: 0.75rem;">
+                        <a href="{% url 'wiki:article-list' %}?tag={{ tag.slug }}" class="pill-badge">
                             <i class="fa-solid fa-tag me-1 opacity-50"></i>{{ tag.name }}
                         </a>
                     {% endfor %}
@@ -42,17 +66,17 @@
 
             <div class="d-flex align-items-center flex-wrap gap-4 mb-4">
                 <!-- User Info -->
-                <div class="d-flex align-items-center gap-2 text-secondary">
+                <div class="author-info">
                     {% if article.author.profile.avatar %}
-                        <img src="{{ article.author.profile.avatar.url }}" alt="avatar" class="rounded-circle" width="36" height="32" style="object-fit: cover;">
+                        <img src="{{ article.author.profile.avatar.url }}" alt="{{ article.author.username }}">
                     {% else %}
-                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px;">
+                        <div class="author-avatar bg-secondary text-white d-flex align-items-center justify-content-center fw-bold">
                             {{ article.author.username.0|upper }}
                         </div>
                     {% endif %}
                     <div>
-                        <strong class="text-dark d-block lh-1"><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a></strong>
-                        <small class="opacity-75">{{ article.created_at|date:"d/m/Y" }}</small>
+                        <strong class="author-name"><a class="article-link" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a></strong>
+                        <div class="author-date">{{ article.created_at|date:"d/m/Y" }}</div>
                     </div>
                 </div>
 
@@ -60,13 +84,13 @@
 
                 <!-- Inline Action Bar -->
                 <div class="article-actions-bar d-flex align-items-center gap-2">
-                    <div class="vote-pill shadow-sm bg-white">
+                    <div class="vote-pill">
                         <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="vote" value="1" />
                             <button class="vote-button is-up" type="submit"><i class="fa-solid fa-chevron-up"></i></button>
                         </form>
-                        <span class="vote-score fw-bold" id="article-score">{{ article_vote_score|default:0 }}</span>
+                        <span class="vote-count" id="article-score">{{ article_vote_score|default:0 }}</span>
                         <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
                             {% csrf_token %}
                             <input type="hidden" name="vote" value="-1" />
@@ -74,7 +98,7 @@
                         </form>
                     </div>
 
-                    <div class="toolbar-pill shadow-sm d-flex align-items-center bg-white overflow-hidden" style="border-radius: 14px; border: 1px solid var(--line);">
+                    <div class="toolbar-pill">
                         <button class="tool-btn article-copy-link" type="button" data-copy-url="{{ request.build_absolute_uri }}" title="Sao chép">
                             <i class="fa-solid fa-link"></i>
                         </button>
@@ -87,14 +111,17 @@
                         <button class="tool-btn article-focus-toggle" type="button" title="Tập trung">
                             <i class="fa-solid fa-eye"></i>
                         </button>
-                        <a class="tool-btn text-decoration-none" href="{% url 'wiki:export-article-pdf' article.pk %}" title="PDF">
-                            <i class="fa-solid fa-file-pdf"></i>
-                        </a>
+
                     </div>
                 </div>
             </div>
             
-            <div class="article-shortcuts opacity-50 small mb-4">Phím tắt: <kbd>/</kbd> tìm, <kbd>S</kbd> lưu, <kbd>F</kbd> tập trung, <kbd>Esc</kbd> thoát.</div>
+            <div class="shortcut-keys">
+                <div class="shortcut-key"><kbd>/</kbd> Tìm kiếm</div>
+                <div class="shortcut-key"><kbd>S</kbd> Lưu bài</div>
+                <div class="shortcut-key"><kbd>F</kbd> Tập trung</div>
+                <div class="shortcut-key"><kbd>Esc</kbd> Thoát</div>
+            </div>
 
         </div>
         <div class="article-content markdown-body">{{ article.content|safe_markdown }}</div>
@@ -214,7 +241,11 @@
                             const expBox = document.getElementById(`explanation-${qId}`);
                             expBox.classList.remove('d-none');
                             expBox.classList.add(result.is_correct ? 'alert-success' : 'alert-warning');
-                            expBox.innerHTML = `<strong>Giải thích:</strong> ${result.explanation}`;
+                            const prefix = document.createElement('strong');
+                            prefix.textContent = "Giải thích: ";
+                            expBox.textContent = "";
+                            expBox.appendChild(prefix);
+                            expBox.appendChild(document.createTextNode(result.explanation));
                         }
                     }
                 })
@@ -229,7 +260,88 @@
         </script>
         {% endif %}
     </div>
-</article>
+        </article>
+    </div>
+</div>
+
+
+{% if coding_exercise %}
+<section class="card border-0 shadow-sm app-card mt-4" id="coding-exercise-section">
+    <div class="card-body p-4 p-lg-5">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <div class="section-eyebrow mb-2">Mini OJ</div>
+                <h2 class="hero-title-sm mb-1">{{ coding_exercise.title }}</h2>
+                <p class="text-secondary mb-0">{{ coding_exercise.description|linebreaksbr }}</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <span class="pill-badge">{{ coding_exercise.time_limit_ms }} ms</span>
+                <span class="pill-badge">{{ coding_exercise.memory_limit_mb }} MB</span>
+                {% if can_edit_article %}
+                    <a class="btn btn-outline-secondary rounded-pill px-3" href="{% url 'wiki:article-coding-manage' article.pk %}">Quản lý</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.is_authenticated and coding_language_choices %}
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="coding-language-select">Ngôn ngữ</label>
+                        <select id="coding-language-select" class="form-select">
+                            {% for language in coding_language_choices %}
+                                <option value="{{ language.key }}" {% if coding_exercise.default_language == language.key %}selected{% endif %}>{{ language.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="coding-editor" style="height: 420px; border: 1px solid rgba(0,0,0,.08); border-radius: 1rem;"></div>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="coding-run-btn">
+                            <i class="fa-solid fa-play me-2"></i>Chạy
+                        </button>
+                        <button type="button" class="btn btn-premium rounded-pill px-4" id="coding-submit-btn">
+                            <i class="fa-solid fa-cloud-arrow-up me-2"></i>Nộp bài giải
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold" for="coding-custom-input">Custom input</label>
+                        <textarea id="coding-custom-input" class="form-control font-monospace" rows="8" placeholder="Nhập input để run thử..."></textarea>
+                        <div class="form-text">Để trống nếu muốn run nhanh trên sample test.</div>
+                    </div>
+                    <div id="coding-samples"></div>
+                </div>
+            </div>
+            <div class="card bg-light border-0 mt-4 d-none" id="coding-result">
+                <div class="card-body">
+                    <div class="fw-semibold mb-2" id="coding-status"></div>
+                    <div id="coding-result-detail" class="small"></div>
+                </div>
+            </div>
+        {% elif user.is_authenticated %}
+            <div class="alert alert-secondary glass-alert mb-0">
+                Máy chủ hiện chưa có runtime phù hợp cho bài tập code này. Hãy vào trang quản lý để chỉnh lại danh sách ngôn ngữ hoặc compiler path.
+            </div>
+        {% else %}
+            <div class="alert alert-secondary glass-alert mb-0">
+                Bạn cần <a href="{% url 'wiki:login' %}?next={{ request.path }}">đăng nhập</a> để nộp bài.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% elif can_edit_article %}
+<section class="card border-0 shadow-sm app-card mt-4">
+    <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <div class="section-eyebrow mb-1">Mini OJ</div>
+            <h2 class="h5 mb-1">Bài viết này chưa có bài tập code</h2>
+            <p class="text-secondary mb-0">Tạo coding exercise để cho người đọc code trực tiếp trên web và chấm bằng testcase.</p>
+        </div>
+        <a class="btn btn-dark rounded-pill px-4" href="{% url 'wiki:article-coding-manage' article.pk %}">Cấu hình ngay</a>
+    </div>
+</section>
+{% endif %}
 
 <section class="card border-0 shadow-sm app-card mt-4" id="comment-section">
     <div class="card-body p-4 p-lg-5">
@@ -249,13 +361,6 @@
                 {% for error in comment_form.content.errors %}
                     <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
-                <div class="mb-3">
-                    <label class="form-label">Xác thực người dùng: {{ captcha_question }}</label>
-                    {{ comment_form.captcha_answer }}
-                    {% for error in comment_form.captcha_answer.errors %}
-                        <div class="text-danger small mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
                 <div class="mt-3">
                     <button class="btn btn-dark rounded-pill px-4" type="submit">Gửi bình luận</button>
                 </div>
@@ -326,6 +431,28 @@
 {% endblock %}
 
 {% block extra_js %}
+<<<<<<< HEAD
+=======
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% if coding_exercise and user.is_authenticated %}
+{{ coding_frontend_config|json_script:"coding-exercise-config" }}
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+<script src="{% static 'js/coding_exercise.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#coding-language-select').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            minimumResultsForSearch: Infinity
+        }).on('change', function() {
+            // trigger native change for coding_exercise.js
+            this.dispatchEvent(new Event('change'));
+        });
+    });
+</script>
+{% endif %}
+>>>>>>> c4f25a998841fdbc0bbad7905fd090542a7a9957
 <!-- Report Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -361,6 +488,7 @@
     </div>
 </div>
 
+<<<<<<< HEAD
 <style>
 /* Apple-style UI Enhancements */
 .choice-wrapper {
@@ -398,6 +526,8 @@
 }
 </style>
 
+=======
+>>>>>>> c4f25a998841fdbc0bbad7905fd090542a7a9957
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     // Reporting Logic
@@ -455,12 +585,33 @@ document.addEventListener("DOMContentLoaded", function () {
             const input = this.querySelector("input");
             if (!input.disabled) {
                 input.checked = true;
+<<<<<<< HEAD
                 // Add temporary focus effect
                 choiceWrappers.forEach(w => w.classList.remove('border-primary'));
+=======
+                const qc = this.closest('.question-card'); if(qc) qc.querySelectorAll('.choice-wrapper').forEach(w => w.classList.remove('border-primary'));
+>>>>>>> c4f25a998841fdbc0bbad7905fd090542a7a9957
                 this.classList.add('border-primary');
             }
         });
     });
+<<<<<<< HEAD
+=======
+    // Initialize Report Select2 when Modal is shown
+    const reportModalEl = document.getElementById('reportModal');
+    if (reportModalEl) {
+        reportModalEl.addEventListener('shown.bs.modal', function () {
+            $('#report-reason').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#reportModal'),
+                width: '100%',
+                minimumResultsForSearch: Infinity
+            });
+        });
+    }
+
+    }
+>>>>>>> c4f25a998841fdbc0bbad7905fd090542a7a9957
 });
 </script>
 {% endblock %}

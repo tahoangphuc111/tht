@@ -1,0 +1,166 @@
+// ─── Featured Section ───
+.featured-label {
+  font-size: 0.68rem;
+  color: var(--brand);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.5rem;
+}
+
+.featured-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+
+  .star-icon {
+    color: var(--warning);
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 6px rgba(255, 159, 10, 0.3));
+    animation: float 4s ease-in-out infinite;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+}
+
+.featured-comment-status {
+  background: var(--brand-soft);
+  color: var(--brand);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s var(--ease);
+}
+
+// ─── Featured Article Card ───
+.featured-card {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .category-badge-square {
+    background: var(--brand);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    font-weight: 700;
+    font-size: 0.72rem;
+    border-radius: var(--radius-xs);
+    text-decoration: none;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: all 0.3s var(--ease-spring);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+
+    &:hover {
+      background: var(--brand-dark);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    }
+  }
+
+  .article-title-link {
+    color: var(--ink);
+    font-size: 1.7rem;
+    font-weight: 800;
+    text-decoration: none;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    transition: color 0.2s var(--ease);
+
+    &:hover { color: var(--brand); }
+  }
+
+  .meta-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 1rem;
+
+    i { font-size: 0.8rem; opacity: 0.6; }
+
+    .author-link {
+      color: var(--ink-light);
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover { color: var(--brand); }
+    }
+  }
+
+  // CTA circle button
+  .read-next-circle {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+    color: white;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.4s var(--ease-spring);
+    flex-shrink: 0;
+    text-align: center;
+    padding: 12px;
+    box-shadow:
+      0 10px 20px var(--brand-soft),
+      0 4px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: scale(1.1) rotate(8deg);
+      box-shadow:
+        0 15px 30px var(--brand-soft),
+        0 8px 16px rgba(0, 0, 0, 0.12);
+      filter: brightness(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    span {
+      font-size: 0.7rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    i {
+      margin-top: 5px;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// ─── Sidebar Link Items (categories, latest articles etc) ───
+.sidebar-link-item {
+  transition: all 0.25s var(--ease-spring);
+  border-radius: var(--radius-sm) !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    background: var(--panel-hover);
+  }
+}

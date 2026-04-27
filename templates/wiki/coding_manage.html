@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Cấu hình bài tập · {{ article.title }} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm app-card">
+            <div class="card-body p-4 p-lg-5">
+                <a href="{{ article.get_absolute_url }}" class="back-link mb-3">&larr; Quay lại bài viết</a>
+                <div class="section-eyebrow mb-2">Mini OJ</div>
+                <h1 class="hero-title-sm mb-2">Cấu hình bài tập</h1>
+                <p class="text-secondary mb-4">Bật chế độ chấm bài, chọn ngôn ngữ cho phép, cài đặt giới hạn và code mẫu.</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                        <div class="mb-4">
+                            {% if field.name == 'is_enabled' %}
+                                <div class="form-check form-switch">
+                                    {{ field }}
+                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                </div>
+                            {% elif 'starter_code_' in field.name %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                                    <i class="fa-solid fa-code me-1 text-muted"></i>{{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                            {% else %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text and 'starter_code_' not in field.name %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="action-row mt-4">
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu cấu hình
+                        </button>
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm app-card h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <div class="section-eyebrow mb-1">Testcases</div>
+                        <h2 class="h4 mb-0">Bộ test</h2>
+                    </div>
+                    <a href="{% url 'wiki:coding-testcase-create' exercise.pk %}" class="btn btn-primary rounded-pill px-3">
+                        <i class="fa-solid fa-plus me-1"></i>Thêm test
+                    </a>
+                </div>
+                <div class="stack-list">
+                    {% for testcase in testcases %}
+                        <div class="stack-item">
+                            <div>
+                                <div class="fw-semibold">{{ testcase.name }}</div>
+                                <div class="stack-item__meta">
+                                    {% if testcase.is_sample %}
+                                        <span class="ui-badge ui-badge--primary me-1">sample</span>
+                                    {% else %}
+                                        <span class="ui-badge me-1">hidden</span>
+                                    {% endif %}
+                                    order {{ testcase.order }} · {{ testcase.score }} điểm
+                                </div>
+                            </div>
+                            <div class="stack-item__actions">
+                                <a href="{% url 'wiki:coding-testcase-edit' testcase.pk %}" class="btn btn-sm btn-outline-secondary px-3">Sửa</a>
+                                <a href="{% url 'wiki:coding-testcase-delete' testcase.pk %}" class="btn btn-sm btn-outline-danger px-3">Xóa</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="empty-state">
+                            <div class="ui-empty-state__icon"><i class="fa-solid fa-flask-vial"></i></div>
+                            <div class="ui-empty-state__text">Chưa có testcase nào. Thêm test đầu tiên để bắt đầu chấm bài.</div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <hr class="my-4">
+                <div class="section-eyebrow mb-2">Ngôn ngữ khả dụng</div>
+                <div class="d-flex gap-2 flex-wrap">
+                    {% for language in enabled_languages %}
+                        <span class="pill-badge">{{ language.label }}</span>
+                    {% empty %}
+                        <span class="text-secondary small">Chưa có runtime nào trên server.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+<script>
+    require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        const textareas = document.querySelectorAll('textarea[name^="starter_code_"]');
+        textareas.forEach(textarea => {
+            const container = document.createElement('div');
+            container.className = 'monaco-starter-container';
+            container.style.height = '240px';
+            container.style.border = '1px solid var(--line)';
+            container.style.borderRadius = '0.75rem';
+            container.style.overflow = 'hidden';
+            container.style.marginBottom = '1rem';
+            
+            textarea.parentNode.insertBefore(container, textarea);
+            textarea.style.display = 'none';
+            
+            const langKey = textarea.name.replace('starter_code_', '');
+            let monacoLang = langKey;
+            if (langKey === 'cpp') monacoLang = 'cpp';
+            if (langKey === 'python') monacoLang = 'python';
+            
+            const editor = monaco.editor.create(container, {
+                value: textarea.value,
+                language: monacoLang,
+                theme: 'vs-light',
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                lineNumbers: 'on',
+                roundedSelection: true,
+                padding: { top: 10, bottom: 10 }
+            });
+            
+            editor.getModel().onDidChangeContent(() => {
+                textarea.value = editor.getValue();
+            });
+        });
+    });
+</script>
+{% endblock %}

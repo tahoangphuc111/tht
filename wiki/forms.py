@@ -3,13 +3,24 @@ Forms for the wiki application.
 """
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import get_user_model
 from django.forms import inlineformset_factory
 from martor.fields import MartorFormField
 from martor.widgets import MartorWidget
 
-from .models import Article, Category, Comment, Profile, UploadedFile, Question, Choice
+from .models import (
+    Article,
+    Category,
+    Choice,
+    CodingExercise,
+    CodingTestCase,
+    Comment,
+    Profile,
+    Question,
+    UploadedFile,
+)
 
 User = get_user_model()
 
@@ -226,13 +237,6 @@ class ArticleForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     """Form for adding comments."""
 
-    captcha_answer = forms.IntegerField(
-        label="Xác thực: bạn là người thật",
-        required=True,
-        widget=forms.NumberInput(
-            attrs={"class": "form-control", "placeholder": "Nhập kết quả"}
-        ),
-    )
     content = MartorFormField(
         widget=MartorWidget(
             attrs={
@@ -333,6 +337,179 @@ class ChoiceForm(forms.ModelForm):
             ),
             "is_correct": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
+
+
+def get_code_language_choices():
+    """Expose enabled judge languages as form choices."""
+    configs = getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {})
+    return [
+        (key, cfg.get("label", key))
+        for key, cfg in configs.items()
+        if cfg.get("enabled")
+    ]
+
+
+class CodingExerciseForm(forms.ModelForm):
+    """Form for configuring a coding exercise."""
+
+    allowed_languages = forms.MultipleChoiceField(
+        choices=(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    class Meta:
+        """Metadata for CodingExerciseForm."""
+
+        model = CodingExercise
+        fields = (
+            "title",
+            "description",
+            "is_enabled",
+            "allowed_languages",
+            "default_language",
+            "time_limit_ms",
+            "memory_limit_mb",
+            "compare_mode",
+        )
+        labels = {
+            "compare_mode": "Checker",
+            "time_limit_ms": "Time limit (ms)",
+            "memory_limit_mb": "Memory limit (MB)",
+        }
+        widgets = {
+            "description": forms.Textarea(
+                attrs={
+                    "rows": 5,
+                    "class": "form-control",
+                    "placeholder": "Mô tả bài tập, yêu cầu input/output...",
+                }
+            ),
+            "is_enabled": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "default_language": forms.Select(attrs={"class": "form-select"}),
+            "time_limit_ms": forms.NumberInput(attrs={"class": "form-control"}),
+            "memory_limit_mb": forms.NumberInput(attrs={"class": "form-control"}),
+            "compare_mode": forms.Select(attrs={"class": "form-select"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        language_choices = get_code_language_choices()
+        self.fields["allowed_languages"].choices = language_choices
+        self.fields["allowed_languages"].help_text = (
+            "Chỉ các ngôn ngữ được chọn mới hiện ra ở Monaco editor."
+        )
+        self.fields["default_language"].choices = [
+            ("", "-- Chọn ngôn ngữ mặc định --")
+        ] + language_choices
+        self.fields["title"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "VD: In ra tổng 2 số"}
+        )
+
+        starter_map = self.instance.starter_code_map if self.instance.pk else {}
+        language_configs = getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {})
+        for language_key, config in language_configs.items():
+            field_name = f"starter_code_{language_key}"
+            self.fields[field_name] = forms.CharField(
+                required=False,
+                label=f"Starter code - {config.get('label', language_key)}",
+                widget=forms.Textarea(
+                    attrs={
+                        "rows": 8,
+                        "class": "form-control font-monospace",
+                        "placeholder": "Code mẫu cho ngôn ngữ này...",
+                    }
+                ),
+                initial=starter_map.get(
+                    language_key, config.get("starter_code", "")
+                ),
+            )
+
+    def clean(self):
+        """Ensure default language is part of the allowed set."""
+        cleaned_data = super().clean()
+        allowed_languages = cleaned_data.get("allowed_languages") or []
+        default_language = cleaned_data.get("default_language")
+        if default_language and default_language not in allowed_languages:
+            self.add_error(
+                "default_language", "Ngôn ngữ mặc định phải nằm trong danh sách cho phép."
+            )
+        if cleaned_data.get("is_enabled") and not allowed_languages:
+            self.add_error(
+                "allowed_languages", "Cần chọn ít nhất một ngôn ngữ khi bật bài tập code."
+            )
+        return cleaned_data
+
+    def save(self, commit=True):
+        """Persist starter codes as a JSON map."""
+        instance = super().save(commit=False)
+        starter_map = {}
+        for language_key in getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}):
+            starter_value = self.cleaned_data.get(f"starter_code_{language_key}", "")
+            if starter_value:
+                starter_map[language_key] = starter_value
+        instance.starter_code_map = starter_map
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
+
+class CodingTestCaseForm(forms.ModelForm):
+    """Form for creating and editing coding exercise testcases."""
+
+    class Meta:
+        """Metadata for CodingTestCaseForm."""
+
+        model = CodingTestCase
+        fields = (
+            "name",
+            "input_text",
+            "expected_output_text",
+            "input_file",
+            "expected_output_file",
+            "is_sample",
+            "order",
+            "score",
+        )
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "sample-1"}
+            ),
+            "input_text": forms.Textarea(
+                attrs={
+                    "rows": 6,
+                    "class": "form-control font-monospace",
+                    "placeholder": "Nhap input raw neu khong upload file",
+                }
+            ),
+            "expected_output_text": forms.Textarea(
+                attrs={
+                    "rows": 6,
+                    "class": "form-control font-monospace",
+                    "placeholder": "Nhap output raw neu khong upload file",
+                }
+            ),
+            "input_file": forms.FileInput(attrs={"class": "form-control"}),
+            "expected_output_file": forms.FileInput(attrs={"class": "form-control"}),
+            "is_sample": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "order": forms.NumberInput(attrs={"class": "form-control"}),
+            "score": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+    def clean(self):
+        """Require either raw text or uploaded files for both sides."""
+        cleaned_data = super().clean()
+        if not (cleaned_data.get("input_text") or cleaned_data.get("input_file")):
+            self.add_error("input_text", "Can input raw hoac file input.")
+        if not (
+            cleaned_data.get("expected_output_text")
+            or cleaned_data.get("expected_output_file")
+        ):
+            self.add_error(
+                "expected_output_text", "Can output raw hoac file output."
+            )
+        return cleaned_data
 
 
 ChoiceFormSet = inlineformset_factory(

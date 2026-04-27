@@ -1,55 +1,115 @@
-.hero-panel {
-  background: var(--panel);
-  backdrop-filter: var(--glass);
-  -webkit-backdrop-filter: var(--glass);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  color: var(--ink);
-  overflow: hidden;
-  padding: 2.5rem;
+@use "ui-components" as *;
+
+// ─── App Shell ───
+.app-shell {
+  background-color: var(--bg) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
+main.app-main {
+  flex: 1 0 auto;
+  padding: 2.5rem 0 4rem;
+  z-index: 1;
+  position: relative;
+}
+
+// ─── Background Decorations — floating orbs ───
+.page-gradient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(0, 113, 227, 0.03) 0, transparent 50%), 
+    radial-gradient(at 100% 100%, rgba(191, 90, 242, 0.06) 0, transparent 50%);
+  transform: translate3d(0, 0, 0);
+}
+
+// ─── Hero Panel — main CTA card with 3D depth ───
+.hero-panel {
+  @extend .ui-card;
+  padding: 2.5rem;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,245,250,0.9) 100%);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+
+  // decorative gradient bubble inside hero
+  &::after {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(0, 113, 227, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+}
+
+// ─── Stats ───
 .stat-grid {
   display: grid;
-  gap: 1.5rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
 }
 
 .stat-card {
-  background: var(--panel-strong);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  min-height: 8rem;
-  padding: 1.5rem;
+  @extend .ui-card;
+  min-height: 7rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  background: var(--panel);
+  transition: all 0.3s var(--ease-spring);
+
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: var(--shadow);
+  }
 }
 
-
 .stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  line-height: 1;
 }
 
 .stat-label {
   color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0.35rem;
 }
 
+// ─── Page layout helpers ───
 .page-shell {
   display: grid;
   gap: 1.5rem;
 }
 
 .page-header {
-  align-items: center;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
+  @extend .ui-section-header;
 }
 
 .page-header__content {
@@ -57,6 +117,7 @@
 }
 
 .page-card {
+  @extend .ui-card;
   padding: 1.5rem;
 }
 
@@ -71,24 +132,28 @@
 .confirm-card,
 .table-shell,
 .stack-shell {
-  overflow: hidden;
+  @extend .ui-card;
 }
 
 .form-intro {
   color: var(--muted);
   margin-bottom: 1.25rem;
   max-width: 42rem;
+  line-height: 1.6;
 }
 
 .back-link {
   color: var(--muted);
   display: inline-flex;
   font-weight: 500;
-  gap: 0.45rem;
+  gap: 0.4rem;
   text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s var(--ease);
 
   &:hover {
-    color: var(--ink);
+    color: var(--brand);
+    transform: translateX(-2px);
   }
 }
 
@@ -99,7 +164,8 @@
 }
 
 .table-shell {
-  padding: 0.35rem;
+  padding: 0;
+  overflow: hidden;
 }
 
 .table-shell .table {
@@ -108,84 +174,106 @@
 
 .stack-list {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.75rem;
 }
 
 .stack-item {
-  align-items: flex-start;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(29, 29, 31, 0.06);
-  border-radius: 0.9rem;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  padding: 0.9rem 1rem;
+  @extend .ui-stack-item;
 }
 
 .stack-item__meta {
+  font-size: 0.85rem;
   color: var(--muted);
-  font-size: 0.9rem;
 }
 
 .stack-item__actions {
   display: flex;
-  flex-shrink: 0;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .saved-count-badge {
-  align-items: center;
-  background: rgba(17, 102, 204, 0.12);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
   border-radius: 999px;
-  color: var(--brand);
-  display: inline-flex;
-  font-size: 0.78rem;
-  justify-content: center;
-  margin-left: 0.45rem;
-  min-width: 1.4rem;
-  padding: 0.1rem 0.4rem;
+  min-width: 1.2rem;
+  text-align: center;
 }
 
 .saved-modal {
-  border-radius: 1rem;
+  @extend .ui-card;
 }
 
 .saved-articles-list {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 .saved-article-item {
-  align-items: flex-start;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(29, 29, 31, 0.06);
-  border-radius: 0.9rem;
-  display: flex;
-  gap: 0.75rem;
-  justify-content: space-between;
-  padding: 0.95rem 1rem;
+  @extend .ui-stack-item;
+  padding: 0.85rem 1rem;
 }
 
 .saved-article-item__title {
-  color: var(--ink);
   font-weight: 600;
+  color: var(--ink);
   text-decoration: none;
 }
 
 .saved-article-item__meta {
+  font-size: 0.82rem;
   color: var(--muted);
-  font-size: 0.88rem;
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
 }
 
+// ─── Footer ───
 .site-footer {
-  background: rgba(255, 255, 255, 0.72);
-  border-top: 1px solid rgba(29, 29, 31, 0.06);
-  margin-top: 3rem;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  padding: 3.5rem 0;
+  margin-top: 6rem;
+
+  .fw-bold {
+    color: var(--ink) !important;
+    letter-spacing: -0.02em;
+  }
+
+  .text-muted {
+    color: var(--muted) !important;
+  }
 }
 
 .footer-title {
-  color: var(--ink);
-  font-size: 1.05rem;
-  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.empty-state {
+  @extend .ui-empty-state;
+}
+
+.app-card {
+  @extend .ui-card;
+}
+
+// ─── Reading Progress Bar ───
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 1040;
+  background: transparent;
+
+  &__bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--brand), #5ac8fa);
+    transition: width 0.12s linear;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 8px rgba(0, 113, 227, 0.4);
+  }
 }

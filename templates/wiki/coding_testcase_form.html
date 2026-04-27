@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{% if form.instance.pk %}sửa testcase{% else %}thêm testcase{% endif %} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="row form-shell">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm app-card form-card">
+            <div class="card-body p-4 p-lg-5">
+                <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="back-link mb-3">&larr; Quay lại mini OJ</a>
+                <div class="section-eyebrow mb-2">Testcase</div>
+                <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Sửa testcase{% else %}Thêm testcase{% endif %}</h1>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-4">
+                            {% if field.name == 'is_sample' %}
+                                <div class="form-check">
+                                    {{ field }}
+                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                </div>
+                            {% else %}
+                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="alert alert-info small">
+                        Có thể nhập raw text hoặc upload file `.inp/.out/.txt/.ans/.in`. Nếu điền cả hai, runner sẽ ưu tiên file upload.
+                    </div>
+                    <div class="action-row">
+                        <button type="submit" class="btn btn-dark rounded-pill px-4">Lưu testcase</button>
+                        <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

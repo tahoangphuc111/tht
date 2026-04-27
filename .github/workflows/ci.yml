@@ -2,9 +2,9 @@ name: Django CI
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "phuc/*", "manh/*" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "phuc/*", "manh/*" ]
 
 jobs:
   test:
@@ -23,6 +23,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
     - name: Install System Dependencies
       run: |
         sudo apt-get update
@@ -33,6 +39,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install flake8
+        npm install
+
+    - name: Build SCSS
+      run: npm run build:css
 
     - name: Run System Check
       run: |
@@ -48,4 +58,4 @@ jobs:
 
     - name: Run Flake8
       run: |
-        flake8 .
+        flake8 . --count --max-line-length=127 --statistics --exclude=venv,migrations,__pycache__

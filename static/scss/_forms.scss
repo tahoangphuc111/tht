@@ -7,11 +7,17 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 select {
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(29, 29, 31, 0.08);
-  border-radius: 0.95rem;
-  min-height: 3rem;
+  background: var(--panel);
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  min-height: 2.75rem;
   width: 100%;
+  font-size: 0.92rem;
+  transition: all 0.25s var(--ease);
+
+  &:hover {
+    border-color: var(--muted-light);
+  }
 }
 
 .form-control:focus,
@@ -23,45 +29,85 @@ input[type="password"]:focus,
 input[type="email"]:focus,
 select:focus,
 textarea:not(.martor):focus {
-  border-color: rgba(10, 102, 217, 0.26);
-  box-shadow: 0 0 0 0.25rem rgba(10, 102, 217, 0.1);
+  border-color: var(--brand);
+  box-shadow: var(--shadow-focus);
+  outline: none;
 }
 
 textarea:not(.martor) {
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(29, 29, 31, 0.08);
-  border-radius: 0.95rem;
+  background: var(--panel);
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--radius-sm);
   min-height: 8rem;
   width: 100%;
+  font-size: 0.92rem;
+  transition: all 0.25s var(--ease);
+
+  &:hover {
+    border-color: var(--muted-light);
+  }
 }
 
 .form-label {
   color: var(--ink);
   font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.4rem;
 }
 
 .form-text {
   color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .form-check-input {
-  border-color: rgba(29, 29, 31, 0.18);
+  border-color: var(--line-strong);
+  transition: all 0.2s var(--ease);
+  width: 1.15em;
+  height: 1.15em;
 }
 
 .form-check-input:checked {
   background-color: var(--brand);
   border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+}
+
+.form-check-input:focus {
+  box-shadow: var(--shadow-focus);
 }
 
 .pagination {
+  gap: 0.3rem;
+
   .page-link {
-    border-color: rgba(29, 29, 31, 0.08);
-    color: var(--brand);
+    border: 1px solid var(--line);
+    color: var(--ink-light);
+    border-radius: var(--radius-xs) !important;
+    font-weight: 500;
+    font-size: 0.88rem;
+    transition: all 0.25s var(--ease-spring);
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--panel-strong);
+      border-color: var(--line-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
   }
 
   .page-item.active .page-link {
     background: var(--brand);
+    border-color: var(--brand);
     color: #fff;
+    box-shadow:
+      0 2px 8px rgba(0, 113, 227, 0.25),
+      0 1px 3px rgba(0, 113, 227, 0.15);
+    transform: translateY(-1px);
   }
 }
 
@@ -83,39 +129,38 @@ textarea:not(.martor) {
 
 .table {
   --bs-table-bg: transparent;
-  --bs-table-striped-bg: rgba(255, 255, 255, 0.44);
-  --bs-table-hover-bg: rgba(10, 102, 217, 0.04);
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.015);
+  --bs-table-hover-bg: rgba(0, 113, 227, 0.03);
 
   thead th {
-    border-bottom-width: 1px;
+    border-bottom: 2px solid var(--line);
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 1rem;
   }
 
   td,
   th {
-    border-color: rgba(29, 29, 31, 0.06);
+    border-color: var(--line);
     vertical-align: middle;
+    padding: 0.85rem 1rem;
   }
 }
 
 .category-table {
+
   td,
   th {
     padding: 1rem 1.15rem;
   }
 }
 
-.empty-state {
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px dashed rgba(29, 29, 31, 0.12);
-  border-radius: 1rem;
-  color: var(--muted);
-  padding: 1.2rem;
-}
-
-.empty-state.centered {
-  padding: 2rem 1.25rem;
-  text-align: center;
+.alert {
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  box-shadow: var(--shadow-sm);
 }

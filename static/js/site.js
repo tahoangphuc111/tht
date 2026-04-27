@@ -4,8 +4,14 @@ const getCookie = (n) => {
 };
 
 const fetchSaved = async () => {
+    const list = document.getElementById("saved-articles-list");
+    if (!list) return;
     try {
         const r = await fetch('/saved-articles/');
+        if (r.redirected || !r.ok || (r.headers.get('content-type') || '').indexOf('application/json') === -1) {
+            renderSaved([]);
+            return;
+        }
         const d = await r.json();
         renderSaved(d.bookmarks);
     } catch (err) {
@@ -70,14 +76,21 @@ const initAjaxVotes = () => {
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
                 body: new FormData(f)
             });
-            const d = await r.json();
-            if (!d.success) throw new Error(d.message);
-
-            const scoreEl = document.getElementById('article-score');
-            if (scoreEl && d.article_vote_score !== undefined) scoreEl.textContent = d.article_vote_score;
-
-            const cScoreEl = document.getElementById(`comment-${d.comment_pk}-score`);
-            if (cScoreEl && d.comment_vote_score !== undefined) cScoreEl.textContent = d.comment_vote_score;
+            
+            const contentType = r.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const d = await r.json();
+                if (!d.success) throw new Error(d.message || "Thao tác không thành công.");
+                
+                const scoreEl = document.getElementById('article-score');
+                if (scoreEl && d.article_vote_score !== undefined) scoreEl.textContent = d.article_vote_score;
+                const cScoreEl = document.getElementById(`comment-${d.comment_pk}-score`);
+                if (cScoreEl && d.comment_vote_score !== undefined) cScoreEl.textContent = d.comment_vote_score;
+                const userScoreEl = document.getElementById(`user-${d.target_user_pk}-score`);
+                if (userScoreEl && d.target_user_score !== undefined) userScoreEl.textContent = d.target_user_score;
+            } else {
+                throw new Error("Lỗi máy chủ hoặc trang không tìm thấy (404/500).");
+            }
 
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, timer: 2000 });
@@ -105,9 +118,23 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchSaved();
 
     document.querySelectorAll(".saved-articles-trigger").forEach(b => b.onclick = fetchSaved);
+    document.querySelectorAll(".article-copy-link").forEach(btn => {
+        btn.onclick = async () => {
+            const url = btn.dataset.copyUrl;
+            if (!url) return;
+            try {
+                await navigator.clipboard.writeText(url);
+                Swal.fire({ icon: 'success', title: 'Đã sao chép', timer: 1200, showConfirmButton: false });
+            } catch (err) {
+                console.error("Error copying link:", err);
+            }
+        };
+    });
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && document.body.classList.contains("is-focus-mode")) document.querySelector(".article-focus-toggle").click();     
+        if (e.key.toLowerCase() === "s" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) document.querySelector(".article-save-toggle")?.click();
+        if (e.key.toLowerCase() === "f" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) document.querySelector(".article-focus-toggle")?.click();
         if (e.key === "/" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) { e.preventDefault(); document.querySelector("#id_q")?.focus(); } 
     });
 });
