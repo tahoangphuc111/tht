@@ -97,6 +97,28 @@ def compare_output(expected_output, actual_output, compare_mode):
     return expected_tokens == actual_tokens
 
 
+def _run_custom_checker(job_dir, exercise, input_data, expected_output, actual_output):
+    actual_path = job_dir / "actual_out.txt"
+    actual_path.write_text(actual_output or "", encoding="utf-8")
+    expected_path = job_dir / "expected_out.txt"
+    expected_path.write_text(expected_output or "", encoding="utf-8")
+    
+    checker_lang = exercise.checker_language or "python"
+    checker_ext = "py" if checker_lang == "python" else "cpp"
+    checker_path = job_dir / f"checker.{checker_ext}"
+    checker_path.write_text(exercise.checker_code or "", encoding="utf-8")
+    
+    if checker_lang == "python":
+        command = ["python", "checker.py", "stdin.txt", "actual_out.txt", "expected_out.txt"]
+        # Use python:3.10-slim docker image implicitly via _run_process
+        process_result = _run_process(command, job_dir, input_data=input_data, timeout_ms=5000)
+        completed = process_result["completed"]
+        if completed and completed.returncode == 0:
+            return "accepted"
+        return "wrong_answer"
+    return "internal_error"
+
+
 def _truncate_text(value):
     if not value:
         return ""
@@ -189,6 +211,42 @@ def _run_process(command, workdir, input_data="", timeout_ms=None):
     run_env["PYTHONUTF8"] = "1"
     run_env["LANG"] = "en_US.UTF-8"
     run_env["LC_ALL"] = "en_US.UTF-8"
+
+    use_docker = getattr(settings, "CODE_EXECUTION_USE_DOCKER", True)
+    mem_limit = getattr(settings, "CODE_EXECUTION_DEFAULT_MEMORY_MB", 128)
+    
+    if use_docker and command:
+        cmd_str = str(command[0]).lower()
+        if "python" in cmd_str or "py" in cmd_str: image = "python:3.10-slim"
+        elif "g++" in cmd_str or "gcc" in cmd_str: image = "gcc:latest"
+        elif "java" in cmd_str or "javac" in cmd_str: image = "openjdk:17-slim"
+        elif "node" in cmd_str: image = "node:18-slim"
+        elif "go" in cmd_str: image = "golang:1.20-alpine"
+        elif "rust" in cmd_str: image = "rust:slim"
+        elif "dotnet" in cmd_str: image = "mcr.microsoft.com/dotnet/sdk:8.0"
+        else: image = "python:3.10-slim"
+        
+        new_cmd = []
+        for arg in command:
+            arg_str = str(arg)
+            if str(workdir) in arg_str:
+                arg_str = arg_str.replace(str(workdir), "/app")
+            arg_str = arg_str.replace("\\", "/")
+            # Also replace any resolved python paths to just python
+            if "python" in arg_str.lower() and (".exe" in arg_str.lower() or "venv" in arg_str.lower()):
+                arg_str = "python"
+            new_cmd.append(arg_str)
+            
+        command = [
+            "docker", "run", "--rm", 
+            "--network", "none",
+            "--memory", f"{mem_limit}m",
+            "-v", f"{workdir}:/app",
+            "-w", "/app",
+            "-i",
+            image
+        ] + new_cmd
+
     started_at = time.perf_counter()
     with open(stdin_path, "rb") as stdin_handle, \
          open(stdout_path, "wb") as stdout_handle, \
@@ -253,7 +311,7 @@ def _compile_source(job_dir, language, language_config, replacements):
     }
 
 
-def _run_testcase(job_dir, language_config, replacements, input_data, expected_output, compare_mode, case_name):
+def _run_testcase(job_dir, language_config, replacements, input_data, expected_output, compare_mode, case_name, exercise=None):
     process_result = _run_process(
         _render_command(language_config.get("run") or [], replacements),
         job_dir,
@@ -276,14 +334,17 @@ def _run_testcase(job_dir, language_config, replacements, input_data, expected_o
         status = "internal_error"
     elif completed.returncode != 0:
         status = "runtime_error"
-    elif expected_output is None:
+    elif expected_output is None and compare_mode != "custom_checker":
         status = "accepted"
     else:
-        status = (
-            "accepted"
-            if compare_output(expected_output, process_result["stdout"], compare_mode)
-            else "wrong_answer"
-        )
+        if compare_mode == "custom_checker" and exercise and exercise.checker_code:
+            status = _run_custom_checker(job_dir, exercise, input_data, expected_output, process_result["stdout"])
+        else:
+            status = (
+                "accepted"
+                if compare_output(expected_output, process_result["stdout"], compare_mode)
+                else "wrong_answer"
+            )
 
     return {
         "case_name": case_name,
@@ -302,9 +363,6 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
     if custom_input and len(custom_input.encode("utf-8")) > max_input_bytes:
         raise CodeRunnerError("Input tùy chỉnh vượt quá giới hạn cho phép.")
 
-    if not RUNNER_LOCK.acquire(timeout=1):
-        raise CodeRunnerError("Máy chấm đang bận, vui lòng thử lại sau.")
-
     submission = CodingSubmission.objects.create(
         exercise=exercise,
         user=user,
@@ -314,6 +372,27 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
         custom_input=custom_input,
         is_sample_run=sample_only,
     )
+    
+    # Import ở đây để tránh circular import
+    from ..tasks import execute_code_task
+    execute_code_task.delay(submission.pk)
+    return submission
+
+def _execute_submission(submission):
+    exercise = submission.exercise
+    language = submission.language
+    source_code = submission.source_code
+    custom_input = submission.custom_input
+    sample_only = submission.is_sample_run
+    
+    language_config = get_language_config(language)
+
+    if not RUNNER_LOCK.acquire(timeout=1):
+        submission.status = "internal_error"
+        submission.compile_output = "Máy chấm đang quá tải, vui lòng thử lại sau."
+        submission.save(update_fields=["status", "compile_output"])
+        return
+
     job_dir = None
     try:
         job_dir = _create_job_directory()
@@ -338,6 +417,9 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
 
         testcase_results = []
         total_tests = 1
+        subtask_scores = {}
+        subtask_max_scores = {}
+        
         if custom_input:
             testcase_results.append(
                 _run_testcase(
@@ -348,31 +430,61 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
                     None,
                     exercise.compare_mode,
                     "custom input",
+                    exercise=exercise,
                 )
             )
         else:
-            queryset = exercise.testcases.all()
+            queryset = list(exercise.testcases.all()[: getattr(settings, "CODE_EXECUTION_MAX_TESTCASES", 30)])
             if sample_only:
-                queryset = queryset.filter(is_sample=True)
-            queryset = queryset[: getattr(settings, "CODE_EXECUTION_MAX_TESTCASES", 30)]
+                queryset = [tc for tc in queryset if tc.is_sample]
             total_tests = len(queryset)
+            
+            # Tính điểm tối đa từng subtask
+            for tc in queryset:
+                sid = str(tc.subtask_id)
+                if sid not in subtask_max_scores:
+                    subtask_max_scores[sid] = tc.score
+                else:
+                    subtask_max_scores[sid] = max(subtask_max_scores[sid], tc.score)
+                if sid not in subtask_scores:
+                    subtask_scores[sid] = subtask_max_scores[sid] # Assume max initially
+
             for testcase in queryset:
-                testcase_results.append(
-                    _run_testcase(
-                        job_dir,
-                        language_config,
-                        replacements,
-                        testcase.get_input_data(),
-                        testcase.get_expected_output_data(),
-                        exercise.compare_mode,
-                        testcase.name,
-                    )
+                res = _run_testcase(
+                    job_dir,
+                    language_config,
+                    replacements,
+                    testcase.get_input_data(),
+                    testcase.get_expected_output_data(),
+                    exercise.compare_mode,
+                    testcase.name,
+                    exercise=exercise,
                 )
-                if testcase_results[-1]["status"] != "accepted" and not sample_only:
-                    break
+                res["subtask_id"] = str(testcase.subtask_id)
+                testcase_results.append(res)
+                
+                # Nếu testcase sai, subtask đó 0 điểm
+                if res["status"] != "accepted":
+                    subtask_scores[str(testcase.subtask_id)] = 0
+                    if not sample_only:
+                        # Vẫn chạy tiếp nếu muốn chấm subtask khác, 
+                        # nhưng nếu OJ strict thì dừng luôn toàn bộ.
+                        # Tạm thời ta không break để chấm hết lấy partial score
+                        pass
 
         passed_tests = sum(1 for item in testcase_results if item["status"] == "accepted")
+        
+        total_score = 0
+        if not custom_input and not sample_only:
+            total_score = sum(subtask_scores.values())
+            
         final_status = "accepted"
+        if not custom_input and passed_tests < total_tests:
+            final_status = "wrong_answer"
+            # Nếu có partial score thì có thể để accepted kèm score, 
+            # nhưng thông thường OJ vẫn báo WA nếu chưa pass hết.
+            
+        # Tìm lỗi đầu tiên để hiển thị (trừ trường hợp tất cả đều accepted)
         for item in testcase_results:
             if item["status"] != "accepted":
                 final_status = item["status"]
@@ -388,6 +500,8 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
         submission.stderr_preview = preview_item["stderr_preview"] if preview_item else ""
         submission.total_tests = total_tests
         submission.passed_tests = passed_tests
+        submission.score = total_score
+        submission.subtask_results = subtask_scores
         submission.runtime_ms = max(
             [item["runtime_ms"] for item in testcase_results],
             default=0,
@@ -401,6 +515,8 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
                 "stderr_preview",
                 "total_tests",
                 "passed_tests",
+                "score",
+                "subtask_results",
                 "runtime_ms",
                 "finished_at",
             ]

@@ -1,0 +1,36 @@
+{% extends "wiki/base.html" %}
+
+{% block title %}Bảng xếp hạng{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-3 tracking-tight">Bảng xếp hạng</h1>
+        <p class="text-gray-600">Những thành viên tích cực giải bài và đóng góp nhất.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <ul class="divide-y divide-gray-100">
+            {% for u in users %}
+            <li class="p-6 flex items-center hover:bg-gray-50/50 transition-colors">
+                <div class="flex-shrink-0 mr-6 text-2xl font-bold {% if forloop.counter <= 3 %}text-blue-600{% else %}text-gray-400{% endif %}">
+                    #{{ forloop.counter }}
+                </div>
+                <img src="{{ u.profile.get_avatar_url }}" alt="Avatar" class="w-12 h-12 rounded-full border border-gray-100 mr-4 shadow-sm object-cover">
+                <div class="flex-grow">
+                    <a href="{{ u.profile.get_absolute_url }}" class="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                        {{ u.profile.display_name|default:u.username }}
+                    </a>
+                    <div class="text-sm text-gray-500 mt-1 flex gap-4">
+                        <span><i class="fas fa-check-circle mr-1"></i> {{ u.accepted_count }} Bài giải</span>
+                        <span><i class="fas fa-star mr-1"></i> {{ u.total_score }} Điểm</span>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="p-8 text-center text-gray-500">Chưa có dữ liệu bảng xếp hạng.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

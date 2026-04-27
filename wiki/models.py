@@ -444,6 +444,7 @@ class CodingExercise(models.Model):
         ("exact", "Exact match"),
         ("trim_lines", "Trim whitespace"),
         ("tokenized", "Token-based"),
+        ("custom_checker", "Custom Checker"),
     )
     article = models.OneToOneField(
         Article, on_delete=models.CASCADE, related_name="coding_exercise"
@@ -459,6 +460,8 @@ class CodingExercise(models.Model):
     compare_mode = models.CharField(
         max_length=20, choices=COMPARE_MODE_CHOICES, default="trim_lines"
     )
+    checker_code = models.TextField(blank=True, help_text="Mã nguồn giám khảo chấm bài (dùng cho Custom Checker)")
+    checker_language = models.CharField(max_length=32, blank=True, help_text="Ngôn ngữ của mã nguồn giám khảo (ví dụ: python, cpp)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -491,6 +494,7 @@ class CodingTestCase(models.Model):
     is_sample = models.BooleanField(default=False)
     order = models.PositiveIntegerField(default=0)
     score = models.PositiveIntegerField(default=1)
+    subtask_id = models.PositiveIntegerField(default=1, help_text="ID của subtask (các testcase cùng ID sẽ gom lại thành 1 subtask)")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -548,6 +552,8 @@ class CodingSubmission(models.Model):
     is_sample_run = models.BooleanField(default=False)
     total_tests = models.PositiveIntegerField(default=0)
     passed_tests = models.PositiveIntegerField(default=0)
+    score = models.PositiveIntegerField(default=0)
+    subtask_results = models.JSONField(default=dict, blank=True)
     runtime_ms = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(null=True, blank=True)

@@ -91,3 +91,16 @@ class UserListView(ListView):
         context = super().get_context_data(**kwargs)
         context["query"] = self.request.GET.get("q", "").strip()
         return context
+
+class LeaderboardView(ListView):
+    """View to show user ranking based on accepted submissions and points."""
+    model = User
+    template_name = "wiki/leaderboard.html"
+    context_object_name = "users"
+    paginate_by = 20
+
+    def get_queryset(self):
+        return User.objects.annotate(
+            accepted_count=Count('coding_submissions', filter=Q(coding_submissions__status='accepted')),
+            total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions', filter=Q(coding_submissions__status='accepted'), distinct=True) * 5
+        ).order_by('-total_score', '-accepted_count')

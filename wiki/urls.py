@@ -15,6 +15,7 @@ from .views import (
     search,
     users,
     voting,
+    submissions,
 )
 
 app_name = "wiki"
@@ -82,9 +83,11 @@ urlpatterns = [
 
     # Users
     path("users/", users.UserListView.as_view(), name="user-list"),
+    path("leaderboard/", users.LeaderboardView.as_view(), name="leaderboard"),
     path("profile/", users.profile_view, name="profile"),
     path("profile/edit/", users.profile_edit_view, name="profile-edit"),
     path("u/<str:username>/", users.public_profile_view, name="public-profile"),
+    path("submissions/", submissions.SubmissionHistoryView.as_view(), name="submissions-history"),
 
     # Auth
     path("login/", auth_views.LoginView.as_view(template_name="registration/login.html", redirect_authenticated_user=True), name="login"),
