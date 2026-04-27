@@ -376,6 +376,10 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
     # Import ở đây để tránh circular import
     from ..tasks import execute_code_task
     execute_code_task.delay(submission.pk)
+    
+    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+        submission.refresh_from_db()
+
     return submission
 
 def _execute_submission(submission):
@@ -462,14 +466,9 @@ def _execute_submission(submission):
                 )
                 res["subtask_id"] = str(testcase.subtask_id)
                 testcase_results.append(res)
-                
-                # Nếu testcase sai, subtask đó 0 điểm
                 if res["status"] != "accepted":
                     subtask_scores[str(testcase.subtask_id)] = 0
                     if not sample_only:
-                        # Vẫn chạy tiếp nếu muốn chấm subtask khác, 
-                        # nhưng nếu OJ strict thì dừng luôn toàn bộ.
-                        # Tạm thời ta không break để chấm hết lấy partial score
                         pass
 
         passed_tests = sum(1 for item in testcase_results if item["status"] == "accepted")
@@ -481,10 +480,6 @@ def _execute_submission(submission):
         final_status = "accepted"
         if not custom_input and passed_tests < total_tests:
             final_status = "wrong_answer"
-            # Nếu có partial score thì có thể để accepted kèm score, 
-            # nhưng thông thường OJ vẫn báo WA nếu chưa pass hết.
-            
-        # Tìm lỗi đầu tiên để hiển thị (trừ trường hợp tất cả đều accepted)
         for item in testcase_results:
             if item["status"] != "accepted":
                 final_status = item["status"]
