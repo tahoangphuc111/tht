@@ -341,12 +341,8 @@ class ChoiceForm(forms.ModelForm):
 
 def get_code_language_choices():
     """Expose enabled judge languages as form choices."""
-    configs = getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {})
-    return [
-        (key, cfg.get("label", key))
-        for key, cfg in configs.items()
-        if cfg.get("enabled")
-    ]
+    from .services.code_runner import get_enabled_language_choices
+    return [(c["key"], c["label"]) for c in get_enabled_language_choices()]
 
 
 class CodingExerciseForm(forms.ModelForm):

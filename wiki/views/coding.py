@@ -16,6 +16,7 @@ from ..models import Article, CodingExercise, CodingTestCase
 from ..services.code_runner import (
     CodeRunnerError,
     execute_code,
+    get_all_language_status,
     get_enabled_language_choices,
     serialize_submission,
 )
@@ -86,7 +87,7 @@ def article_coding_manage_view(request, article_pk):
             "exercise": exercise,
             "form": form,
             "testcases": exercise.testcases.all(),
-            "enabled_languages": get_enabled_language_choices(),
+            "all_languages": get_all_language_status(),
         },
     )
 

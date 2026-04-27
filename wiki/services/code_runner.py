@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import threading
 import time
@@ -9,7 +10,7 @@ from pathlib import Path
 from django.conf import settings
 from django.utils import timezone
 
-from ..models import CodingSubmission, CodingSubmissionResult
+from ..models import CodingSubmission, CodingSubmissionResult, LanguageRuntime
 
 RUNNER_LOCK = threading.BoundedSemaphore(
     value=max(1, getattr(settings, "CODE_EXECUTION_MAX_CONCURRENT_JOBS", 2))
@@ -20,21 +21,65 @@ class CodeRunnerError(Exception):
     pass
 
 
+def _merged_configs():
+    base = dict(getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}))
+    try:
+        for rt in LanguageRuntime.objects.filter(enabled=True):
+            base[rt.key] = rt.to_config()
+    except Exception:
+        pass
+    return base
+
+
 def get_language_config(language):
-    return getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}).get(language, {})
+    return _merged_configs().get(language, {})
 
 
 def get_enabled_language_choices():
-    configs = getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {})
     return [
         {
             "key": key,
             "label": cfg.get("label", key),
             "monaco_language": cfg.get("monaco_language", "plaintext"),
         }
-        for key, cfg in configs.items()
+        for key, cfg in _merged_configs().items()
         if cfg.get("enabled")
     ]
+
+
+def _load_binary_map():
+    json_path = settings.BASE_DIR / "config" / "languages.json"
+    if not json_path.exists():
+        return {}
+    try:
+        with open(json_path, "r", encoding="utf-8") as fh:
+            raw = json.load(fh)
+        return {k: v.get("binaries", []) for k, v in raw.items()}
+    except Exception:
+        return {}
+
+
+def get_all_language_status():
+    configs = _merged_configs()
+    binmap = _load_binary_map()
+    results = []
+    for key, cfg in configs.items():
+        bins = binmap.get(key, [])
+        found = None
+        for b in bins:
+            found = shutil.which(b)
+            if found:
+                break
+        results.append({
+            "key": key,
+            "label": cfg.get("label", key),
+            "monaco_language": cfg.get("monaco_language", "plaintext"),
+            "enabled": bool(cfg.get("enabled")),
+            "detected": bool(found),
+            "binary_path": found,
+            "source": "db" if key not in getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}) else "json",
+        })
+    return results
 
 
 def compare_output(expected_output, actual_output, compare_mode):

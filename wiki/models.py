@@ -410,6 +410,35 @@ class Choice(models.Model):
         return self.content
 
 
+class LanguageRuntime(models.Model):
+    key = models.CharField(max_length=32, unique=True)
+    label = models.CharField(max_length=64)
+    monaco = models.CharField(max_length=32, default="plaintext")
+    source = models.CharField(max_length=64)
+    compile_cmd = models.JSONField(default=list, blank=True)
+    run_cmd = models.JSONField(default=list)
+    starter = models.TextField(blank=True)
+    enabled = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=100)
+
+    class Meta:
+        ordering = ["order", "key"]
+
+    def __str__(self):
+        return self.label
+
+    def to_config(self):
+        return {
+            "label": self.label,
+            "monaco_language": self.monaco,
+            "source_name": self.source,
+            "compile": self.compile_cmd or [],
+            "run": self.run_cmd or [],
+            "starter_code": self.starter,
+            "enabled": self.enabled,
+        }
+
+
 class CodingExercise(models.Model):
     COMPARE_MODE_CHOICES = (
         ("exact", "Exact match"),

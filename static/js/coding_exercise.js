@@ -155,7 +155,7 @@
                 </div>
             </div>
         `).join("");
-        sampleNode.innerHTML = rows || '<div class="empty-state centered">Chưa có sample test.</div>';
+        sampleNode.innerHTML = rows || '<div class="empty-state"><div class="ui-empty-state__icon"><i class="fa-solid fa-code"></i></div><div class="ui-empty-state__text">Chưa có sample test.</div></div>';
     };
 
     const loadMonaco = () => {
@@ -170,11 +170,15 @@
             editorApi = window.monaco.editor.create(editorHost, {
                 value: readStoredSource(initialLanguage),
                 language: config.monacoMap[initialLanguage] || "plaintext",
+                theme: "vs-light",
                 automaticLayout: true,
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
                 fontSize: 14,
-                theme: "vs",
+                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                lineNumbers: "on",
+                roundedSelection: true,
+                padding: { top: 16, bottom: 16 },
             });
             editorApi.onDidChangeModelContent(() => {
                 writeStoredSource(languageSelect.value, editorApi.getValue());
