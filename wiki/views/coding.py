@@ -61,6 +61,7 @@ def article_coding_manage_view(request, article_pk):
 
     defaults = {
         "title": article.title,
+        "is_enabled": True,
         "allowed_languages": [item["key"] for item in get_enabled_language_choices()],
         "default_language": (
             get_enabled_language_choices()[0]["key"]

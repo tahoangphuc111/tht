@@ -16,10 +16,11 @@
                     {% for field in form.visible_fields %}
                         <div class="mb-4">
                             {% if field.name == 'is_enabled' %}
-                                <div class="form-check form-switch">
+                                <div class="form-check form-switch mb-2">
                                     {{ field }}
                                     <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 </div>
+                                <div class="form-text text-primary mb-3"><i class="fa-solid fa-circle-info me-1"></i>Bật công tắc này để hiển thị bài tập code trên trang bài viết.</div>
                             {% elif 'starter_code_' in field.name %}
                                 <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
                                     <i class="fa-solid fa-code me-1 text-muted"></i>{{ field.label }}
