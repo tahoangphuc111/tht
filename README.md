@@ -7,6 +7,7 @@ cp wiki is a knowledge base platform designed for the competitive programming co
 - python 3.10+
 - nodejs 18+
 - git
+- redis
 
 ### 0 install prerequisites
 
@@ -53,8 +54,16 @@ source venv/bin/activate
 **linux (ubuntu/debian)**
 ```bash
 sudo apt-get update
-sudo apt-get install -y libcairo2-dev pkg-config
+sudo apt-get install -y libcairo2-dev pkg-config redis-server
+sudo service redis-server start
 ```
+
+**windows**
+Run Redis via Docker (recommended):
+```powershell
+docker run -d -p 6379:6379 redis
+```
+Or use WSL to install `redis-server` as shown in the Linux section.
 
 **python & node**
 ```bash
@@ -140,6 +149,16 @@ chmod +x scripts/build_styles.sh
 ### development server
 ```bash
 python manage.py runserver
+```
+
+### celery worker (for mini oj)
+in a separate terminal, start the celery worker to process code submissions:
+```bash
+# linux / macos
+celery -A config worker -l info -P gevent
+
+# windows powershell
+.\venv\Scripts\celery.exe -A config worker -l info -P gevent
 ```
 
 ### asgi for websockets
