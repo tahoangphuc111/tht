@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, UpdateView, CreateView
 
 from ..forms import CodingExerciseForm, CodingTestCaseForm
-from ..models import Article, CodingExercise, CodingTestCase
+from ..models import Article, CodingExercise, CodingTestCase, CodingSubmission
 from ..services.code_runner import (
     CodeRunnerError,
     execute_code,
