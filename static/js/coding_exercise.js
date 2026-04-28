@@ -49,7 +49,7 @@
         }
     };
 
-    const renderResult = (data, actionLabel) => {
+    const renderResult = (data, actionLabel, shouldScroll = true) => {
         resultNode.classList.remove("d-none");
         resultNode.classList.add("fade-in");
         
@@ -92,10 +92,14 @@
             if (data.stderr_preview && data.status !== "compile_error") {
                 parts.push(`<div class="mb-2"><strong>stderr:</strong><pre class="bg-light p-2 rounded mt-1 small text-danger">${escapeHtml(data.stderr_preview)}</pre></div>`);
             }
+        } else if (data.status === "running") {
+            parts.push(`<div class="text-center py-5 text-secondary"><div class="spinner-border spinner-border-sm me-2"></div>Đang chấm bài, vui lòng đợi...</div>`);
         }
 
         detailNode.innerHTML = parts.join("");
-        resultNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (shouldScroll) {
+            resultNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     };
 
     const escapeHtml = (value) => {
@@ -130,25 +134,28 @@
 
             // Poll for results if the status is "running"
             if (data.status === "running" && data.submission_id) {
-                const pollUrl = config.statusUrl.replace("0", data.submission_id);
+                const pollBaseUrl = config.statusUrl.replace("0", data.submission_id);
                 const poll = async () => {
                     try {
+                        const pollUrl = `${pollBaseUrl}?t=${Date.now()}`;
                         const pollRes = await fetch(pollUrl);
                         const pollData = await pollRes.json();
-                        renderResult(pollData, actionLabel);
+                        
+                        renderResult(pollData, actionLabel, false);
+                        
                         if (pollData.status === "running") {
                             setTimeout(poll, 1000);
                         } else {
-                            setBusy(false, button);
+                            setBusy(false);
                         }
                     } catch (e) {
                         console.error("Polling error:", e);
-                        setBusy(false, button);
+                        setBusy(false);
                     }
                 };
                 setTimeout(poll, 1000);
             } else {
-                setBusy(false, button);
+                setBusy(false);
             }
         } catch (error) {
             renderResult(
@@ -161,7 +168,7 @@
                 },
                 actionLabel
             );
-            setBusy(false, button);
+            setBusy(false);
         }
     };
 

@@ -89,6 +89,7 @@ urlpatterns = [
     path("profile/edit/", users.profile_edit_view, name="profile-edit"),
     path("u/<str:username>/", users.public_profile_view, name="public-profile"),
     path("submissions/", submissions.SubmissionHistoryView.as_view(), name="submissions-history"),
+    path("submission/<int:pk>/", submissions.SubmissionDetailView.as_view(), name="submission-detail"),
 
     # Auth
     path("login/", auth_views.LoginView.as_view(template_name="registration/login.html", redirect_authenticated_user=True), name="login"),

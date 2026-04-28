@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chi tiết bài nộp #{{ submission.pk }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <div class="section-eyebrow mb-1">Submission Detail</div>
+                <h1 class="hero-title-sm mb-0">Bài nộp #{{ submission.pk }}</h1>
+            </div>
+            <a href="{% url 'wiki:submissions-history' %}" class="btn btn-outline-secondary rounded-pill px-4">Quay lại lịch sử</a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm app-card mb-4">
+                    <div class="card-body p-4">
+                        <div class="section-eyebrow mb-3">Overview</div>
+                        <div class="mb-4">
+                            {% if submission.status == 'accepted' %}
+                                <div class="badge bg-success-soft text-success p-2 rounded-3 w-100 text-center mb-3">
+                                    <i class="fa-solid fa-check-circle me-2"></i><strong>Accepted</strong>
+                                </div>
+                            {% elif submission.status == 'running' %}
+                                <div class="badge bg-primary-soft text-primary p-2 rounded-3 w-100 text-center mb-3">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i><strong>Running</strong>
+                                </div>
+                            {% else %}
+                                <div class="badge bg-danger-soft text-danger p-2 rounded-3 w-100 text-center mb-3">
+                                    <i class="fa-solid fa-circle-xmark me-2"></i><strong>{{ submission.status|title }}</strong>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Người nộp:</span>
+                                <span class="fw-bold">{{ submission.user.username }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Bài tập:</span>
+                                <a href="{{ submission.exercise.article.get_absolute_url }}" class="fw-bold text-decoration-none">{{ submission.exercise.article.title }}</a>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Ngôn ngữ:</span>
+                                <span class="fw-bold">{{ submission.language }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Thời gian:</span>
+                                <span class="fw-bold">{{ submission.runtime_ms }} ms</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Điểm:</span>
+                                <span class="fw-bold">{{ submission.score }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary">Nộp lúc:</span>
+                                <span class="fw-bold">{{ submission.created_at|date:"d/m/Y H:i:s" }}</span>
+                            </div>
+                        </div>
+
+                        {% if submission.compile_output %}
+                            <div class="section-eyebrow mb-2">Compile Output</div>
+                            <pre class="bg-dark text-light p-3 rounded-3 small shadow-inner" style="max-height: 200px; overflow-y: auto;">{{ submission.compile_output }}</pre>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm app-card mb-4">
+                    <div class="card-body p-4">
+                        <div class="section-eyebrow mb-3">Source Code</div>
+                        <pre class="bg-light p-4 rounded-4 border" style="font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.5; max-height: 600px; overflow-y: auto;">{{ submission.source_code }}</pre>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm app-card">
+                    <div class="card-body p-4">
+                        <div class="section-eyebrow mb-3">Test Case Results</div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Case</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                        <th class="text-end">Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in submission.results.all %}
+                                        <tr>
+                                            <td class="fw-medium">{{ result.case_name }}</td>
+                                            <td>
+                                                {% if result.status == 'accepted' %}
+                                                    <span class="badge bg-success-soft text-success">Accepted</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger-soft text-danger">{{ result.status|title }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ result.runtime_ms }} ms</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-soft" type="button" data-bs-toggle="collapse" data-bs-target="#result-{{ result.id }}">
+                                                    Xem kết quả
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr class="collapse" id="result-{{ result.id }}">
+                                            <td colspan="4" class="p-3 bg-light rounded-bottom">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="small text-secondary mb-1">Expected:</div>
+                                                        <pre class="bg-white p-2 rounded border small mb-0">{{ result.expected_preview }}</pre>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="small text-secondary mb-1">Actual:</div>
+                                                        <pre class="bg-white p-2 rounded border small mb-0">{{ result.actual_preview }}</pre>
+                                                    </div>
+                                                    {% if result.stderr_preview %}
+                                                    <div class="col-12">
+                                                        <div class="small text-danger mb-1">Error Stream:</div>
+                                                        <pre class="bg-white p-2 rounded border small mb-0 text-danger">{{ result.stderr_preview }}</pre>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-secondary">
+                                                Chưa có dữ liệu kết quả chi tiết.
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

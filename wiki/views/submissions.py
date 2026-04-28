@@ -1,5 +1,5 @@
-from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from ..models import CodingSubmission
 
 class SubmissionHistoryView(LoginRequiredMixin, ListView):
@@ -9,8 +9,24 @@ class SubmissionHistoryView(LoginRequiredMixin, ListView):
     paginate_by = 20
     
     def get_queryset(self):
-        qs = CodingSubmission.objects.filter(user=self.request.user).select_related('exercise__article')
+        if self.request.user.is_superuser:
+            qs = CodingSubmission.objects.all()
+        else:
+            qs = CodingSubmission.objects.filter(user=self.request.user)
+            
+        qs = qs.select_related('exercise__article', 'user').order_by('-created_at')
+        
         exercise_id = self.request.GET.get('exercise')
         if exercise_id:
             qs = qs.filter(exercise_id=exercise_id)
         return qs
+
+class SubmissionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = CodingSubmission
+    template_name = "wiki/coding/submission_detail.html"
+    context_object_name = "submission"
+
+    def test_func(self):
+        submission = self.get_object()
+        return self.request.user.is_superuser or submission.user == self.request.user
+

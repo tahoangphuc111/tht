@@ -19,18 +19,24 @@
                     <table class="table table-hover align-middle mb-0 custom-table">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-4 py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Trạng thái</th>
+                                <th class="ps-4 py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">ID</th>
+                                <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Trạng thái</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Bài tập</th>
+                                {% if user.is_superuser %}
+                                    <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Người nộp</th>
+                                {% endif %}
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Ngôn ngữ</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Thời gian chạy</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase text-end" style="letter-spacing: 0.5px;">Điểm</th>
+                                <th class="py-3 text-secondary fw-semibold small text-uppercase text-end" style="letter-spacing: 0.5px;">Thao tác</th>
                                 <th class="pe-4 py-3 text-secondary fw-semibold small text-uppercase text-end" style="letter-spacing: 0.5px;">Nộp lúc</th>
                             </tr>
                         </thead>
                         <tbody class="border-top-0">
                             {% for submission in submissions %}
                             <tr>
-                                <td class="ps-4 py-3">
+                                <td class="ps-4 py-3 text-secondary small">#{{ submission.pk }}</td>
+                                <td class="py-3">
                                     {% if submission.status == 'accepted' %}
                                         <span class="pill-badge" style="background: rgba(40,167,69,0.1); color: #28a745;"><i class="fa-solid fa-check-circle me-1"></i>Accepted</span>
                                     {% elif submission.status == 'running' %}
@@ -42,9 +48,15 @@
                                 <td class="py-3 fw-medium">
                                     <a href="{{ submission.exercise.article.get_absolute_url }}" class="text-decoration-none text-dark">{{ submission.exercise.article.title }}</a>
                                 </td>
+                                {% if user.is_superuser %}
+                                    <td class="py-3 text-muted">@{{ submission.user.username }}</td>
+                                {% endif %}
                                 <td class="py-3 text-muted">{{ submission.language }}</td>
                                 <td class="py-3 text-muted">{{ submission.runtime_ms }} ms</td>
                                 <td class="py-3 text-end fw-semibold">{{ submission.score }}</td>
+                                <td class="py-3 text-end">
+                                    <a href="{% url 'wiki:submission-detail' submission.pk %}" class="btn btn-sm btn-soft">Chi tiết</a>
+                                </td>
                                 <td class="pe-4 py-3 text-end text-muted small">{{ submission.created_at|date:"d/m/Y H:i" }}</td>
                             </tr>
                             {% empty %}
