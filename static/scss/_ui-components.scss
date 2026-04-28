@@ -453,6 +453,13 @@
   }
 }
 
+.shadow-glow {
+  box-shadow: var(--shadow-glow) !important;
+  &:hover {
+    box-shadow: 0 0 25px rgba(67, 56, 202, 0.25) !important;
+  }
+}
+
 // ─── Glassmorphism helper ───
 .glass-effect {
   background: var(--panel-glass);
@@ -460,3 +467,10 @@
   -webkit-backdrop-filter: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
+
+.bg-primary-soft { background-color: var(--brand-soft) !important; }
+.bg-success-soft { background-color: var(--success-soft) !important; }
+.bg-danger-soft { background-color: var(--danger-soft) !important; }
+.bg-warning-soft { background-color: var(--warning-soft) !important; }
+
+.cursor-pointer { cursor: pointer; }

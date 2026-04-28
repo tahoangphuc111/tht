@@ -639,11 +639,38 @@ a {
   box-shadow: var(--shadow-lg) !important;
 }
 
+.shadow-glow {
+  box-shadow: var(--shadow-glow) !important;
+}
+.shadow-glow:hover {
+  box-shadow: 0 0 25px rgba(67, 56, 202, 0.25) !important;
+}
+
 .glass-effect {
   background: var(--panel-glass);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
   border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.bg-primary-soft {
+  background-color: var(--brand-soft) !important;
+}
+
+.bg-success-soft {
+  background-color: var(--success-soft) !important;
+}
+
+.bg-danger-soft {
+  background-color: var(--danger-soft) !important;
+}
+
+.bg-warning-soft {
+  background-color: var(--warning-soft) !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .article-shell {
@@ -1347,6 +1374,59 @@ textarea.font-monospace:focus {
 .activity-item .activity-meta {
   font-size: 0.8rem;
   color: var(--muted);
+}
+
+.contribution-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+  gap: 4px;
+  padding: 0.5rem 0;
+}
+
+.contribution-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--contrib-0);
+  transition: transform 0.1s ease;
+}
+.contribution-cell:hover {
+  transform: scale(1.2);
+  z-index: 2;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+.contribution-cell.contribution-level-0 {
+  background: var(--contrib-0);
+}
+.contribution-cell.contribution-level-1 {
+  background: var(--contrib-1);
+}
+.contribution-cell.contribution-level-2 {
+  background: var(--contrib-2);
+}
+.contribution-cell.contribution-level-3 {
+  background: var(--contrib-3);
+}
+.contribution-cell.contribution-level-4 {
+  background: var(--contrib-4);
+}
+
+.pill-badge--admin {
+  background: linear-gradient(135deg, #ff9500 0%, #ffcc00 100%) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+  border: none;
+}
+.pill-badge--admin:hover {
+  box-shadow: 0 6px 16px rgba(255, 149, 0, 0.4);
+  transform: scale(1.08) rotate(-1deg);
+}
+
+.badge-icon--admin {
+  background: rgba(255, 149, 0, 0.1) !important;
+  color: #ff9500 !important;
+  border: 1.5px solid rgba(255, 149, 0, 0.2);
+  animation: pulse-glow 2s infinite ease-in-out;
 }
 
 @media (max-width: 1200px) {

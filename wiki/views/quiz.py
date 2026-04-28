@@ -20,7 +20,10 @@ def article_quiz_manage_view(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
     if article.author != request.user and not request.user.is_superuser:
         return redirect("wiki:article-detail", pk=article.pk, slug=article.slug)
-    return render(request, "wiki/quiz_manage.html", {"article": article})
+    return render(request, "wiki/quiz_manage.html", {
+        "article": article,
+        "questions": article.questions.all().prefetch_related('choices')
+    })
 
 
 @login_required

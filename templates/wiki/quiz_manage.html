@@ -1,53 +1,130 @@
 {% extends 'base.html' %}
 {% load martortags %}
+
 {% block title %}Quản lý trắc nghiệm - {{ article.title }} | CP Wiki{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="page-header mb-4">
+    <div class="col-lg-10 col-xl-9">
+        <div class="page-header mb-5 d-flex justify-content-between align-items-end flex-wrap gap-4">
             <div>
-                <a href="{{ article.get_absolute_url }}" class="back-link mb-2">&larr; Quay lại bài viết</a>
+                <a href="{{ article.get_absolute_url }}" class="back-link mb-3 d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại bài viết
+                </a>
+                <div class="section-eyebrow mb-1">Quiz Editor</div>
                 <h1 class="hero-title-sm mb-0">Quản lý trắc nghiệm: {{ article.title }}</h1>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'wiki:upload-quiz-file' article.pk %}" class="btn btn-outline-secondary rounded-pill px-3" title="Upload từ file"><i class="fa-solid fa-file-import"></i></a>
-                <a href="{% url 'wiki:question-create' article.pk %}" class="btn btn-primary rounded-pill px-3" title="Thêm câu hỏi"><i class="fa-solid fa-plus"></i></a>
+                <a href="{% url 'wiki:upload-quiz-file' article.pk %}" class="btn btn-soft rounded-pill px-4" title="Nhập từ file">
+                    <i class="fa-solid fa-file-import me-2"></i>Nhập file
+                </a>
+                <a href="{% url 'wiki:question-create' article.pk %}" class="btn btn-primary rounded-pill px-4 shadow-glow" title="Thêm câu hỏi">
+                    <i class="fa-solid fa-plus me-2"></i>Thêm câu hỏi
+                </a>
             </div>
         </div>
 
         {% if questions %}
-            <div class="card border-0 shadow-sm app-card stack-shell">
-                <div class="list-group list-group-flush">
+            <div class="activity-stack">
                 {% for question in questions %}
-                    <div class="list-group-item p-4 bg-transparent border-bottom">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="pe-4">
-                                <h5 class="mb-2 text-primary">Câu {{ question.order }}</h5>
-                                <div class="markdown-body mb-2">{{ question.content|safe_markdown }}</div>
-                                <ul class="list-unstyled mb-0">
-                                {% for choice in question.choices.all %}
-                                    <li class="{% if choice.is_correct %}text-success fw-bold{% else %}text-secondary{% endif %}">
-                                        {% if choice.is_correct %}&check;{% else %}&bull;{% endif %} {{ choice.content }}
-                                    </li>
-                                {% endfor %}
-                                </ul>
-                                {% if question.explanation %}
-                                    <div class="mt-2 small text-muted markdown-body"><strong>Giải thích:</strong> {{ question.explanation|safe_markdown }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="stack-item__actions">
-                                <a href="{% url 'wiki:question-edit' question.pk %}" class="btn btn-sm btn-outline-secondary px-2" title="Sửa"><i class="fa-solid fa-pen"></i></a>
-                                <a href="{% url 'wiki:question-delete' question.pk %}" class="btn btn-sm btn-outline-danger px-2" title="Xóa"><i class="fa-solid fa-trash"></i></a>
+                    <div class="card border-0 shadow-sm app-card mb-4 transition-all">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="d-flex justify-content-between align-items-start gap-4">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-3 mb-4">
+                                        <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-2 fw-bold">
+                                            Câu {{ question.order }}
+                                        </div>
+                                        <div class="text-secondary small">
+                                            <i class="fa-solid fa-layer-group me-1"></i> {{ question.choices.count }} lựa chọn
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="markdown-body quiz-content mb-5" style="font-size: 1.15rem; color: var(--ink);">
+                                        {{ question.content|safe_markdown }}
+                                    </div>
+                                    
+                                    <div class="row g-3">
+                                        {% for choice in question.choices.all %}
+                                            <div class="col-md-6">
+                                                <div class="p-3 rounded-4 border h-100 {% if choice.is_correct %}bg-success-soft border-success text-success{% else %}bg-light border-transparent text-secondary{% endif %} d-flex align-items-center gap-3">
+                                                    {% if choice.is_correct %}
+                                                        <i class="fa-solid fa-circle-check fs-5"></i>
+                                                    {% else %}
+                                                        <i class="fa-regular fa-circle opacity-30 fs-5"></i>
+                                                    {% endif %}
+                                                    <span class="{% if choice.is_correct %}fw-bold text-dark{% endif %}">{{ choice.content }}</span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    {% if question.explanation %}
+                                        <div class="mt-5 p-4 rounded-4 bg-warm border-start border-4 border-primary">
+                                            <div class="section-eyebrow mb-2">Giải thích chi tiết</div>
+                                            <div class="markdown-body text-secondary small">{{ question.explanation|safe_markdown }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="{% url 'wiki:question-edit' question.pk %}" class="btn btn-icon btn-soft" title="Sửa">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <a href="{% url 'wiki:question-delete' question.pk %}" class="btn btn-icon btn-soft text-danger" title="Xóa">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 {% endfor %}
-                </div>
             </div>
         {% else %}
-            <div class="empty-state centered">Chưa có câu hỏi trắc nghiệm nào cho bài viết này.</div>
+            <div class="card border-0 shadow-sm app-card text-center py-5">
+                <div class="card-body py-5">
+                    <div class="ui-empty-state__icon mb-4">
+                        <i class="fa-solid fa-clipboard-question opacity-10" style="font-size: 5rem; color: var(--brand);"></i>
+                    </div>
+                    <h3 class="h4 mb-3 fw-bold">Chưa có câu hỏi nào</h3>
+                    <p class="text-muted mb-5 mx-auto" style="max-width: 420px; font-size: 1.05rem;">
+                        Bài viết này hiện chưa có câu hỏi trắc nghiệm. Hãy bắt đầu bằng cách thêm câu hỏi đầu tiên để giúp cộng đồng ôn luyện.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'wiki:question-create' article.pk %}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-glow">
+                            <i class="fa-solid fa-plus me-2"></i>Tạo câu hỏi đầu tiên
+                        </a>
+                    </div>
+                </div>
+            </div>
         {% endif %}
     </div>
 </div>
+
+<style>
+.quiz-content p:last-child { margin-bottom: 0; }
+.bg-warm { background-color: #fcfcfd; }
+.btn-icon {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.2s var(--ease);
+}
+.btn-icon:hover {
+    transform: scale(1.1);
+    background: var(--bg-soft);
+}
+.app-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg) !important;
+}
+.bg-success-soft {
+    background-color: rgba(48, 209, 88, 0.08) !important;
+}
+.opacity-10 { opacity: 0.1; }
+.fs-5 { font-size: 1.25rem !important; }
+</style>
 {% endblock %}
