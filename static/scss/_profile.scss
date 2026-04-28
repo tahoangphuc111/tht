@@ -116,3 +116,51 @@
     color: var(--muted);
   }
 }
+
+// ─── Contribution Grid (Heatmap) ───
+.contribution-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+  gap: 4px;
+  padding: 0.5rem 0;
+}
+
+.contribution-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--contrib-0);
+  transition: transform 0.1s ease;
+
+  &:hover {
+    transform: scale(1.2);
+    z-index: 2;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  }
+
+  &.contribution-level-0 { background: var(--contrib-0); }
+  &.contribution-level-1 { background: var(--contrib-1); }
+  &.contribution-level-2 { background: var(--contrib-2); }
+  &.contribution-level-3 { background: var(--contrib-3); }
+  &.contribution-level-4 { background: var(--contrib-4); }
+}
+
+// ─── Admin Badges & Roles ───
+.pill-badge--admin {
+  background: linear-gradient(135deg, #ff9500 0%, #ffcc00 100%) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+  border: none;
+  
+  &:hover {
+    box-shadow: 0 6px 16px rgba(255, 149, 0, 0.4);
+    transform: scale(1.08) rotate(-1deg);
+  }
+}
+
+.badge-icon--admin {
+  background: rgba(255, 149, 0, 0.1) !important;
+  color: #ff9500 !important;
+  border: 1.5px solid rgba(255, 149, 0, 0.2);
+  animation: pulse-glow 2s infinite ease-in-out;
+}

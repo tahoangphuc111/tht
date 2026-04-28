@@ -121,7 +121,7 @@ def build_profile_stats(user, viewer=None):
         "chart_posts": [sum(d["posts"] for d in contribution_days[i : i + 14]) for i in range(0, len(contribution_days), 14)],
         "chart_edits": [sum(d["edits"] for d in contribution_days[i : i + 14]) for i in range(0, len(contribution_days), 14)],
         "user_vote_score": user.profile.vote_score,
-        "role_names": [g.name for g in user.groups.all()] or ["user"],
+        "role_names": list(set([g.name for g in user.groups.all()] + (["admin"] if user.is_superuser else []))) or ["user"],
         "edited_articles_count": ArticleRevision.objects.filter(author=user)
         .values("article")
         .distinct()
