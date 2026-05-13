@@ -102,12 +102,12 @@ def _run_custom_checker(job_dir, exercise, input_data, expected_output, actual_o
     actual_path.write_text(actual_output or "", encoding="utf-8")
     expected_path = job_dir / "expected_out.txt"
     expected_path.write_text(expected_output or "", encoding="utf-8")
-    
+
     checker_lang = exercise.checker_language or "python"
     checker_ext = "py" if checker_lang == "python" else "cpp"
     checker_path = job_dir / f"checker.{checker_ext}"
     checker_path.write_text(exercise.checker_code or "", encoding="utf-8")
-    
+
     if checker_lang == "python":
         command = ["python", "checker.py", "stdin.txt", "actual_out.txt", "expected_out.txt"]
         # Use python:3.10-slim docker image implicitly via _run_process
@@ -323,7 +323,7 @@ def _run_testcase(job_dir, language_config, replacements, input_data, expected_o
 
 
 def execute_code(exercise, user, language, source_code, *, custom_input="", sample_only=False):
-    language_config = _ensure_language_is_available(exercise, language)
+    _ensure_language_is_available(exercise, language)
     max_input_bytes = getattr(settings, "CODE_EXECUTION_MAX_SOURCE_BYTES", 128 * 1024)
     if custom_input and len(custom_input.encode("utf-8")) > max_input_bytes:
         raise CodeRunnerError("Input tùy chỉnh vượt quá giới hạn cho phép.")
@@ -337,15 +337,17 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
         custom_input=custom_input,
         is_sample_run=sample_only,
     )
-    
+
     # Import ở đây để tránh circular import
     from ..tasks import execute_code_task
+
     execute_code_task.delay(submission.pk)
-    
+
     if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
         submission.refresh_from_db()
 
     return submission
+
 
 def _execute_submission(submission):
     exercise = submission.exercise
@@ -353,7 +355,7 @@ def _execute_submission(submission):
     source_code = submission.source_code
     custom_input = submission.custom_input
     sample_only = submission.is_sample_run
-    
+
     language_config = get_language_config(language)
 
     if not RUNNER_LOCK.acquire(timeout=1):
@@ -388,7 +390,7 @@ def _execute_submission(submission):
         total_tests = 1
         subtask_scores = {}
         subtask_max_scores = {}
-        
+
         if custom_input:
             testcase_results.append(
                 _run_testcase(
@@ -407,7 +409,7 @@ def _execute_submission(submission):
             if sample_only:
                 queryset = [tc for tc in queryset if tc.is_sample]
             total_tests = len(queryset)
-            
+
             # Tính điểm tối đa từng subtask
             for tc in queryset:
                 sid = str(tc.subtask_id)
@@ -416,7 +418,7 @@ def _execute_submission(submission):
                 else:
                     subtask_max_scores[sid] = max(subtask_max_scores[sid], tc.score)
                 if sid not in subtask_scores:
-                    subtask_scores[sid] = subtask_max_scores[sid] # Assume max initially
+                    subtask_scores[sid] = subtask_max_scores[sid]  # Assume max initially
 
             for testcase in queryset:
                 res = _run_testcase(
@@ -437,11 +439,11 @@ def _execute_submission(submission):
                         pass
 
         passed_tests = sum(1 for item in testcase_results if item["status"] == "accepted")
-        
+
         total_score = 0
         if not custom_input and not sample_only:
             total_score = sum(subtask_scores.values())
-            
+
         final_status = "accepted"
         if not custom_input and passed_tests < total_tests:
             final_status = "wrong_answer"

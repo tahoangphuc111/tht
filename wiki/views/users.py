@@ -92,8 +92,10 @@ class UserListView(ListView):
         context["query"] = self.request.GET.get("q", "").strip()
         return context
 
+
 class LeaderboardView(ListView):
     """View to show user ranking based on accepted submissions and points."""
+
     model = User
     template_name = "wiki/leaderboard.html"
     context_object_name = "users"
