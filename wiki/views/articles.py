@@ -158,7 +158,11 @@ class ArticleDetailView(DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not self.object.allow_comments or not request.user.is_authenticated:
+        if (
+            not self.object.allow_comments
+            or not request.user.is_authenticated
+            or not request.user.has_perm("wiki.add_comment")
+        ):
             return redirect(self.object.get_absolute_url())
         form = CommentForm(request.POST)
         if form.is_valid():

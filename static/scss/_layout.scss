@@ -33,8 +33,9 @@ main.app-main {
   z-index: -1;
   background-color: var(--bg);
   background-image: 
-    radial-gradient(at 0% 0%, rgba(0, 113, 227, 0.03) 0, transparent 50%), 
-    radial-gradient(at 100% 100%, rgba(191, 90, 242, 0.06) 0, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(214, 106, 140, 0.10) 0, transparent 48%),
+    radial-gradient(at 100% 100%, rgba(243, 159, 134, 0.12) 0, transparent 46%),
+    radial-gradient(at 100% 0%, rgba(127, 200, 191, 0.08) 0, transparent 34%);
   transform: translate3d(0, 0, 0);
 }
 
@@ -43,8 +44,8 @@ main.app-main {
   @extend .ui-card;
   padding: 2.5rem;
   background:
-    linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,245,250,0.9) 100%);
-  border: 1px solid rgba(255,255,255,0.6);
+    linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(255,243,246,0.92) 52%, rgba(255,249,245,0.92) 100%);
+  border: 1px solid rgba(255,255,255,0.78);
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
@@ -57,7 +58,7 @@ main.app-main {
     right: -60px;
     width: 250px;
     height: 250px;
-    background: radial-gradient(circle, rgba(0, 113, 227, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(214, 106, 140, 0.12) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
   }
@@ -230,7 +231,7 @@ main.app-main {
 .site-footer {
   flex-shrink: 0;
   background: var(--panel);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   padding: 3.5rem 0;
   margin-top: 6rem;
 

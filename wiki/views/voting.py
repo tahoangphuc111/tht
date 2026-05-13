@@ -6,8 +6,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.views.decorators.http import require_POST
+
 from ..websockets import broadcast_vote_update
 from ..models import Article, Comment, ArticleVote, CommentVote, UserVote, Profile
+from ..utils import get_safe_redirect_url
 
 User = get_user_model()
 
@@ -70,13 +73,14 @@ def _handle_vote(request, model, target_field, target_obj, vote_attr):
 
     next_url = request.POST.get("next")
     if next_url:
-        return redirect(next_url)
+        return redirect(get_safe_redirect_url(request, next_url, fallback="/"))
 
     if hasattr(target_obj, "get_absolute_url"):
         return redirect(target_obj.get_absolute_url())
     return redirect("wiki:home")
 
 
+@require_POST
 def vote_article(request, pk):
     """Handle voting for an article."""
     return _handle_vote(
@@ -84,6 +88,7 @@ def vote_article(request, pk):
     )
 
 
+@require_POST
 def vote_comment(request, pk):
     """Handle voting for a comment."""
     return _handle_vote(
@@ -91,6 +96,7 @@ def vote_comment(request, pk):
     )
 
 
+@require_POST
 def vote_user(request, username):
     """Handle voting for a user (reputation)."""
     try:

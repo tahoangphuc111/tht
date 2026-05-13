@@ -4,8 +4,11 @@ Utility functions for the wiki application.
 
 from collections import defaultdict
 from datetime import timedelta
+
 from django.contrib.auth import get_user_model
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+
 from .models import ArticleRevision
 
 User = get_user_model()
@@ -44,9 +47,27 @@ def get_profile_name(user):
     return user.profile.display_name or user.get_full_name() or user.username
 
 
+def get_safe_redirect_url(request, candidate, fallback="/"):
+    """Return a local redirect target or the provided fallback."""
+    if candidate and url_has_allowed_host_and_scheme(
+        candidate,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return candidate
+    return fallback
+
+
 def build_profile_stats(user, viewer=None):
     """Generate statistics and contribution data for a user's profile."""
-    articles = list(user.articles.select_related("category").order_by("-updated_at"))
+    is_owner = viewer == user
+    is_admin = bool(viewer and viewer.is_superuser)
+    can_view = not user.profile.is_profile_private or is_owner or is_admin
+
+    article_queryset = user.articles.select_related("category").order_by("-updated_at")
+    if not (is_owner or is_admin):
+        article_queryset = article_queryset.filter(status="published")
+    articles = list(article_queryset)
     revisions = ArticleRevision.objects.filter(author=user).select_related("article")
     recent_comments = (
         user.comments.select_related("article")
@@ -100,11 +121,6 @@ def build_profile_stats(user, viewer=None):
             }
         )
         curr += timedelta(days=1)
-
-    # Permission check for private profile
-    is_owner = viewer == user
-    is_admin = viewer and viewer.is_superuser
-    can_view = not user.profile.is_profile_private or is_owner or is_admin
 
     return {
         "profile": user.profile,

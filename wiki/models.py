@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -235,6 +236,7 @@ class Comment(models.Model):
 
 
 def upload_file_validator(value):
+    allowed_extensions = {".pdf", ".docx", ".png", ".jpg", ".jpeg"}
     allowed = [
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -242,6 +244,9 @@ def upload_file_validator(value):
         "image/jpeg",
         "image/jpg",
     ]
+    file_ext = Path(value.name).suffix.lower()
+    if file_ext not in allowed_extensions:
+        raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
     if value.file.content_type not in allowed:
         raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
 

@@ -1,8 +1,10 @@
 """Views for the coding exercise feature."""
 
 import json
+import logging
 
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
@@ -21,6 +23,8 @@ from ..services.code_runner import (
     serialize_submission,
 )
 from ..utils import can_manage_wiki
+
+logger = logging.getLogger(__name__)
 
 
 def _get_article_for_manage(article_pk):
@@ -197,6 +201,8 @@ class CodingTestCaseDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVi
 @login_required
 def run_code_view(request, article_pk):
     """Run code against custom input or sample testcases."""
+    if not getattr(settings, "CODE_EXECUTION_ENABLED", False):
+        return JsonResponse({"success": False, "message": "Chức năng chấm code đang tắt."}, status=503)
     article = get_object_or_404(Article, pk=article_pk)
     exercise = get_object_or_404(CodingExercise, article=article, is_enabled=True)
     try:
@@ -213,16 +219,21 @@ def run_code_view(request, article_pk):
             sample_only=not bool(custom_input),
         )
         return JsonResponse(serialize_submission(submission))
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": "Dữ liệu gửi lên không hợp lệ."}, status=400)
     except CodeRunnerError as error:
         return JsonResponse({"success": False, "message": str(error)}, status=400)
     except Exception as error:  # pylint: disable=broad-exception-caught
-        return JsonResponse({"success": False, "message": str(error)}, status=500)
+        logger.exception("Unexpected error while running sample code for article %s", article_pk)
+        return JsonResponse({"success": False, "message": "Có lỗi hệ thống khi chạy code."}, status=500)
 
 
 @require_POST
 @login_required
 def submit_code_view(request, article_pk):
     """Judge code against all configured testcases."""
+    if not getattr(settings, "CODE_EXECUTION_ENABLED", False):
+        return JsonResponse({"success": False, "message": "Chức năng chấm code đang tắt."}, status=503)
     article = get_object_or_404(Article, pk=article_pk)
     exercise = get_object_or_404(CodingExercise, article=article, is_enabled=True)
     try:
@@ -231,10 +242,13 @@ def submit_code_view(request, article_pk):
         source_code = payload.get("source_code", "")
         submission = execute_code(exercise, request.user, language, source_code)
         return JsonResponse(serialize_submission(submission))
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": "Dữ liệu gửi lên không hợp lệ."}, status=400)
     except CodeRunnerError as error:
         return JsonResponse({"success": False, "message": str(error)}, status=400)
     except Exception as error:  # pylint: disable=broad-exception-caught
-        return JsonResponse({"success": False, "message": str(error)}, status=500)
+        logger.exception("Unexpected error while judging submission for article %s", article_pk)
+        return JsonResponse({"success": False, "message": "Có lỗi hệ thống khi chấm bài."}, status=500)
 
 
 @login_required

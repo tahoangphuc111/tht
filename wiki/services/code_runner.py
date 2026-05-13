@@ -1,7 +1,9 @@
 import json
+import logging
 import os
 import shutil
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -11,6 +13,8 @@ from django.conf import settings
 from django.utils import timezone
 
 from ..models import CodingSubmission, CodingSubmissionResult, LanguageRuntime
+
+logger = logging.getLogger(__name__)
 
 RUNNER_LOCK = threading.BoundedSemaphore(
     value=max(1, getattr(settings, "CODE_EXECUTION_MAX_CONCURRENT_JOBS", 2))
@@ -108,13 +112,30 @@ def _run_custom_checker(job_dir, exercise, input_data, expected_output, actual_o
     checker_path = job_dir / f"checker.{checker_ext}"
     checker_path.write_text(exercise.checker_code or "", encoding="utf-8")
 
-    if checker_lang == "python":
-        command = ["python", "checker.py", "stdin.txt", "actual_out.txt", "expected_out.txt"]
-        # Use python:3.10-slim docker image implicitly via _run_process
-        process_result = _run_process(command, job_dir, input_data=input_data, timeout_ms=5000)
-        completed = process_result["completed"]
-        if completed and completed.returncode == 0:
-            return "accepted"
+    if checker_lang != "python":
+        logger.warning("Unsupported checker language configured: %s", checker_lang)
+        return "internal_error"
+
+    command = [
+        sys.executable,
+        checker_path.name,
+        "stdin.txt",
+        "actual_out.txt",
+        "expected_out.txt",
+    ]
+    process_result = _run_process(
+        command,
+        job_dir,
+        input_data=input_data,
+        timeout_ms=5000,
+        memory_limit_mb=max(64, getattr(settings, "CODE_EXECUTION_DEFAULT_MEMORY_MB", 128)),
+    )
+    completed = process_result["completed"]
+    if completed and completed.returncode == 0:
+        return "accepted"
+    if process_result["timed_out"]:
+        return "internal_error"
+    if completed and completed.returncode == 1:
         return "wrong_answer"
     return "internal_error"
 
@@ -200,7 +221,23 @@ def _write_source(job_dir, language, source_code, language_config):
     }
 
 
-def _run_process(command, workdir, input_data="", timeout_ms=None):
+def _build_preexec_fn(memory_limit_mb):
+    if os.name == "nt" or not memory_limit_mb:
+        return None
+    try:
+        import resource
+    except ImportError:
+        return None
+
+    memory_bytes = int(memory_limit_mb) * 1024 * 1024
+
+    def _apply_limits():
+        resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
+
+    return _apply_limits
+
+
+def _run_process(command, workdir, input_data="", timeout_ms=None, memory_limit_mb=None):
     timeout_seconds = (timeout_ms or getattr(settings, "CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS", 2000)) / 1000
     stdin_path = workdir / "stdin.txt"
     stdout_path = workdir / "stdout.txt"
@@ -227,6 +264,7 @@ def _run_process(command, workdir, input_data="", timeout_ms=None):
                 check=False,
                 shell=False,
                 env=run_env,
+                preexec_fn=_build_preexec_fn(memory_limit_mb),
             )
             timed_out = False
         except subprocess.TimeoutExpired:
@@ -257,6 +295,11 @@ def _compile_source(job_dir, language, language_config, replacements):
         timeout_ms=max(
             1000, getattr(settings, "CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS", 2000)
         ),
+        memory_limit_mb=max(
+            256,
+            replacements.get("memory_limit_mb", 0),
+            getattr(settings, "CODE_EXECUTION_DEFAULT_MEMORY_MB", 128),
+        ),
     )
     if process_result["timed_out"]:
         return {"ok": False, "status": "compile_error", "stdout": "", "stderr": "Compile timeout."}
@@ -282,6 +325,7 @@ def _run_testcase(job_dir, language_config, replacements, input_data, expected_o
         job_dir,
         input_data=input_data,
         timeout_ms=replacements["time_limit_ms"],
+        memory_limit_mb=replacements.get("memory_limit_mb"),
     )
     if process_result["timed_out"]:
         return {
@@ -323,6 +367,8 @@ def _run_testcase(job_dir, language_config, replacements, input_data, expected_o
 
 
 def execute_code(exercise, user, language, source_code, *, custom_input="", sample_only=False):
+    if not getattr(settings, "CODE_EXECUTION_ENABLED", False):
+        raise CodeRunnerError("Chức năng chấm code hiện đang tắt.")
     _ensure_language_is_available(exercise, language)
     max_input_bytes = getattr(settings, "CODE_EXECUTION_MAX_SOURCE_BYTES", 128 * 1024)
     if custom_input and len(custom_input.encode("utf-8")) > max_input_bytes:
@@ -356,7 +402,7 @@ def _execute_submission(submission):
     custom_input = submission.custom_input
     sample_only = submission.is_sample_run
 
-    language_config = get_language_config(language)
+    language_config = _ensure_language_is_available(exercise, language)
 
     if not RUNNER_LOCK.acquire(timeout=1):
         submission.status = "internal_error"
@@ -369,6 +415,7 @@ def _execute_submission(submission):
         job_dir = _create_job_directory()
         replacements = _write_source(job_dir, language, source_code, language_config)
         replacements["time_limit_ms"] = exercise.time_limit_ms
+        replacements["memory_limit_mb"] = exercise.memory_limit_mb
 
         compile_result = _compile_source(job_dir, language, language_config, replacements)
         if not compile_result["ok"]:
@@ -408,6 +455,8 @@ def _execute_submission(submission):
             queryset = list(exercise.testcases.all()[: getattr(settings, "CODE_EXECUTION_MAX_TESTCASES", 30)])
             if sample_only:
                 queryset = [tc for tc in queryset if tc.is_sample]
+            if not queryset:
+                raise CodeRunnerError("Bài tập chưa có testcase để chấm.")
             total_tests = len(queryset)
 
             # Tính điểm tối đa từng subtask
@@ -485,13 +534,13 @@ def _execute_submission(submission):
         )
 
         testcase_lookup = {
-            testcase.name: testcase
+            (str(testcase.subtask_id), testcase.name): testcase
             for testcase in exercise.testcases.all()[: getattr(settings, "CODE_EXECUTION_MAX_TESTCASES", 30)]
         }
         for item in testcase_results:
             CodingSubmissionResult.objects.create(
                 submission=submission,
-                test_case=testcase_lookup.get(item["case_name"]),
+                test_case=testcase_lookup.get((item.get("subtask_id", ""), item["case_name"])),
                 case_name=item["case_name"],
                 status=item["status"],
                 runtime_ms=item["runtime_ms"],
@@ -512,6 +561,8 @@ def _execute_submission(submission):
         submission.save(
             update_fields=["status", "compile_output", "finished_at"]
         )
+        if not isinstance(error, CodeRunnerError):
+            logger.exception("Unexpected judge failure for submission %s", submission.pk)
         raise
     finally:
         if job_dir and job_dir.exists():

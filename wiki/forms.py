@@ -434,6 +434,11 @@ class CodingExerciseForm(forms.ModelForm):
             self.add_error(
                 "allowed_languages", "Cần chọn ít nhất một ngôn ngữ khi bật bài tập code."
             )
+        if cleaned_data.get("compare_mode") == "custom_checker":
+            self.add_error(
+                "compare_mode",
+                "Chế độ Custom Checker chưa được hỗ trợ cấu hình đầy đủ từ form này.",
+            )
         return cleaned_data
 
     def save(self, commit=True):

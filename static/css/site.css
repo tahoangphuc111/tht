@@ -6,72 +6,76 @@
   font-display: swap;
 }
 :root {
-  --bg: #f2f2f7;
-  --bg-warm: #fafafa;
+  --bg: #fff7f8;
+  --bg-warm: #fffdfb;
+  --bg-soft: #fff1f3;
   --panel: #ffffff;
-  --panel-strong: #f5f5fa;
-  --panel-hover: #ededf3;
-  --panel-glass: rgba(255, 255, 255, 0.72);
-  --ink: #1d1d1f;
-  --ink-light: #3a3a3c;
-  --muted: #86868b;
-  --muted-light: #aeaeb2;
-  --line: rgba(0, 0, 0, 0.06);
-  --line-strong: rgba(0, 0, 0, 0.12);
-  --brand: #4338ca;
-  --brand-soft: rgba(67, 56, 202, 0.08);
-  --brand-dark: #3730a3;
-  --brand-hover: #4f46e5;
-  --accent-teal: #0d9488;
-  --accent-purple: #7c3aed;
-  --accent-indigo: #4338ca;
-  --success: #30d158;
-  --success-soft: rgba(48, 209, 88, 0.1);
-  --danger: #ff453a;
-  --danger-soft: rgba(255, 69, 58, 0.1);
-  --warning: #ff9f0a;
-  --warning-soft: rgba(255, 159, 10, 0.1);
-  --purple: #bf5af2;
-  --purple-soft: rgba(191, 90, 242, 0.1);
-  --teal: #64d2ff;
-  --teal-soft: rgba(100, 210, 255, 0.1);
-  --shadow-xs: 0 1px 1px rgba(0,0,0,0.04);
+  --panel-strong: #fff6f8;
+  --panel-hover: #fff0f4;
+  --panel-glass: rgba(255, 250, 251, 0.82);
+  --ink: #402a31;
+  --ink-light: #694852;
+  --muted: #8d6c75;
+  --muted-light: #baa3aa;
+  --line: rgba(133, 72, 93, 0.10);
+  --line-strong: rgba(133, 72, 93, 0.18);
+  --brand: #d66a8c;
+  --brand-soft: rgba(214, 106, 140, 0.14);
+  --brand-dark: #ba5275;
+  --brand-hover: #dd7999;
+  --accent-teal: #6fb8b3;
+  --accent-purple: #c989b9;
+  --accent-indigo: #9a79c8;
+  --accent-peach: #f39f86;
+  --accent-butter: #f3cf8f;
+  --success: #4ea88a;
+  --success-soft: rgba(78, 168, 138, 0.12);
+  --danger: #d96565;
+  --danger-soft: rgba(217, 101, 101, 0.12);
+  --warning: #e1a14a;
+  --warning-soft: rgba(225, 161, 74, 0.12);
+  --purple: #c989b9;
+  --purple-soft: rgba(201, 137, 185, 0.12);
+  --teal: #7fc8bf;
+  --teal-soft: rgba(127, 200, 191, 0.12);
+  --shadow-xs: 0 1px 1px rgba(98, 55, 70, 0.05);
   --shadow-sm:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 2px 4px rgba(0,0,0,0.03);
+    0 1px 2px rgba(98, 55, 70, 0.05),
+    0 4px 10px rgba(214, 106, 140, 0.06);
   --shadow:
-    0 2px 4px rgba(0,0,0,0.04),
-    0 4px 12px rgba(0,0,0,0.06);
+    0 4px 12px rgba(98, 55, 70, 0.06),
+    0 14px 30px rgba(214, 106, 140, 0.10);
   --shadow-lg:
-    0 4px 8px rgba(0,0,0,0.04),
-    0 8px 24px rgba(0,0,0,0.08),
-    0 16px 48px rgba(0,0,0,0.04);
+    0 8px 18px rgba(98, 55, 70, 0.06),
+    0 18px 42px rgba(214, 106, 140, 0.12),
+    0 28px 54px rgba(243, 159, 134, 0.07);
   --shadow-xl:
-    0 8px 16px rgba(0,0,0,0.06),
-    0 16px 48px rgba(0,0,0,0.1),
-    0 24px 64px rgba(0,0,0,0.06);
+    0 12px 26px rgba(98, 55, 70, 0.08),
+    0 24px 56px rgba(214, 106, 140, 0.16),
+    0 30px 68px rgba(243, 159, 134, 0.10);
   --shadow-float:
-    0 8px 30px rgba(0,0,0,0.12),
-    0 2px 8px rgba(0,0,0,0.06);
-  --shadow-focus: 0 0 0 4px rgba(0, 113, 227, 0.2);
-  --shadow-glow: 0 0 20px rgba(0, 113, 227, 0.15);
+    0 10px 34px rgba(214, 106, 140, 0.16),
+    0 4px 10px rgba(98, 55, 70, 0.08);
+  --shadow-focus: 0 0 0 4px rgba(214, 106, 140, 0.20);
+  --shadow-glow: 0 0 24px rgba(214, 106, 140, 0.16);
   --radius-xs: 10px;
   --radius-sm: 14px;
   --radius: 20px;
   --radius-lg: 28px;
   --radius-xl: 36px;
   --glass: saturate(180%) blur(20px);
-  --font-sans: "Nunito", "Inter", "Lucida Grande Custom", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Nunito", "Inter", "Lucida Grande Custom", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Cormorant Garamond", "Nunito", serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --contrib-0: #ebedf0;
-  --contrib-1: #c6e0f5;
-  --contrib-2: #79b8f8;
-  --contrib-3: #3b82f6;
-  --contrib-4: #1d4ed8;
+  --contrib-0: #f7e9ee;
+  --contrib-1: #f0cfd9;
+  --contrib-2: #e8aaba;
+  --contrib-3: #d97996;
+  --contrib-4: #ba5275;
 }
 
 *,
@@ -99,12 +103,12 @@ body.app-shell {
 }
 
 ::-moz-selection {
-  background: rgba(0, 113, 227, 0.18);
+  background: rgba(214, 106, 140, 0.22);
   color: var(--ink);
 }
 
 ::selection {
-  background: rgba(0, 113, 227, 0.18);
+  background: rgba(214, 106, 140, 0.22);
   color: var(--ink);
 }
 
@@ -165,19 +169,21 @@ body.app-shell {
 }
 
 .hero-title {
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 4vw, 2.8rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
   color: var(--ink);
   text-wrap: balance;
 }
 
 .hero-title-sm {
+  font-family: var(--font-display);
   font-size: clamp(1.3rem, 2.5vw, 1.75rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   color: var(--ink);
 }
 
@@ -1033,14 +1039,15 @@ a {
 .featured-title-row .star-icon {
   color: var(--warning);
   font-size: 1.4rem;
-  filter: drop-shadow(0 2px 6px rgba(255, 159, 10, 0.3));
+  filter: drop-shadow(0 2px 6px rgba(225, 161, 74, 0.3));
   animation: float 4s ease-in-out infinite;
 }
 .featured-title-row h1 {
+  font-family: var(--font-display);
   font-size: 2.2rem;
-  font-weight: 800;
+  font-weight: 700;
   margin: 0;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
@@ -1082,12 +1089,12 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   transition: all 0.3s var(--ease-spring);
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+  box-shadow: 0 4px 12px rgba(214, 106, 140, 0.18);
 }
 .featured-card .category-badge-square:hover {
   background: var(--brand-dark);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+  box-shadow: 0 8px 18px rgba(214, 106, 140, 0.24);
 }
 .featured-card .article-title-link {
   color: var(--ink);
@@ -1136,7 +1143,7 @@ a {
   flex-shrink: 0;
   text-align: center;
   padding: 12px;
-  box-shadow: 0 10px 20px var(--brand-soft), 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px var(--brand-soft), 0 4px 8px rgba(98, 55, 70, 0.08);
 }
 .featured-card .read-next-circle:hover {
   transform: scale(1.1) rotate(8deg);
