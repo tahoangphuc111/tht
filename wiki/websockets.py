@@ -1,7 +1,10 @@
 import asyncio
 import json
+import logging
 from typing import Any, Set
 from asgiref.sync import async_to_sync
+
+logger = logging.getLogger(__name__)
 
 connected_websockets: Set[Any] = set()
 
@@ -9,7 +12,8 @@ connected_websockets: Set[Any] = set()
 async def _send_message(send_callable, text):
     try:
         await send_callable({"type": "websocket.send", "text": text})
-    except Exception:
+    except Exception as e:
+        logger.exception("Websocket send failed")
         connected_websockets.discard(send_callable)
 
 

@@ -3,6 +3,7 @@ Forms for the wiki application.
 """
 
 from pathlib import Path
+import logging
 
 from django import forms
 from django.conf import settings
@@ -25,6 +26,8 @@ from .models import (
 )
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 def extract_quiz_text(upload):
@@ -380,6 +383,7 @@ class QuestionForm(forms.ModelForm):
             try:
                 extracted_text = extract_quiz_text(upload).strip()
             except Exception as error:  # pylint: disable=broad-exception-caught
+                logger.exception("Failed to extract quiz text from uploaded file")
                 self.add_error(
                     "question_file",
                     f"Không thể đọc file này: {error}",

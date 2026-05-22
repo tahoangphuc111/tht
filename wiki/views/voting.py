@@ -11,6 +11,9 @@ from django.views.decorators.http import require_POST
 from ..websockets import broadcast_vote_update
 from ..models import Article, Comment, ArticleVote, CommentVote, UserVote, Profile
 from ..utils import get_safe_redirect_url
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -63,8 +66,8 @@ def _handle_vote(request, model, target_field, target_obj, vote_attr):
 
     try:
         broadcast_vote_update(payload)
-    except Exception:  # pylint: disable=broad-exception-caught
-        pass
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        logger.exception("Failed to broadcast vote update")
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse(

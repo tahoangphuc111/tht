@@ -3,6 +3,7 @@ Views for handling quizzes related to articles.
 """
 
 import json
+import logging
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -13,6 +14,8 @@ from django.urls import reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
 from ..forms import ChoiceFormSet, QuestionForm, extract_quiz_text
 from ..models import Article, Question
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -66,6 +69,7 @@ def submit_quiz_view(request, article_pk):
             }
         )
     except Exception as error:  # pylint: disable=broad-exception-caught
+        logger.exception("Error grading quiz for article %s", article_pk)
         return JsonResponse({"success": False, "message": str(error)}, status=400)
 
 
@@ -85,6 +89,7 @@ def upload_quiz_file_view(request, article_pk):
         try:
             text = extract_quiz_text(upload)
         except Exception as error:  # pylint: disable=broad-exception-caught
+            logger.exception("Failed to extract quiz file for article %s", article_pk)
             messages.error(request, f"Không thể đọc file: {error}")
             return render(request, "wiki/quiz_upload.html", {"article": article})
 

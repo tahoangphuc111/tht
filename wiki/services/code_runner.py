@@ -31,7 +31,7 @@ def _merged_configs():
         for rt in LanguageRuntime.objects.filter(enabled=True):
             base[rt.key] = rt.to_config()
     except Exception:
-        pass
+        logger.exception("Failed to load LanguageRuntime configs from DB")
     return base
 
 
@@ -60,6 +60,7 @@ def _load_binary_map():
             raw = json.load(fh)
         return {k: v.get("binaries", []) for k, v in raw.items()}
     except Exception:
+        logger.exception("Failed to read languages.json for binary map")
         return {}
 
 

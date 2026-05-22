@@ -4,6 +4,7 @@ Views for handling moderation tasks like reporting content.
 
 import json
 from django.http import JsonResponse
+import logging
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -40,4 +41,6 @@ def report_content_view(request):
         report.save()
         return JsonResponse({"success": True, "message": "Cảm ơn bạn! Báo cáo đã được gửi tới quản trị viên."})
     except Exception as error:  # pylint: disable=broad-exception-caught
+        logger = logging.getLogger(__name__)
+        logger.exception("Failed to create report")
         return JsonResponse({"success": False, "message": str(error)}, status=400)

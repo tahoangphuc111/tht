@@ -16,7 +16,7 @@
 
     const storageKey = (language) => `cpwiki:${config.articleId}:${language || "default"}`;
 
-    const setBusy = (isBusy) => {
+    const setBusy = (isBusy, _button) => {
         [runButton, submitButton, languageSelect].forEach((element) => {
             if (element) element.disabled = isBusy;
         });
