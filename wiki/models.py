@@ -247,7 +247,13 @@ def upload_file_validator(value):
     file_ext = Path(value.name).suffix.lower()
     if file_ext not in allowed_extensions:
         raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
-    if value.file.content_type not in allowed:
+    # Some uploaded file objects (e.g., SimpleUploadedFile in tests) expose
+    # `content_type` directly, others may keep it on `.file`. Be defensive.
+    content_type = getattr(value, "content_type", None)
+    if not content_type:
+        file_obj = getattr(value, "file", None)
+        content_type = getattr(file_obj, "content_type", None) if file_obj is not None else None
+    if content_type not in allowed:
         raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
 
 
