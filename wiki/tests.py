@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+import tempfile
+import shutil
 from django.urls import reverse
 
 from .models import Article, ArticleVote, Category, Comment, Question, UploadedFile
@@ -219,61 +221,69 @@ class WikiFlowTests(TestCase):
         articles = list(response.context["articles"])
         self.assertEqual(articles[0], other_article)
 
-    @override_settings(MEDIA_ROOT="/private/tmp/cpwiki_test_media")
     def test_martor_uploader_saves_file_to_media(self):
         """Test that Martor uploads use a real endpoint instead of /media/."""
-        self.client.login(username="author", password="StrongPass123")
-        upload = SimpleUploadedFile(
-            "note.png",
-            b"fake png data",
-            content_type="image/png",
-        )
+        tmpdir = tempfile.mkdtemp(prefix="cpwiki_test_media_")
+        try:
+            with override_settings(MEDIA_ROOT=tmpdir):
+                self.client.login(username="author", password="StrongPass123")
+                upload = SimpleUploadedFile(
+                    "note.png",
+                    b"fake png data",
+                    content_type="image/png",
+                )
 
-        response = self.client.post(
-            "/martor/uploader/",
-            {"markdown-image-upload": upload},
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
+                response = self.client.post(
+                    "/martor/uploader/",
+                    {"markdown-image-upload": upload},
+                    HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+                )
 
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(data["status"], 200)
-        self.assertEqual(data["name"], "note.png")
-        self.assertIn("/media/martor/", data["link"])
+                self.assertEqual(response.status_code, 200)
+                data = response.json()
+                self.assertEqual(data["status"], 200)
+                self.assertEqual(data["name"], "note.png")
+                self.assertIn("/media/martor/", data["link"])
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
-    @override_settings(MEDIA_ROOT="/private/tmp/cpwiki_test_media")
     def test_article_create_saves_attachments(self):
         """Article attachments from the create form should be persisted."""
-        self.client.login(username="author", password="StrongPass123")
-        upload = SimpleUploadedFile(
-            "diagram.png",
-            b"fake png data",
-            content_type="image/png",
-        )
+        tmpdir = tempfile.mkdtemp(prefix="cpwiki_test_media_")
+        try:
+            with override_settings(MEDIA_ROOT=tmpdir):
+                self.client.login(username="author", password="StrongPass123")
+                upload = SimpleUploadedFile(
+                    "diagram.png",
+                    b"fake png data",
+                    content_type="image/png",
+                )
 
-        response = self.client.post(
-            reverse("wiki:article-create"),
-            {
-                "title": "Article With Attachment",
-                "slug": "article-with-attachment",
-                "category": self.category.pk,
-                "tags": "",
-                "allow_comments": "on",
-                "content": "Noi dung bai viet.",
-                "change_summary": "Initial",
-                "attachments": upload,
-            },
-        )
+                response = self.client.post(
+                    reverse("wiki:article-create"),
+                    {
+                        "title": "Article With Attachment",
+                        "slug": "article-with-attachment",
+                        "category": self.category.pk,
+                        "tags": "",
+                        "allow_comments": "on",
+                        "content": "Noi dung bai viet.",
+                        "change_summary": "Initial",
+                        "attachments": upload,
+                    },
+                )
 
-        article = Article.objects.get(slug="article-with-attachment")
-        self.assertRedirects(response, article.get_absolute_url())
-        self.assertTrue(
-            UploadedFile.objects.filter(
-                article=article,
-                user=self.author,
-                file__contains="diagram",
-            ).exists()
-        )
+                article = Article.objects.get(slug="article-with-attachment")
+                self.assertRedirects(response, article.get_absolute_url())
+                self.assertTrue(
+                    UploadedFile.objects.filter(
+                        article=article,
+                        user=self.author,
+                        file__contains="diagram",
+                    ).exists()
+                )
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_article_attachment_validation_error_is_visible(self):
         """Invalid article attachments should show a form error."""
