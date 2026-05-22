@@ -223,7 +223,7 @@ def run_code_view(request, article_pk):
         return JsonResponse({"success": False, "message": "Dữ liệu gửi lên không hợp lệ."}, status=400)
     except CodeRunnerError as error:
         return JsonResponse({"success": False, "message": str(error)}, status=400)
-    except Exception as error:  # pylint: disable=broad-exception-caught
+    except Exception:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error while running sample code for article %s", article_pk)
         return JsonResponse({"success": False, "message": "Có lỗi hệ thống khi chạy code."}, status=500)
 
@@ -246,7 +246,7 @@ def submit_code_view(request, article_pk):
         return JsonResponse({"success": False, "message": "Dữ liệu gửi lên không hợp lệ."}, status=400)
     except CodeRunnerError as error:
         return JsonResponse({"success": False, "message": str(error)}, status=400)
-    except Exception as error:  # pylint: disable=broad-exception-caught
+    except Exception:  # pylint: disable=broad-exception-caught
         logger.exception("Unexpected error while judging submission for article %s", article_pk)
         return JsonResponse({"success": False, "message": "Có lỗi hệ thống khi chấm bài."}, status=500)
 

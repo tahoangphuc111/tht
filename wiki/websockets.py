@@ -12,7 +12,7 @@ connected_websockets: Set[Any] = set()
 async def _send_message(send_callable, text):
     try:
         await send_callable({"type": "websocket.send", "text": text})
-    except Exception as e:
+    except Exception:
         logger.exception("Websocket send failed")
         connected_websockets.discard(send_callable)
 

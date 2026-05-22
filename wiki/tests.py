@@ -24,7 +24,6 @@ class WikiFlowTests(TestCase):
         from django.contrib.auth.models import Permission
         self.user_group, _ = Group.objects.get_or_create(name="user")
         self.contributor_group, _ = Group.objects.get_or_create(name="contributor")
-        
         # Ensure user group has permission to comment
         comment_ct = ContentType.objects.get_for_model(Comment)
         add_comment_perm = Permission.objects.get(codename="add_comment", content_type=comment_ct)
