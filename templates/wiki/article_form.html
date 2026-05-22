@@ -13,6 +13,13 @@
                 <p class="text-secondary mb-4">Martor đã được tích hợp để bạn soạn nội dung bằng Markdown với live preview, code block và hỗ trợ công thức KaTeX như <code>$n$</code> hoặc <code>$$\sum_{i=1}^{n} i$$</code>.</p>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     {% for field in form %}
                         <div class="mb-4">
                             {% if field.name == 'allow_comments' %}

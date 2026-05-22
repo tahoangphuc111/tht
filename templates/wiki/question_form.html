@@ -12,7 +12,7 @@
                 <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Sửa câu hỏi{% else %}Thêm câu hỏi mới{% endif %}</h1>
                 <p class="form-intro">Tạo câu hỏi ngắn gọn, đáp án rõ ràng và thêm giải thích để người học tự kiểm tra kiến thức sau khi đọc bài.</p>
 
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     <h5 class="mb-3">Thông tin câu hỏi</h5>

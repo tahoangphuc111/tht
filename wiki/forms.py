@@ -2,6 +2,8 @@
 Forms for the wiki application.
 """
 
+from pathlib import Path
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -23,6 +25,29 @@ from .models import (
 )
 
 User = get_user_model()
+
+
+def extract_quiz_text(upload):
+    """Extract text from a PDF, DOCX, or TXT upload."""
+    file_ext = Path(upload.name).suffix.lower()
+    upload.seek(0)
+
+    if file_ext == ".txt":
+        return upload.read().decode("utf-8", errors="ignore")
+
+    if file_ext == ".docx":
+        from docx import Document
+
+        document = Document(upload)
+        return "\n".join(paragraph.text for paragraph in document.paragraphs)
+
+    if file_ext == ".pdf":
+        from PyPDF2 import PdfReader
+
+        reader = PdfReader(upload)
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+    return ""
 
 
 class SignUpForm(UserCreationForm):
@@ -283,8 +308,20 @@ class UploadFileForm(forms.ModelForm):
 class QuestionForm(forms.ModelForm):
     """Form for creating quiz questions."""
 
+    question_file = forms.FileField(
+        label="Upload nội dung từ file",
+        required=False,
+        help_text="Có thể upload PDF/DOCX/TXT. Nếu để trống nội dung, hệ thống sẽ lấy text từ file.",
+        widget=forms.FileInput(
+            attrs={
+                "class": "form-control",
+                "accept": ".pdf,.docx,.txt",
+            }
+        ),
+    )
     content = MartorFormField(
         label="Nội dung câu hỏi",
+        required=False,
         widget=MartorWidget(
             attrs={
                 "class": "form-control",
@@ -309,7 +346,7 @@ class QuestionForm(forms.ModelForm):
         """Metadata for the QuestionForm."""
 
         model = Question
-        fields = ("content", "explanation", "order")
+        fields = ("content", "question_file", "explanation", "order")
         widgets = {
             "order": forms.NumberInput(
                 attrs={
@@ -318,6 +355,47 @@ class QuestionForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean_question_file(self):
+        """Validate uploaded source file for a quiz question."""
+        upload = self.cleaned_data.get("question_file")
+        if not upload:
+            return upload
+
+        allowed_extensions = {".pdf", ".docx", ".txt"}
+        file_ext = Path(upload.name).suffix.lower()
+        if file_ext not in allowed_extensions:
+            raise forms.ValidationError("Chỉ hỗ trợ file PDF, DOCX hoặc TXT.")
+        if upload.size > 15 * 1024 * 1024:
+            raise forms.ValidationError("File quá lớn. Vui lòng upload tối đa 15MB.")
+        return upload
+
+    def clean(self):
+        """Allow typing content directly or extracting it from an uploaded file."""
+        cleaned_data = super().clean()
+        content = (cleaned_data.get("content") or "").strip()
+        upload = cleaned_data.get("question_file")
+
+        if not content and upload:
+            try:
+                extracted_text = extract_quiz_text(upload).strip()
+            except Exception as error:  # pylint: disable=broad-exception-caught
+                self.add_error(
+                    "question_file",
+                    f"Không thể đọc file này: {error}",
+                )
+                return cleaned_data
+            if extracted_text:
+                cleaned_data["content"] = extracted_text
+            else:
+                self.add_error(
+                    "question_file",
+                    "Không trích xuất được nội dung từ file này.",
+                )
+        elif not content:
+            self.add_error("content", "Nhập nội dung câu hỏi hoặc upload file.")
+
+        return cleaned_data
 
 
 class ChoiceForm(forms.ModelForm):

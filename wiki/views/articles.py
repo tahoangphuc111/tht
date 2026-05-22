@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count, Q
@@ -9,10 +10,33 @@ from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from ..models import Article, Category, ArticleRevision, Bookmark
+from ..models import Article, Category, ArticleRevision, Bookmark, UploadedFile
 from ..forms import ArticleForm, CommentForm
 from ..services.code_runner import get_enabled_language_choices, get_language_config
 from ..utils import save_article_revision, can_publish_articles, can_manage_wiki
+
+
+def _validate_article_attachments(form, files):
+    """Validate article attachment uploads before saving the article."""
+    if len(files) > 5:
+        form.add_error(None, "Chỉ được upload tối đa 5 file đính kèm.")
+        return False
+
+    is_valid = True
+    for upload in files:
+        candidate = UploadedFile(file=upload)
+        try:
+            candidate.full_clean(exclude=["user", "article"])
+        except ValidationError as error:
+            form.add_error(None, f"{upload.name}: {'; '.join(error.messages)}")
+            is_valid = False
+    return is_valid
+
+
+def _save_article_attachments(article, user, files):
+    """Persist validated attachments for an article."""
+    for upload in files:
+        UploadedFile.objects.create(article=article, user=user, file=upload)
 
 
 class ArticleListView(ListView):
@@ -188,8 +212,12 @@ class ArticleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return super().handle_no_permission()
 
     def form_valid(self, form):
+        attachments = self.request.FILES.getlist("attachments")
+        if not _validate_article_attachments(form, attachments):
+            return self.form_invalid(form)
         form.instance.author = self.request.user
         response = super().form_valid(form)
+        _save_article_attachments(self.object, self.request.user, attachments)
         save_article_revision(self.object, self.request.user, form.cleaned_data.get("change_summary", "Initial"))
         return response
 
@@ -212,11 +240,15 @@ class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return redirect("wiki:article-list")
 
     def form_valid(self, form):
+        attachments = self.request.FILES.getlist("attachments")
+        if not _validate_article_attachments(form, attachments):
+            return self.form_invalid(form)
         article_fields = ["title", "slug", "content", "category", "tags", "allow_comments"]
-        if not any(f in form.changed_data for f in article_fields):
+        if not attachments and not any(f in form.changed_data for f in article_fields):
             messages.info(self.request, "Không có thay đổi nào được thực hiện.")
             return redirect(self.get_success_url())
         response = super().form_valid(form)
+        _save_article_attachments(self.object, self.request.user, attachments)
         save_article_revision(self.object, self.request.user, form.cleaned_data.get("change_summary", "Cập nhật"))
         return response
 

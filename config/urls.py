@@ -19,9 +19,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from wiki.views.martor import markdown_upload_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("martor/uploader/", markdown_upload_view, name="imgur_uploader"),
     path("martor/", include("martor.urls")),
     path("", include("wiki.urls")),
 ]

@@ -222,7 +222,7 @@ def _write_source(job_dir, language, source_code, language_config):
 
 
 def _build_preexec_fn(memory_limit_mb):
-    if os.name == "nt" or not memory_limit_mb:
+    if os.name == "nt" or sys.platform == "darwin" or not memory_limit_mb:
         return None
     try:
         import resource

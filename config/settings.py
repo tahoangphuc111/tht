@@ -224,7 +224,7 @@ MARTOR_ENABLE_CONFIGS = {
     "spellcheck": "true",
     "hljs": "true",
 }
-MARTOR_UPLOAD_URL = "/media/"
+MARTOR_UPLOAD_URL = "/martor/uploader/"
 MARTOR_UPLOAD_PATH = str(MEDIA_ROOT)
 MARTOR_UPLOAD_MAX_SIZE = 15 * 1024 * 1024  # 15MB cap cho editor uploads
 # Các loại file cho phép tải lên qua Martor:

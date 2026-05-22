@@ -4,10 +4,11 @@ Tests for the wiki application.
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import Article, ArticleVote, Category, Comment
+from .models import Article, ArticleVote, Category, Comment, Question, UploadedFile
 
 User = get_user_model()
 
@@ -17,8 +18,16 @@ class WikiFlowTests(TestCase):
 
     def setUp(self):
         """Set up test data before each test."""
+        from django.contrib.contenttypes.models import ContentType
+        from django.contrib.auth.models import Permission
         self.user_group, _ = Group.objects.get_or_create(name="user")
         self.contributor_group, _ = Group.objects.get_or_create(name="contributor")
+        
+        # Ensure user group has permission to comment
+        comment_ct = ContentType.objects.get_for_model(Comment)
+        add_comment_perm = Permission.objects.get(codename="add_comment", content_type=comment_ct)
+        self.user_group.permissions.add(add_comment_perm)
+
         self.category = Category.objects.create(
             name="Thuật toán",
             slug="thuat-toan",
@@ -66,7 +75,7 @@ class WikiFlowTests(TestCase):
         """Test that the home page is accessible."""
         response = self.client.get(reverse("wiki:home"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Home Dashboard")
+        self.assertContains(response, "CP Wiki")
 
     def test_search_matches_article_content(self):
         """Test that searching finds articles by content."""
@@ -210,6 +219,92 @@ class WikiFlowTests(TestCase):
         articles = list(response.context["articles"])
         self.assertEqual(articles[0], other_article)
 
+    @override_settings(MEDIA_ROOT="/private/tmp/cpwiki_test_media")
+    def test_martor_uploader_saves_file_to_media(self):
+        """Test that Martor uploads use a real endpoint instead of /media/."""
+        self.client.login(username="author", password="StrongPass123")
+        upload = SimpleUploadedFile(
+            "note.png",
+            b"fake png data",
+            content_type="image/png",
+        )
+
+        response = self.client.post(
+            "/martor/uploader/",
+            {"markdown-image-upload": upload},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["status"], 200)
+        self.assertEqual(data["name"], "note.png")
+        self.assertIn("/media/martor/", data["link"])
+
+    @override_settings(MEDIA_ROOT="/private/tmp/cpwiki_test_media")
+    def test_article_create_saves_attachments(self):
+        """Article attachments from the create form should be persisted."""
+        self.client.login(username="author", password="StrongPass123")
+        upload = SimpleUploadedFile(
+            "diagram.png",
+            b"fake png data",
+            content_type="image/png",
+        )
+
+        response = self.client.post(
+            reverse("wiki:article-create"),
+            {
+                "title": "Article With Attachment",
+                "slug": "article-with-attachment",
+                "category": self.category.pk,
+                "tags": "",
+                "allow_comments": "on",
+                "content": "Noi dung bai viet.",
+                "change_summary": "Initial",
+                "attachments": upload,
+            },
+        )
+
+        article = Article.objects.get(slug="article-with-attachment")
+        self.assertRedirects(response, article.get_absolute_url())
+        self.assertTrue(
+            UploadedFile.objects.filter(
+                article=article,
+                user=self.author,
+                file__contains="diagram",
+            ).exists()
+        )
+
+    def test_article_attachment_validation_error_is_visible(self):
+        """Invalid article attachments should show a form error."""
+        self.client.login(username="author", password="StrongPass123")
+        upload = SimpleUploadedFile(
+            "notes.txt",
+            b"plain text",
+            content_type="text/plain",
+        )
+
+        response = self.client.post(
+            reverse("wiki:article-create"),
+            {
+                "title": "Article With Bad Attachment",
+                "slug": "article-with-bad-attachment",
+                "category": self.category.pk,
+                "tags": "",
+                "allow_comments": "on",
+                "content": "Noi dung bai viet.",
+                "change_summary": "Initial",
+                "attachments": upload,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "notes.txt")
+        self.assertContains(response, "Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
+        self.assertFalse(
+            Article.objects.filter(slug="article-with-bad-attachment").exists()
+        )
+
     def test_public_profile_is_available(self):
         """Test that public user profiles are accessible."""
         response = self.client.get(
@@ -270,6 +365,144 @@ class WikiFlowTests(TestCase):
         self.assertRedirects(
             response,
             reverse("wiki:article-detail", args=[self.article.pk, self.article.slug]),
+        )
+
+    def test_question_create_form_supports_file_uploads(self):
+        """Question create form must allow uploaded files."""
+        self.client.login(username="author", password="StrongPass123")
+        response = self.client.get(reverse("wiki:question-create", args=[self.article.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'enctype="multipart/form-data"')
+        self.assertContains(response, 'name="question_file"')
+
+    def test_question_can_be_created_from_uploaded_text_file(self):
+        """Uploaded question source files should populate question content."""
+        self.client.login(username="author", password="StrongPass123")
+        upload = SimpleUploadedFile(
+            "question.txt",
+            b"What is binary search?",
+            content_type="text/plain",
+        )
+        response = self.client.post(
+            reverse("wiki:question-create", args=[self.article.pk]),
+            {
+                "question_file": upload,
+                "explanation": "",
+                "order": "1",
+                "choices-TOTAL_FORMS": "0",
+                "choices-INITIAL_FORMS": "0",
+                "choices-MIN_NUM_FORMS": "0",
+                "choices-MAX_NUM_FORMS": "1000",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("wiki:article-quiz-manage", args=[self.article.pk]),
+        )
+        self.assertTrue(
+            Question.objects.filter(
+                article=self.article,
+                content="What is binary search?",
+            ).exists()
+        )
+
+    def test_question_can_be_created_from_uploaded_pdf_file(self):
+        """PDF uploads should be accepted when creating quiz questions."""
+        self.client.login(username="author", password="StrongPass123")
+        pdf_bytes = (
+            b"%PDF-1.4\n"
+            b"1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj\n"
+            b"2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj\n"
+            b"3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 144] "
+            b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>endobj\n"
+            b"4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n"
+            b"5 0 obj<< /Length 44 >>stream\n"
+            b"BT /F1 12 Tf 72 72 Td (PDF question text?) Tj ET\n"
+            b"endstream\nendobj\nxref\n0 6\n0000000000 65535 f \n"
+            b"0000000009 00000 n \n0000000058 00000 n \n"
+            b"0000000115 00000 n \n0000000241 00000 n \n"
+            b"0000000311 00000 n \ntrailer<< /Root 1 0 R /Size 6 >>\n"
+            b"startxref\n405\n%%EOF\n"
+        )
+        upload = SimpleUploadedFile(
+            "question.pdf",
+            pdf_bytes,
+            content_type="application/pdf",
+        )
+
+        response = self.client.post(
+            reverse("wiki:question-create", args=[self.article.pk]),
+            {
+                "question_file": upload,
+                "explanation": "",
+                "order": "1",
+                "choices-TOTAL_FORMS": "0",
+                "choices-INITIAL_FORMS": "0",
+                "choices-MIN_NUM_FORMS": "0",
+                "choices-MAX_NUM_FORMS": "1000",
+            },
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("wiki:article-quiz-manage", args=[self.article.pk]),
+        )
+        self.assertTrue(
+            Question.objects.filter(
+                article=self.article,
+                content__contains="PDF question text?",
+            ).exists()
+        )
+
+    def test_invalid_question_pdf_shows_form_error(self):
+        """Invalid PDFs should not crash the question create view."""
+        self.client.login(username="author", password="StrongPass123")
+        upload = SimpleUploadedFile(
+            "broken.pdf",
+            b"not a real pdf",
+            content_type="application/pdf",
+        )
+
+        response = self.client.post(
+            reverse("wiki:question-create", args=[self.article.pk]),
+            {
+                "question_file": upload,
+                "explanation": "",
+                "order": "1",
+                "choices-TOTAL_FORMS": "0",
+                "choices-INITIAL_FORMS": "0",
+                "choices-MIN_NUM_FORMS": "0",
+                "choices-MAX_NUM_FORMS": "1000",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Không thể đọc file này")
+        self.assertFalse(Question.objects.filter(article=self.article).exists())
+
+    def test_quiz_file_upload_creates_questions(self):
+        """Bulk quiz upload should import question blocks from a text file."""
+        self.client.login(username="author", password="StrongPass123")
+        upload = SimpleUploadedFile(
+            "quiz.txt",
+            b"Question one content?\n\nQuestion two content?",
+            content_type="text/plain",
+        )
+
+        response = self.client.post(
+            reverse("wiki:upload-quiz-file", args=[self.article.pk]),
+            {"quiz_file": upload},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("wiki:article-quiz-manage", args=[self.article.pk]),
+        )
+        self.assertEqual(
+            Question.objects.filter(article=self.article).count(),
+            2,
         )
 
     def test_profile_page_has_required_context(self):

@@ -3,6 +3,7 @@ Views for handling quizzes related to articles.
 """
 
 import json
+from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
@@ -10,8 +11,8 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
-from django.forms import inlineformset_factory
-from ..models import Article, Question, Choice
+from ..forms import ChoiceFormSet, QuestionForm, extract_quiz_text
+from ..models import Article, Question
 
 
 @login_required
@@ -68,16 +69,45 @@ def submit_quiz_view(request, article_pk):
         return JsonResponse({"success": False, "message": str(error)}, status=400)
 
 
-ChoiceFormSet = inlineformset_factory(Question, Choice, fields=('content', 'is_correct'), extra=4, can_delete=True)
-
-
 @login_required
 def upload_quiz_file_view(request, article_pk):
     """View to upload a file containing quiz questions."""
     article = get_object_or_404(Article, pk=article_pk)
     if article.author != request.user and not request.user.is_superuser:
         return redirect("wiki:article-detail", pk=article.pk, slug=article.slug)
-    return redirect("wiki:article-quiz-manage", article_pk=article.pk)
+
+    if request.method == "POST":
+        upload = request.FILES.get("quiz_file")
+        if not upload:
+            messages.error(request, "Vui lòng chọn file câu hỏi.")
+            return render(request, "wiki/quiz_upload.html", {"article": article})
+
+        try:
+            text = extract_quiz_text(upload)
+        except Exception as error:  # pylint: disable=broad-exception-caught
+            messages.error(request, f"Không thể đọc file: {error}")
+            return render(request, "wiki/quiz_upload.html", {"article": article})
+
+        blocks = [
+            block.strip()
+            for block in text.replace("\r\n", "\n").split("\n\n")
+            if len(block.strip()) > 10
+        ]
+        if not blocks:
+            messages.error(request, "Không tìm thấy đoạn câu hỏi hợp lệ trong file.")
+            return render(request, "wiki/quiz_upload.html", {"article": article})
+
+        start_order = article.questions.count()
+        Question.objects.bulk_create(
+            [
+                Question(article=article, content=block, order=start_order + index + 1)
+                for index, block in enumerate(blocks)
+            ]
+        )
+        messages.success(request, f"Đã nhập {len(blocks)} câu hỏi từ file.")
+        return redirect("wiki:article-quiz-manage", article_pk=article.pk)
+
+    return render(request, "wiki/quiz_upload.html", {"article": article})
 
 
 class QuizAuthorRequiredMixin(UserPassesTestMixin):
@@ -101,7 +131,7 @@ class QuizAuthorRequiredMixin(UserPassesTestMixin):
 
 class QuestionCreateView(LoginRequiredMixin, QuizAuthorRequiredMixin, CreateView):
     model = Question
-    fields = ['content', 'explanation', 'order']
+    form_class = QuestionForm
     template_name = 'wiki/question_form.html'
 
     def get_context_data(self, **kwargs):
@@ -109,7 +139,7 @@ class QuestionCreateView(LoginRequiredMixin, QuizAuthorRequiredMixin, CreateView
         article = get_object_or_404(Article, pk=self.kwargs['article_pk'])
         context['article'] = article
         if self.request.POST:
-            context['choice_formset'] = ChoiceFormSet(self.request.POST)
+            context['choice_formset'] = ChoiceFormSet(self.request.POST, self.request.FILES)
         else:
             context['choice_formset'] = ChoiceFormSet()
         return context
@@ -133,14 +163,18 @@ class QuestionCreateView(LoginRequiredMixin, QuizAuthorRequiredMixin, CreateView
 
 class QuestionUpdateView(LoginRequiredMixin, QuizAuthorRequiredMixin, UpdateView):
     model = Question
-    fields = ['content', 'explanation', 'order']
+    form_class = QuestionForm
     template_name = 'wiki/question_form.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['article'] = self.object.article
         if self.request.POST:
-            context['choice_formset'] = ChoiceFormSet(self.request.POST, instance=self.object)
+            context['choice_formset'] = ChoiceFormSet(
+                self.request.POST,
+                self.request.FILES,
+                instance=self.object,
+            )
         else:
             context['choice_formset'] = ChoiceFormSet(instance=self.object)
         return context
