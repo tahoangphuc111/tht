@@ -40,7 +40,7 @@ def report_content_view(request):
 
         report.save()
         return JsonResponse({"success": True, "message": "Cảm ơn bạn! Báo cáo đã được gửi tới quản trị viên."})
-    except Exception as error:  # pylint: disable=broad-exception-caught
+    except Exception:  # pylint: disable=broad-exception-caught
         logger = logging.getLogger(__name__)
         logger.exception("Failed to create report")
         return JsonResponse({"success": False, "message": "Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại sau."}, status=400)
