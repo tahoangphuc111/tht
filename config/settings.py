@@ -3,6 +3,7 @@ Django settings for config project.
 """
 
 import json
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -69,16 +70,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "tht",
-        "USER": "thtuser",
-        "PASSWORD": "",
-        "HOST": "127.0.0.1",
-        "PORT": "3306",
+if os.environ.get("GITHUB_ACTIONS") == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "tht",
+            "USER": "thtuser",
+            "PASSWORD": "",
+            "HOST": "127.0.0.1",
+            "PORT": "3306",
+        }
+    }
 
 
 # Password validation

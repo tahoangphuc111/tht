@@ -6,23 +6,23 @@
   font-display: swap;
 }
 :root {
-  --bg: #fff7f8;
-  --bg-warm: #fffdfb;
-  --bg-soft: #fff1f3;
-  --panel: #ffffff;
-  --panel-strong: #fff6f8;
-  --panel-hover: #fff0f4;
-  --panel-glass: rgba(255, 250, 251, 0.82);
-  --ink: #402a31;
-  --ink-light: #694852;
-  --muted: #8d6c75;
-  --muted-light: #baa3aa;
-  --line: rgba(133, 72, 93, 0.10);
-  --line-strong: rgba(133, 72, 93, 0.18);
-  --brand: #d66a8c;
-  --brand-soft: rgba(214, 106, 140, 0.14);
-  --brand-dark: #ba5275;
-  --brand-hover: #dd7999;
+  --bg: #f8fafc;
+  --bg-warm: #fcfcfb;
+  --bg-soft: #f1f5f9;
+  --panel: rgba(255, 255, 255, 0.52);
+  --panel-strong: rgba(255, 255, 255, 0.72);
+  --panel-hover: rgba(241, 245, 249, 0.65);
+  --panel-glass: rgba(255, 255, 255, 0.45);
+  --ink: #0f172a;
+  --ink-light: #334155;
+  --muted: #64748b;
+  --muted-light: #94a3b8;
+  --line: rgba(148, 163, 184, 0.12);
+  --line-strong: rgba(148, 163, 184, 0.22);
+  --brand: #5c60f5;
+  --brand-soft: rgba(92, 96, 245, 0.08);
+  --brand-dark: #474cb8;
+  --brand-hover: #7378ff;
   --accent-teal: #6fb8b3;
   --accent-purple: #c989b9;
   --accent-indigo: #9a79c8;
@@ -38,26 +38,26 @@
   --purple-soft: rgba(201, 137, 185, 0.12);
   --teal: #7fc8bf;
   --teal-soft: rgba(127, 200, 191, 0.12);
-  --shadow-xs: 0 1px 1px rgba(98, 55, 70, 0.05);
+  --shadow-xs: 0 1px 1px rgba(15, 23, 42, 0.05);
   --shadow-sm:
-    0 1px 2px rgba(98, 55, 70, 0.05),
-    0 4px 10px rgba(214, 106, 140, 0.06);
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 4px 10px rgba(92, 96, 245, 0.06);
   --shadow:
-    0 4px 12px rgba(98, 55, 70, 0.06),
-    0 14px 30px rgba(214, 106, 140, 0.10);
+    0 4px 12px rgba(15, 23, 42, 0.06),
+    0 14px 30px rgba(92, 96, 245, 0.08);
   --shadow-lg:
-    0 8px 18px rgba(98, 55, 70, 0.06),
-    0 18px 42px rgba(214, 106, 140, 0.12),
-    0 28px 54px rgba(243, 159, 134, 0.07);
+    0 8px 18px rgba(15, 23, 42, 0.05),
+    0 18px 42px rgba(92, 96, 245, 0.10),
+    0 28px 54px rgba(15, 23, 42, 0.03);
   --shadow-xl:
-    0 12px 26px rgba(98, 55, 70, 0.08),
-    0 24px 56px rgba(214, 106, 140, 0.16),
-    0 30px 68px rgba(243, 159, 134, 0.10);
+    0 12px 26px rgba(15, 23, 42, 0.06),
+    0 24px 56px rgba(92, 96, 245, 0.12),
+    0 30px 68px rgba(15, 23, 42, 0.04);
   --shadow-float:
-    0 10px 34px rgba(214, 106, 140, 0.16),
-    0 4px 10px rgba(98, 55, 70, 0.08);
-  --shadow-focus: 0 0 0 4px rgba(214, 106, 140, 0.20);
-  --shadow-glow: 0 0 24px rgba(214, 106, 140, 0.16);
+    0 10px 34px rgba(92, 96, 245, 0.12),
+    0 4px 10px rgba(15, 23, 42, 0.06);
+  --shadow-focus: 0 0 0 4px rgba(92, 96, 245, 0.15);
+  --shadow-glow: 0 0 24px rgba(92, 96, 245, 0.12);
   --radius-xs: 10px;
   --radius-sm: 14px;
   --radius: 20px;
@@ -71,11 +71,11 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --contrib-0: #f7e9ee;
-  --contrib-1: #f0cfd9;
-  --contrib-2: #e8aaba;
-  --contrib-3: #d97996;
-  --contrib-4: #ba5275;
+  --contrib-0: #f1f5f9;
+  --contrib-1: #e0e7ff;
+  --contrib-2: #c7d2fe;
+  --contrib-3: #818cf8;
+  --contrib-4: #4f46e5;
 }
 
 *,
@@ -103,12 +103,12 @@ body.app-shell {
 }
 
 ::-moz-selection {
-  background: rgba(214, 106, 140, 0.22);
+  background: rgba(92, 96, 245, 0.18);
   color: var(--ink);
 }
 
 ::selection {
-  background: rgba(214, 106, 140, 0.22);
+  background: rgba(92, 96, 245, 0.18);
   color: var(--ink);
 }
 
@@ -251,32 +251,34 @@ a {
 }
 
 .ui-card, .ui-card--glass, .ui-card--strong {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--panel) !important;
+  backdrop-filter: var(--glass) !important;
+  -webkit-backdrop-filter: var(--glass) !important;
+  border: 1px solid rgba(255, 255, 255, 0.48) !important;
   border-radius: var(--radius);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02), inset 0 1px 0 0 rgba(255, 255, 255, 0.25) !important;
   transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.25s var(--ease);
   overflow: hidden;
   position: relative;
 }
 .ui-card.is-interactive:hover, .is-interactive.ui-card--glass:hover, .is-interactive.ui-card--strong:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-  border-color: var(--line-strong);
+  box-shadow: 0 16px 40px rgba(31, 38, 135, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.65) !important;
 }
 .ui-card--strong {
-  background: var(--panel-strong);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  background: var(--panel-strong) !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
 }
 .ui-card--glass {
-  background: var(--panel-glass);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: var(--panel-glass) !important;
 }
 .ui-card--flat {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: var(--panel) !important;
+  backdrop-filter: var(--glass) !important;
+  -webkit-backdrop-filter: var(--glass) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: var(--radius);
   overflow: hidden;
 }
@@ -1145,12 +1147,12 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   transition: all 0.3s var(--ease-spring);
-  box-shadow: 0 4px 12px rgba(214, 106, 140, 0.18);
+  box-shadow: 0 4px 12px rgba(92, 96, 245, 0.14);
 }
 .featured-card .category-badge-square:hover {
   background: var(--brand-dark);
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 18px rgba(214, 106, 140, 0.24);
+  box-shadow: 0 8px 18px rgba(92, 96, 245, 0.18);
 }
 .featured-card .article-title-link {
   color: var(--ink);
@@ -1199,7 +1201,7 @@ a {
   flex-shrink: 0;
   text-align: center;
   padding: 12px;
-  box-shadow: 0 10px 20px var(--brand-soft), 0 4px 8px rgba(98, 55, 70, 0.08);
+  box-shadow: 0 10px 20px var(--brand-soft), 0 4px 8px rgba(15, 23, 42, 0.06);
 }
 .featured-card .read-next-circle:hover {
   transform: scale(1.1) rotate(8deg);

@@ -68,7 +68,7 @@
     &.is-active {
       background: var(--brand);
       color: #fff;
-      box-shadow: 0 6px 16px rgba(214, 106, 140, 0.26);
+      box-shadow: 0 6px 16px rgba(92, 96, 245, 0.20);
       transform: translateY(-1px);
 
       i { opacity: 1; }
@@ -148,7 +148,7 @@
   align-items: center;
 }
 
-// ─── Icon Button (notification bell etc) ───
+// ─── Icon Button (notification bell etc) — Liquid Glass style ───
 .nav-icon-btn {
   display: flex;
   align-items: center;
@@ -156,8 +156,10 @@
   width: 42px;
   height: 42px;
   border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  background: var(--panel) !important;
+  backdrop-filter: var(--glass) !important;
+  -webkit-backdrop-filter: var(--glass) !important;
   color: var(--muted);
   font-size: 0.95rem;
   transition: all 0.25s var(--ease-spring);
@@ -165,13 +167,18 @@
   cursor: pointer;
   padding: 0;
   outline: none;
+  box-shadow: 
+    0 4px 12px rgba(31, 38, 135, 0.04), 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25) !important;
 
   &:hover {
-    background: var(--panel-hover);
+    background: rgba(255, 255, 255, 0.65) !important;
     color: var(--ink);
-    border-color: var(--line-strong);
+    border-color: rgba(255, 255, 255, 0.6) !important;
     transform: translateY(-2px) scale(1.05);
-    box-shadow: var(--shadow);
+    box-shadow: 
+      0 8px 24px rgba(31, 38, 135, 0.08), 
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
   }
 
   &:active {
@@ -179,20 +186,22 @@
   }
 
   &:focus {
-    box-shadow: var(--shadow-focus);
+    box-shadow: var(--shadow-focus) !important;
   }
 }
 
-// ─── Pill Button (Saved articles etc) ───
+// ─── Pill Button (Saved articles etc) — Liquid Glass style ───
 .nav-pill-btn {
   display: flex;
   align-items: center;
   gap: 0.85rem;
   height: 44px;
-  padding: 0 1.75rem;
+  padding: 0 1.5rem;
   border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  background: var(--panel) !important;
+  backdrop-filter: var(--glass) !important;
+  -webkit-backdrop-filter: var(--glass) !important;
   color: var(--ink-light);
   font-size: 0.88rem;
   font-weight: 600;
@@ -203,15 +212,43 @@
   white-space: nowrap;
   flex-shrink: 0;
   min-width: max-content;
+  box-shadow: 
+    0 4px 12px rgba(31, 38, 135, 0.04), 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.25) !important;
 
-  i { opacity: 0.65; font-size: 1rem; color: var(--brand); }
+  i { 
+    opacity: 0.85; 
+    font-size: 1.05rem; 
+    color: var(--brand); 
+  }
+
+  &.bookmark-btn {
+    padding-left: 1.6rem !important;
+    padding-right: 1.4rem !important;
+    gap: 0.7rem !important;
+
+    i {
+      margin-right: 0.15rem;
+    }
+
+    .badge {
+      background: var(--brand-soft) !important;
+      color: var(--brand) !important;
+      font-weight: 700;
+      padding: 0.35em 0.65em;
+      border: 1px solid rgba(92, 96, 245, 0.15);
+      border-radius: 999px;
+    }
+  }
 
   &:hover {
-    background: var(--panel-hover);
-    border-color: var(--line-strong);
+    background: rgba(255, 255, 255, 0.65) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
     color: var(--brand);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 
+      0 8px 24px rgba(31, 38, 135, 0.08), 
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
   }
 
   &.dropdown-toggle::after {
@@ -252,5 +289,54 @@
   .dropdown-divider {
     opacity: 0.06;
     margin: 0.4rem 0;
+  }
+}
+
+// ─── Navbar Auth Buttons ───
+.navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+
+  .btn-login {
+    color: var(--ink-light) !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.45rem 1.15rem;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all 0.25s var(--ease);
+
+    &:hover {
+      color: var(--brand) !important;
+      background: var(--brand-soft);
+      border-radius: 999px;
+    }
+  }
+
+  .btn-signup {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%) !important;
+    color: #fff !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.45rem 1.35rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s var(--ease-spring);
+    border: none !important;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      filter: brightness(1.08);
+      color: #fff !important;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 }

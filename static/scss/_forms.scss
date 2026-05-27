@@ -88,7 +88,7 @@ input[type="file"] {
   &:checked {
     background-color: var(--brand);
     border-color: var(--brand);
-    box-shadow: 0 0 0 3px rgba(214, 106, 140, 0.12);
+    box-shadow: 0 0 0 3px rgba(92, 96, 245, 0.12);
   }
 
   &:focus {
@@ -123,7 +123,7 @@ input[type="file"] {
     background: var(--brand);
     border-color: var(--brand);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(214, 106, 140, 0.2);
+    box-shadow: 0 4px 12px rgba(92, 96, 245, 0.16);
     transform: translateY(-1px);
   }
 }
@@ -147,7 +147,7 @@ input[type="file"] {
 .table {
   --bs-table-bg: transparent;
   --bs-table-striped-bg: rgba(0, 0, 0, 0.015);
-  --bs-table-hover-bg: rgba(214, 106, 140, 0.03);
+  --bs-table-hover-bg: rgba(92, 96, 245, 0.03);
 
   thead th {
     border-bottom: 2px solid var(--line);

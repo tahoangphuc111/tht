@@ -108,9 +108,9 @@
                             </ul>
                         </div>
                     {% else %}
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-link text-decoration-none text-dark fw-bold px-3" href="{% url 'wiki:login' %}" style="font-size: 0.85rem;">Đăng nhập</a>
-                            <a class="btn btn-dark rounded-pill px-3 shadow-sm" href="{% url 'wiki:signup' %}" style="font-size: 0.85rem; font-weight: 600;">Bắt đầu ngay</a>
+                        <div class="navbar-auth">
+                            <a class="btn-login" href="{% url 'wiki:login' %}">Đăng nhập</a>
+                            <a class="btn-signup" href="{% url 'wiki:signup' %}">Bắt đầu ngay</a>
                         </div>
                     {% endif %}
                 </div>

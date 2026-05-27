@@ -69,12 +69,12 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
     transition: all 0.3s var(--ease-spring);
-    box-shadow: 0 4px 12px rgba(214, 106, 140, 0.18);
+    box-shadow: 0 4px 12px rgba(92, 96, 245, 0.14);
 
     &:hover {
       background: var(--brand-dark);
       transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 8px 18px rgba(214, 106, 140, 0.24);
+      box-shadow: 0 8px 18px rgba(92, 96, 245, 0.18);
     }
   }
 
@@ -127,7 +127,7 @@
     padding: 12px;
     box-shadow:
       0 10px 20px var(--brand-soft),
-      0 4px 8px rgba(98, 55, 70, 0.08);
+      0 4px 8px rgba(15, 23, 42, 0.06);
 
     &:hover {
       transform: scale(1.1) rotate(8deg);
