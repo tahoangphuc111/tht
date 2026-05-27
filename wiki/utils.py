@@ -96,7 +96,9 @@ def build_profile_stats(user, viewer=None):
     try:
         from .models import CodingSubmission
 
-        coding_submissions = CodingSubmission.objects.filter(user=user)
+        coding_submissions = CodingSubmission.objects.filter(
+            user=user, created_at__date__gte=start_date,
+        )
         for sub in coding_submissions:
             s_day = timezone.localtime(sub.created_at).date()
             if s_day >= start_date:

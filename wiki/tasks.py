@@ -22,9 +22,9 @@ def execute_code_task(self, submission_id):
         code_runner._execute_submission(submission)
 
     except CodingSubmission.DoesNotExist:
-        logger.error(f"Submission {submission_id} not found.")
+        logger.error("Submission %s not found.", submission_id)
     except Exception as e:
-        logger.error(f"Error executing submission {submission_id}: {e}")
+        logger.error("Error executing submission %s: %s", submission_id, e)
         try:
             sub = CodingSubmission.objects.get(pk=submission_id)
             sub.status = "internal_error"

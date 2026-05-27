@@ -40,13 +40,20 @@ const toggleBookmark = async (id) => {
             method: 'POST',
             headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
         });
+        
+        if (r.status === 401 || r.status === 403) {
+            window.location.href = '/login/?next=' + window.location.pathname;
+            return;
+        }
+        
         const d = await r.json();
         if (d.is_bookmarked !== undefined) {
-            const btn = document.querySelector(`.article-save-toggle[data-article-id="${id}"]`);
-            if (btn) {
+            const btns = document.querySelectorAll(`.article-save-toggle[data-article-id="${id}"]`);
+            btns.forEach(btn => {
                 btn.classList.toggle("text-primary", d.is_bookmarked);
-                btn.querySelector('i').className = d.is_bookmarked ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark";
-            }
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = d.is_bookmarked ? "fa-solid fa-bookmark" : "fa-regular fa-bookmark";
+            });
             fetchSaved(); // Refresh the list
         }
     } catch (err) {
@@ -69,6 +76,7 @@ const initAjaxVotes = () => {
     document.querySelectorAll('.ajax-vote-form').forEach(f => f.onsubmit = async (e) => {
         e.preventDefault();
         const btn = f.querySelector('button');
+        const oldTransform = btn.style.transform;
         btn.style.transform = "scale(0.8)";
         try {
             const r = await fetch(f.action, {
@@ -77,15 +85,20 @@ const initAjaxVotes = () => {
                 body: new FormData(f)
             });
             
+            if (r.status === 401 || r.status === 403) {
+                window.location.href = '/login/?next=' + window.location.pathname;
+                return;
+            }
+
             const contentType = r.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 const d = await r.json();
                 if (!d.success) throw new Error(d.message || "Thao tác không thành công.");
                 
                 const scoreEl = document.getElementById('article-score');
-                if (scoreEl && d.article_vote_score !== undefined) scoreEl.textContent = d.article_vote_score;
+                if (scoreEl && d.article_score !== undefined) scoreEl.textContent = d.article_score;
                 const cScoreEl = document.getElementById(`comment-${d.comment_pk}-score`);
-                if (cScoreEl && d.comment_vote_score !== undefined) cScoreEl.textContent = d.comment_vote_score;
+                if (cScoreEl && d.comment_score !== undefined) cScoreEl.textContent = d.comment_score;
                 const userScoreEl = document.getElementById(`user-${d.target_user_pk}-score`);
                 if (userScoreEl && d.target_user_score !== undefined) userScoreEl.textContent = d.target_user_score;
             } else {
@@ -95,21 +108,37 @@ const initAjaxVotes = () => {
         } catch (err) {
             Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, timer: 2000 });
         } finally {
-            setTimeout(() => btn.style.transform = "scale(1)", 150);
+            setTimeout(() => btn.style.transform = oldTransform || "scale(1)", 150);
         }
     });
 };
 
 const initArticleActions = () => {
-    const sBtn = document.querySelector(".article-save-toggle"), fBtn = document.querySelector(".article-focus-toggle");
-    if (sBtn) {
-        sBtn.onclick = () => toggleBookmark(sBtn.dataset.articleId);
-    }
-    if (fBtn) fBtn.onclick = () => {
-        const a = document.body.classList.toggle("is-focus-mode");
-        fBtn.querySelector('i').className = a ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
-        fBtn.classList.toggle("text-primary", a);
-    };
+    document.querySelectorAll(".article-save-toggle").forEach(sBtn => {
+        sBtn.onclick = (e) => {
+            e.preventDefault();
+            toggleBookmark(sBtn.dataset.articleId);
+        };
+    });
+    
+    document.querySelectorAll(".article-focus-toggle").forEach(fBtn => {
+        fBtn.onclick = (e) => {
+            e.preventDefault();
+            const active = document.body.classList.toggle("is-focus-mode");
+            const icon = fBtn.querySelector('i');
+            if (icon) icon.className = active ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+            fBtn.classList.toggle("text-primary", active);
+            
+            // Sync other focus buttons if any
+            document.querySelectorAll(".article-focus-toggle").forEach(other => {
+                if (other !== fBtn) {
+                    const otherIcon = other.querySelector('i');
+                    if (otherIcon) otherIcon.className = active ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+                    other.classList.toggle("text-primary", active);
+                }
+            });
+        };
+    });
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -132,9 +161,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && document.body.classList.contains("is-focus-mode")) document.querySelector(".article-focus-toggle").click();     
-        if (e.key.toLowerCase() === "s" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) document.querySelector(".article-save-toggle")?.click();
-        if (e.key.toLowerCase() === "f" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) document.querySelector(".article-focus-toggle")?.click();
-        if (e.key === "/" && !["INPUT", "TEXTAREA"].includes(e.target.tagName)) { e.preventDefault(); document.querySelector("#id_q")?.focus(); } 
+        // Skip if typing in an input, textarea, or select
+        const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) || e.target.isContentEditable;
+        if (isTyping && e.key !== "Escape") return;
+
+        // Skip if modifier keys are pressed (except for Escape)
+        if ((e.ctrlKey || e.metaKey || e.altKey) && e.key !== "Escape") return;
+
+        const key = e.key.toLowerCase();
+        
+        if (key === "s") {
+            const btn = document.querySelector(".article-save-toggle");
+            if (btn) {
+                e.preventDefault();
+                btn.click();
+            }
+        } else if (key === "f") {
+            const btn = document.querySelector(".article-focus-toggle");
+            if (btn) {
+                e.preventDefault();
+                btn.click();
+            }
+        } else if (e.key === "/") {
+            // Priority: search input with ID id_q, then class search-input
+            const searchInput = document.querySelector("#id_q") || document.querySelector(".search-input");
+            if (searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        } else if (e.key === "Escape") {
+            if (document.body.classList.contains("is-focus-mode")) {
+                document.querySelector(".article-focus-toggle")?.click();
+            } else if (isTyping) {
+                e.target.blur();
+            }
+        }
     });
 });

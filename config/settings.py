@@ -69,13 +69,14 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "tht",
+        "USER": "thtuser",
+        "PASSWORD": "",
+        "HOST": "127.0.0.1",
+        "PORT": "3306",
     }
 }
 
@@ -236,12 +237,6 @@ MARTOR_ALLOWED_UPLOADS = [
     "image/jpg",
 ]
 
-try:
-    # pylint: disable=wildcard-import, unused-wildcard-import
-    from .local_settings import *
-except ImportError:
-    pass
-
 # Celery Configuration
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
@@ -249,3 +244,9 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
+
+try:
+    # pylint: disable=wildcard-import, unused-wildcard-import
+    from .local_settings import *
+except ImportError:
+    pass

@@ -255,7 +255,7 @@ def upload_file_validator(value):
     if not content_type:
         file_obj = getattr(value, "file", None)
         content_type = getattr(file_obj, "content_type", None) if file_obj is not None else None
-    if content_type not in allowed:
+    if content_type is not None and content_type not in allowed:
         raise ValidationError("Chỉ hỗ trợ upload file pdf, docx, png, jpg.")
 
 

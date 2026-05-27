@@ -63,15 +63,12 @@ def article_coding_manage_view(request, article_pk):
     if not _can_manage_exercise(request.user, article):
         return redirect("wiki:article-detail", pk=article.pk, slug=article.slug)
 
+    enabled_choices = get_enabled_language_choices()
     defaults = {
         "title": article.title,
         "is_enabled": True,
-        "allowed_languages": [item["key"] for item in get_enabled_language_choices()],
-        "default_language": (
-            get_enabled_language_choices()[0]["key"]
-            if get_enabled_language_choices()
-            else ""
-        ),
+        "allowed_languages": [item["key"] for item in enabled_choices],
+        "default_language": enabled_choices[0]["key"] if enabled_choices else "",
     }
     exercise, _ = CodingExercise.objects.get_or_create(article=article, defaults=defaults)
 

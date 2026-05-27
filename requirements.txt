@@ -12,3 +12,4 @@ gunicorn
 celery>=5.4.0
 gevent
 redis>=5.0.0
+mysqlclient

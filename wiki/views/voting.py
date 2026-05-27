@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
 from ..websockets import broadcast_vote_update
@@ -26,6 +27,20 @@ def _handle_vote(request, model, target_field, target_obj, vote_attr):
                 {"success": False, "message": "Bạn cần đăng nhập."}, status=401
             )
         return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+
+    # Prevent self-voting on articles and comments
+    if target_field == "article" and target_obj.author == request.user:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {"success": False, "message": "Không thể vote bài viết của chính mình."}, status=400
+            )
+        return redirect(target_obj.get_absolute_url())
+    if target_field == "comment" and target_obj.author == request.user:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {"success": False, "message": "Không thể vote bình luận của chính mình."}, status=400
+            )
+        return redirect(target_obj.get_absolute_url())
 
     try:
         val = int(request.POST.get("vote", 0))
@@ -84,6 +99,7 @@ def _handle_vote(request, model, target_field, target_obj, vote_attr):
 
 
 @require_POST
+@login_required
 def vote_article(request, pk):
     """Handle voting for an article."""
     return _handle_vote(
@@ -92,6 +108,7 @@ def vote_article(request, pk):
 
 
 @require_POST
+@login_required
 def vote_comment(request, pk):
     """Handle voting for a comment."""
     return _handle_vote(

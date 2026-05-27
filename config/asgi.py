@@ -1,9 +1,7 @@
 import asyncio
 import json
 import os
-from typing import Any, Set
 
-from asgiref.sync import async_to_sync
 from django.core.asgi import get_asgi_application
 from wiki.websockets import connected_websockets
 

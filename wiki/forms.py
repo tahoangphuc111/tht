@@ -554,6 +554,7 @@ class CodingTestCaseForm(forms.ModelForm):
             "is_sample",
             "order",
             "score",
+            "subtask_id",
         )
         widgets = {
             "name": forms.TextInput(

@@ -170,6 +170,17 @@ uvicorn config.asgi:application --port 8001
 ## production deployment
 for production environments use the following setup with **nginx** and **uwsgi**
 
+### 0 in-memory database setup (mariadb ram disk)
+to run the database entirely on ram (faster, no disk footprint), use the following commands on linux:
+```bash
+sudo systemctl stop mariadb
+sudo mount -t tmpfs -o size=1G tmpfs /var/lib/mysql
+sudo chown mysql:mysql /var/lib/mysql
+sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+sudo systemctl start mariadb
+```
+*note: all data will be lost on reboot. ensure you have a backup strategy.*
+
 ### 1 set up uwsgi
 ensure uwsgi is installed (`pip install uwsgi`) and use the provided config:
 ```bash

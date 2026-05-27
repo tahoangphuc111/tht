@@ -157,7 +157,13 @@ class ArticleDetailView(DetailView):
                 "monacoMap": coding_monaco_map,
                 "samples": coding_samples,
             }
+        # Only show questions that have choices and at least one correct choice
+        quiz_questions = article.questions.prefetch_related("choices").annotate(
+            correct_count=Count("choices", filter=Q(choices__is_correct=True))
+        ).filter(correct_count__gt=0)
+
         context.update({
+            "quiz_questions": quiz_questions,
             "comments": article.comments.select_related("author").filter(is_approved=True),
             "related_articles": Article.objects.filter(
                 category=article.category, status="published"
@@ -228,7 +234,9 @@ class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = "wiki/article_form.html"
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Article, pk=self.kwargs.get("pk"))
+        if not hasattr(self, '_cached_object'):
+            self._cached_object = get_object_or_404(Article, pk=self.kwargs.get("pk"))
+        return self._cached_object
 
     def test_func(self):
         article = self.get_object()
@@ -259,7 +267,9 @@ class ArticleDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy("wiki:article-list")
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Article, pk=self.kwargs.get("pk"))
+        if not hasattr(self, '_cached_object'):
+            self._cached_object = get_object_or_404(Article, pk=self.kwargs.get("pk"))
+        return self._cached_object
 
     def test_func(self):
         article = self.get_object()

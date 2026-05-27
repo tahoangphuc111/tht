@@ -7,10 +7,10 @@
 <div class="row g-4 align-items-start">
     <div class="col-lg-8">
         <div class="card border-0 shadow-lg app-card">
-            <div class="card-body p-4 p-lg-5">
-                <div class="section-eyebrow mb-2">Markdown Editor</div>
-                <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Chỉnh sửa bài viết{% else %}Tạo bài viết mới{% endif %}</h1>
-                <p class="text-secondary mb-4">Martor đã được tích hợp để bạn soạn nội dung bằng Markdown với live preview, code block và hỗ trợ công thức KaTeX như <code>$n$</code> hoặc <code>$$\sum_{i=1}^{n} i$$</code>.</p>
+            <div class="card-body p-4 p-lg-5 pt-lg-4">
+                <div class="section-eyebrow mb-1">Markdown Editor</div>
+                <h1 class="hero-title-sm mb-2">{% if form.instance.pk %}Chỉnh sửa bài viết{% else %}Tạo bài viết mới{% endif %}</h1>
+                <p class="text-secondary mb-4 small">Martor đã được tích hợp để bạn soạn nội dung bằng Markdown với live preview, code block và hỗ trợ công thức KaTeX.</p>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% if form.non_field_errors %}
@@ -21,33 +21,32 @@
                         </div>
                     {% endif %}
                     {% for field in form %}
-                        <div class="mb-4">
+                        <div class="mb-3">
                             {% if field.name == 'allow_comments' %}
                                 <div class="form-check article-form-check">
                                     {{ field }}
                                     <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 </div>
                             {% else %}
-                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                <label class="form-label fw-semibold mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
                             {% endif %}
                             {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
+                                <div class="form-text mt-1">{{ field.help_text }}</div>
                             {% endif %}
                             {% for error in field.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold" for="id_attachments">Tệp đính kèm</label>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold mb-1" for="id_attachments">Tệp đính kèm</label>
                         <input type="file" name="attachments" id="id_attachments" class="form-control" multiple>
-                        <div class="form-text">Tải lên tối đa 5 file pdf/docx/png/jpg, mỗi file tối đa 15MB.</div>
+                        <div class="form-text mt-1">Tối đa 5 file (pdf/docx/png/jpg), mỗi file 15MB.</div>
                     </div>
                     <div class="mb-4">
-                        <div class="alert alert-info small">
-                            Nếu bạn tải file PDF/DOCX/PNG lên ở phần “Tệp đính kèm”, đường dẫn thường sẽ có dạng `{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}...`.
-                            Dán vào nội dung Markdown theo dạng: `![Tên hình]({{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}path/to/file.png)` hoặc `[Tên file](URL)`.
+                        <div class="alert alert-info py-2 px-3 small border-0 bg-light">
+                            <i class="fa-solid fa-circle-info me-1"></i> Chèn file: `![Tên]({{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}path/to/file.png)`
                         </div>
                     </div>
                     <div class="d-flex gap-2 flex-wrap">

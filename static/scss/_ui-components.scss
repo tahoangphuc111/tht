@@ -63,7 +63,7 @@
   background: none;
   padding: 0;
   cursor: pointer;
-  font-family: inherit;
+  font-family: var(--font-sans);
   outline: none;
   box-shadow: none;
 }
@@ -468,9 +468,83 @@
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.bg-primary-soft { background-color: var(--brand-soft) !important; }
-.bg-success-soft { background-color: var(--success-soft) !important; }
-.bg-danger-soft { background-color: var(--danger-soft) !important; }
-.bg-warning-soft { background-color: var(--warning-soft) !important; }
+// ─── Quiz Choice Styling ───
+.choice-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--panel);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+  gap: 1rem;
+
+  &:hover {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+    transform: translateX(4px);
+  }
+
+  &.border-primary {
+    border-color: var(--brand) !important;
+    background: var(--brand-soft) !important;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .form-check {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .form-check-input.quiz-choice {
+    width: 1.35rem;
+    height: 1.35rem;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid var(--line-strong);
+    background-color: #fff;
+    flex-shrink: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    transition: all 0.2s var(--ease);
+
+    &:checked {
+      background-color: var(--brand);
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px var(--brand-soft);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #fff;
+      }
+    }
+  }
+
+  .form-check-label {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    line-height: 1.4;
+    flex: 1;
+  }
+}
 
 .cursor-pointer { cursor: pointer; }

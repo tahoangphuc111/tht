@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 from typing import Any, Set
-from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,7 @@ def broadcast_vote_update(payload):
     text_data = json.dumps(message)
 
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

@@ -88,6 +88,9 @@ def upload_quiz_file_view(request, article_pk):
 
         try:
             text = extract_quiz_text(upload)
+            if not text or len(text.strip()) < 50:
+                messages.error(request, "Nội dung file quá ngắn hoặc không thể đọc được. Vui lòng kiểm tra lại file.")
+                return render(request, "wiki/quiz_upload.html", {"article": article})
         except Exception as error:  # pylint: disable=broad-exception-caught
             logger.exception("Failed to extract quiz file for article %s", article_pk)
             messages.error(request, f"Không thể đọc file: {error}")
@@ -98,8 +101,9 @@ def upload_quiz_file_view(request, article_pk):
             for block in text.replace("\r\n", "\n").split("\n\n")
             if len(block.strip()) > 10
         ]
+        
         if not blocks:
-            messages.error(request, "Không tìm thấy đoạn câu hỏi hợp lệ trong file.")
+            messages.error(request, "File không đúng định dạng yêu cầu (cần phân tách các câu hỏi bằng 2 lần xuống dòng).")
             return render(request, "wiki/quiz_upload.html", {"article": article})
 
         start_order = article.questions.count()
@@ -121,12 +125,27 @@ class QuizAuthorRequiredMixin(UserPassesTestMixin):
     def _get_article(self):
         if hasattr(self, "object") and self.object:
             return self.object.article
-        return get_object_or_404(Article, pk=self.kwargs["article_pk"])
+        
+        # Priority 1: article_pk from URL
+        article_pk = self.kwargs.get("article_pk")
+        if article_pk:
+            return get_object_or_404(Article, pk=article_pk)
+            
+        # Priority 2: pk of the question object
+        pk = self.kwargs.get("pk")
+        if pk:
+            question = get_object_or_404(Question, pk=pk)
+            return question.article
+            
+        raise AttributeError("Article context not found.")
 
     def test_func(self):
         """Check if the current user can manage the quiz."""
-        article = self._get_article()
-        return article.author == self.request.user or self.request.user.is_superuser
+        try:
+            article = self._get_article()
+            return article.author == self.request.user or self.request.user.is_superuser
+        except Exception:
+            return False
 
     def handle_no_permission(self):
         """Redirect unauthorized users to the article detail page."""

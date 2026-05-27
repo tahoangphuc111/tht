@@ -566,6 +566,7 @@ def _execute_submission(submission):
             logger.exception("Unexpected judge failure for submission %s", submission.pk)
         raise
     finally:
+        RUNNER_LOCK.release()
         if job_dir and job_dir.exists():
             for path in sorted(job_dir.rglob("*"), reverse=True):
                 if path.is_file():

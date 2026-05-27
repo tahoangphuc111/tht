@@ -48,6 +48,8 @@ def store_old_status(sender, instance, **kwargs):
 @receiver(post_save, sender=Article)
 def notify_on_article_status_change(sender, instance, created, **kwargs):
     """Notify author when article is approved or rejected."""
+    if created:
+        return
     old_status = getattr(instance, '_old_status', None)
     if old_status != instance.status:
         if instance.status == "published":
