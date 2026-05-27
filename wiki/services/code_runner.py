@@ -573,7 +573,6 @@ def _execute_submission(submission):
                 else:
                     path.rmdir()
             job_dir.rmdir()
-        RUNNER_LOCK.release()
 
 
 def serialize_submission(submission):

@@ -161,7 +161,7 @@ class ArticleDetailView(DetailView):
             "comments": article.comments.select_related("author").filter(is_approved=True),
             "related_articles": Article.objects.filter(
                 category=article.category, status="published"
-            ).exclude(pk=article.pk).annotate(comment_count=Count("comments", distinct=True))[:3],
+            ).exclude(pk=article.pk).select_related("author", "category").annotate(comment_count=Count("comments", distinct=True))[:3],
             "comment_form": kwargs.get("comment_form", CommentForm()),
             "can_comment": (article.allow_comments and user.is_authenticated and user.has_perm("wiki.add_comment")),
             "commenting_locked": not article.allow_comments,

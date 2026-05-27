@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 def execute_code_task(self, submission_id):
     try:
         submission = CodingSubmission.objects.get(pk=submission_id)
-        # Bỏ qua nếu không phải trạng thái running (đã xử lý)
+        # bỏ qua nếu không phải trạng thái running (tức là đã xử lý)
         if submission.status != "running":
             return
 
-        # Gọi hàm execute_code trong code_runner.py
-        # Chúng ta sẽ refactor lại execute_code để nhận tham số hợp lý hơn
-        # Vì nó đã lưu trong DB rồi, ta có thể chạy lại
+        # gọi hàm execute_code trong code_runner.py
+        # chúng ta sẽ refactor lại execute_code để nhận tham số hợp lý hơn
+        # vì nó đã lưu trong database rồi, ta có thể chạy lại
         code_runner._execute_submission(submission)
 
     except CodingSubmission.DoesNotExist:

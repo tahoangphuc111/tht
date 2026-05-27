@@ -55,7 +55,9 @@ class Profile(models.Model):
     def get_avatar_url(self):
         if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar.url
-        return f"https://ui-avatars.com/api/?name={self.user.username}&background=random"
+        import hashlib
+        email_hash = hashlib.md5(self.user.email.strip().lower().encode('utf-8')).hexdigest() if self.user.email else "00000000000000000000000000000000"
+        return f"https://www.gravatar.com/avatar/{email_hash}?d=identicon&s=150"
 
     @property
     def total_votes(self):
