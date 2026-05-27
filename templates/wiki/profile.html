@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="d-flex gap-3 flex-wrap mb-4">
                     {% for ub in badges %}
                         <div class="text-center" title="{{ ub.badge.description }}">
-                            <div class="badge-icon mb-1 {% if profile_user.is_superuser %}badge-icon--admin{% endif %}" style="width: 48px; height: 48px; line-height: 48px; background: rgba(0, 113, 227, 0.1); color: #0071e3; border-radius: 12px; font-size: 1.25rem;">
+                            <div class="badge-icon mb-1 {% if profile_user.is_superuser %}badge-icon--admin{% endif %}">
                                 <i class="fa-solid {{ ub.badge.icon }}"></i>
                             </div>
                             <div class="small fw-bold">{{ ub.badge.name }}</div>

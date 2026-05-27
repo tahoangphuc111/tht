@@ -272,9 +272,9 @@ main.app-main {
   &__bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--brand), #5ac8fa);
+    background: linear-gradient(90deg, var(--brand), var(--brand-hover));
     transition: width 0.12s linear;
     border-radius: 0 3px 3px 0;
-    box-shadow: 0 0 8px rgba(0, 113, 227, 0.4);
+    box-shadow: 0 0 8px rgba(92, 96, 245, 0.4);
   }
 }

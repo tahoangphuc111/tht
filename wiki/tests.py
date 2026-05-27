@@ -496,7 +496,7 @@ class WikiFlowTests(TestCase):
         self.client.login(username="author", password="StrongPass123")
         upload = SimpleUploadedFile(
             "quiz.txt",
-            b"Question one content?\n\nQuestion two content?",
+            b"Question number one content check?\n\nQuestion number two content check?",
             content_type="text/plain",
         )
 

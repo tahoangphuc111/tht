@@ -110,7 +110,7 @@
   a {
     color: var(--brand);
     text-decoration: none;
-    border-bottom: 1px solid rgba(0, 113, 227, 0.2);
+    border-bottom: 1px solid var(--brand-soft);
     transition: all 0.2s var(--ease);
 
     &:hover {
@@ -355,7 +355,7 @@
     &.border-primary {
       border-color: var(--brand) !important;
       background: var(--brand-soft);
-      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.08);
+      box-shadow: 0 0 0 3px var(--brand-soft);
     }
   }
 }

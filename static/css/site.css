@@ -333,7 +333,7 @@ a {
 }
 .ui-stack-item.is-link:hover {
   background: var(--panel-hover);
-  border-color: rgba(0, 113, 227, 0.15);
+  border-color: var(--line-strong);
   transform: translateY(-2px);
   box-shadow: var(--shadow);
 }
@@ -385,39 +385,47 @@ a {
 .ui-badge, .pill-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.7rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 600;
-  background: var(--panel-strong);
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: var(--glass) !important;
+  -webkit-backdrop-filter: var(--glass) !important;
   color: var(--muted);
   text-decoration: none;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(31, 38, 135, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.2) !important;
   transition: all 0.2s var(--ease);
 }
+.ui-badge:hover, .pill-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(31, 38, 135, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+}
 .ui-badge--primary {
-  background: var(--brand-soft);
-  color: var(--brand);
-  border-color: transparent;
+  background: var(--brand-soft) !important;
+  color: var(--brand) !important;
+  border-color: rgba(92, 96, 245, 0.15) !important;
 }
 .ui-badge--success {
-  background: var(--success-soft);
-  color: #1a8d47;
-  border-color: transparent;
+  background: var(--success-soft) !important;
+  color: #1a8d47 !important;
+  border-color: rgba(78, 168, 138, 0.15) !important;
 }
 .ui-badge--danger {
-  background: var(--danger-soft);
-  color: var(--danger);
-  border-color: transparent;
+  background: var(--danger-soft) !important;
+  color: var(--brand) !important;
+  border-color: rgba(217, 101, 101, 0.15) !important;
 }
 .ui-badge--warning {
-  background: var(--warning-soft);
-  color: #b37000;
-  border-color: transparent;
+  background: var(--warning-soft) !important;
+  color: #b37000 !important;
+  border-color: rgba(225, 161, 74, 0.15) !important;
 }
 .ui-badge--outline {
-  background: transparent;
-  border: 1px solid var(--line-strong);
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 .btn-soft {
@@ -436,7 +444,7 @@ a {
   background: var(--brand);
   color: #fff;
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25), 0 2px 6px rgba(0, 113, 227, 0.15);
+  box-shadow: 0 4px 14px rgba(92, 96, 245, 0.22), 0 2px 6px rgba(92, 96, 245, 0.12);
 }
 .btn-soft:active {
   transform: translateY(0) scale(0.98);
@@ -841,7 +849,7 @@ a {
 .article-content a, .main-martor .martor-preview a {
   color: var(--brand);
   text-decoration: none;
-  border-bottom: 1px solid rgba(0, 113, 227, 0.2);
+  border-bottom: 1px solid var(--brand-soft);
   transition: all 0.2s var(--ease);
 }
 .article-content a:hover, .main-martor .martor-preview a:hover {
@@ -1056,7 +1064,7 @@ a {
 .quiz-section .choice-wrapper.border-primary {
   border-color: var(--brand) !important;
   background: var(--brand-soft);
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.08);
+  box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
 .toc-nav .nav-link {
@@ -1351,7 +1359,7 @@ textarea.font-monospace::placeholder {
 }
 textarea.font-monospace:focus {
   border-color: var(--brand) !important;
-  box-shadow: var(--shadow-focus), inset 0 0 0 1px rgba(0, 113, 227, 0.1) !important;
+  box-shadow: var(--shadow-focus), inset 0 0 0 1px rgba(92, 96, 245, 0.1) !important;
   outline: none;
 }
 
@@ -1506,10 +1514,30 @@ textarea.font-monospace:focus {
   transform: scale(1.08) rotate(-1deg);
 }
 
+.badge-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--brand-soft) !important;
+  color: var(--brand) !important;
+  border: 1.5px solid rgba(92, 96, 245, 0.15) !important;
+  border-radius: 12px;
+  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s var(--ease-spring);
+}
+.badge-icon:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-sm);
+  background: var(--brand) !important;
+  color: white !important;
+}
+
 .badge-icon--admin {
   background: rgba(255, 149, 0, 0.1) !important;
   color: #ff9500 !important;
-  border: 1.5px solid rgba(255, 149, 0, 0.2);
+  border: 1.5px solid rgba(255, 149, 0, 0.2) !important;
   animation: pulse-glow 2s infinite ease-in-out;
 }
 
