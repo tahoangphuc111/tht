@@ -7,7 +7,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         new Typed('#typed-hero-title', {
-            strings: ['Ghi chú thuật toán', 'Thảo luận cộng đồng', 'Kiến thức lập trình'],
+            strings: ['Góc học tập và ghi chép cá nhân', 'Không gian thảo luận cùng bạn bè', 'Ghi lại những ý tưởng sáng tạo mỗi ngày'],
             typeSpeed: 50,
             backSpeed: 30,
             backDelay: 2000,
@@ -21,9 +21,9 @@
 <section class="hero-panel mb-5" data-aos="fade-up">
     <div class="row g-4 align-items-center">
         <div class="col-lg-7">
-            <div class="ui-eyebrow mb-2">Study Lounge</div>
+            <div class="ui-eyebrow mb-2">Góc sáng tạo</div>
             <h1 class="hero-title mb-3" style="min-height: 1.2em;"><span id="typed-hero-title"></span></h1>
-            <p class="hero-copy mb-4">Một góc học tập dịu mắt cho ghi chú contest, bài viết và thảo luận kỹ thuật. Mọi thứ được đặt gần nhau để đọc, lưu và quay lại nhanh hơn.</p>
+            <p class="hero-copy mb-4">Chào mừng bạn đến với không gian học tập và ghi chép dịu mắt. Nơi chúng ta phác thảo ý tưởng, viết lách và lưu giữ những bài học bổ ích mỗi ngày. Mọi thứ đã được chuẩn bị sẵn sàng để bạn đọc, lưu trữ và tra cứu bất cứ lúc nào.</p>
             <div class="d-flex gap-3 flex-wrap">
                 <a class="btn btn-premium btn-lg rounded-pill px-5 shadow-sm" href="{% url 'wiki:article-list' %}">
                     <i class="fa-solid fa-compass me-2"></i>Khám phá bài viết
@@ -63,10 +63,9 @@
                         <div class="featured-label">Featured</div>
                         <div class="featured-title-row">
                             <i class="fa-solid fa-star star-icon"></i>
-                            <h1>Bài viết nổi bật</h1>
+                            <h1>Gợi ý bài viết hay ho</h1>
                         </div>
                     </div>
-                    <span class="featured-comment-status">{{ open_comment_articles|default:"0" }} bài đang mở bình luận</span>
                 </div>
 
                 {% if featured_article %}
@@ -94,7 +93,6 @@
                                 <span class="d-flex align-items-center gap-1">
                                     <i class="fa-solid fa-book-open"></i> {{ featured_article.reading_time_minutes }} phút
                                 </span>
-                                <span class="ms-2 text-muted opacity-75">{{ featured_article.content|striptags|truncatechars:50 }}</span>
                             </div>
 
                             <p class="text-secondary mb-0 d-none d-md-block">{{ featured_article.content|striptags|truncatechars:120 }}</p>
@@ -115,7 +113,7 @@
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Top Categories</div>
-                <h2 class="h4 mb-4"><i class="fa-solid fa-tags text-primary me-2"></i>Danh mục</h2>
+                <h2 class="h4 mb-4"><i class="fa-solid fa-tags text-primary me-2"></i>Chuyên mục yêu thích</h2>
                 <div class="sidebar-stack">
                     {% for category in top_categories %}
                         <a class="sidebar-link-item ui-card p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-center" href="{{ category.get_absolute_url }}">
@@ -123,7 +121,7 @@
                             <span class="ui-badge ui-badge--primary">{{ category.article_total }}</span>
                         </a>
                     {% empty %}
-                        <div class="empty-state">Chưa có danh mục nào.</div>
+                        <div class="empty-state">Hiện tại chưa có chuyên mục nào được tạo.</div>
                     {% endfor %}
                 </div>
             </div>
@@ -136,7 +134,7 @@
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Latest Articles</div>
-                <h2 class="h4 mb-4"><i class="fa-solid fa-newspaper text-info me-2"></i>Bài mới đăng</h2>
+                <h2 class="h4 mb-4"><i class="fa-solid fa-newspaper text-info me-2"></i>Bài viết mới lên sóng</h2>
                 <div class="sidebar-stack">
                     {% for article in latest_articles %}
                         <div class="sidebar-link-item p-3 mb-2 rounded-3 border border-light transition-all hover-float">
@@ -151,7 +149,7 @@
                             </div>
                         </div>
                     {% empty %}
-                        <div class="empty-state">Chưa có bài viết mới.</div>
+                         <div class="empty-state">Hiện tại chưa có bài viết mới nào.</div>
                     {% endfor %}
                 </div>
             </div>
@@ -161,7 +159,7 @@
         <div class="card border-0 shadow-sm ui-card h-100">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Recent Discussion</div>
-                <h2 class="h4 mb-4"><i class="fa-solid fa-comments text-success me-2"></i>Bình luận mới</h2>
+                <h2 class="h4 mb-4"><i class="fa-solid fa-comments text-success me-2"></i>Bình luận mới nhận</h2>
                 <div class="sidebar-stack">
                     {% for comment in recent_comments %}
                         <a class="sidebar-link-item p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-start border border-light rounded-3 transition-all hover-float" href="{{ comment.article.get_absolute_url }}">
@@ -172,7 +170,7 @@
                             <i class="fa-solid fa-chevron-right text-muted mt-1"></i>
                         </a>
                     {% empty %}
-                        <div class="empty-state">Chưa có bình luận mới.</div>
+                        <div class="empty-state">Hiện tại chưa có bình luận mới nào.</div>
                     {% endfor %}
                 </div>
             </div>

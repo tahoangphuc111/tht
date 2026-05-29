@@ -6,9 +6,9 @@
 <section class="hero-panel mb-5">
     <div class="row g-4 align-items-center">
         <div class="col-lg-7">
-            <div class="ui-eyebrow mb-2">Competitive Programming Notebook</div>
-            <h1 class="hero-title mb-3">Tra cứu kiến thức thuật toán & Cấu trúc dữ liệu</h1>
-            <p class="hero-copy mb-4">Lưu lại pattern, cấu trúc dữ liệu, chiến thuật contest và ghi chú tối ưu. Thảo luận và chia sẻ kinh nghiệm cùng cộng đồng CP Wiki.</p>
+            <div class="ui-eyebrow mb-2">Góc học tập của chúng ta</div>
+            <h1 class="hero-title mb-3">Tìm kiếm & Ghi chép kiến thức</h1>
+            <p class="hero-copy mb-4">Ghi lại những ý tưởng sáng tạo và những bài học bổ ích của bạn tại đây nhé. Đừng ngần ngại chia sẻ và thảo luận cùng chúng mình nhé!</p>
             <div class="d-flex gap-2 flex-wrap">
                 {% if can_publish %}
                     <a class="btn btn-primary px-4" href="{% url 'wiki:article-create' %}">
@@ -164,10 +164,10 @@
         <div class="col-12">
             <div class="ui-empty-state">
                 <i class="fa-solid fa-box-open fs-1 text-muted mb-3 d-block"></i>
-                <span class="fs-5">Chưa có bài viết phù hợp với bộ lọc hiện tại.</span>
+                <span class="fs-5">Chúng mình chưa tìm thấy bài viết nào phù hợp với bộ lọc này của bạn rồi.</span>
                 {% if query or selected_author or selected_category or selected_discussion or selected_sort != 'newest' %}
                     <div class="mt-4">
-                        <a class="btn btn-soft rounded-pill px-4" href="{% url 'wiki:article-list' %}">Quay về danh sách đầy đủ</a>
+                        <a class="btn btn-soft rounded-pill px-4" href="{% url 'wiki:article-list' %}">Quay lại xem tất cả bài viết nhé</a>
                     </div>
                 {% endif %}
             </div>

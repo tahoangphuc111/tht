@@ -1,7 +1,5 @@
 @use "content" as *;
 
-// ─── Editor (Martor Markdown Editor) ───
-// ─── Editor (Martor Markdown Editor) ───
 .main-martor {
   margin: 1.5rem 0;
 
@@ -190,7 +188,6 @@
   padding: 0.5rem 0;
 }
 
-// Dark-themed code textareas (starter code fields in coding_manage)
 textarea.font-monospace {
   background: #1a1b26 !important;
   color: #c0caf5 !important;
@@ -216,4 +213,3 @@ textarea.font-monospace {
     outline: none;
   }
 }
-

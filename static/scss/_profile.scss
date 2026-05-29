@@ -1,6 +1,5 @@
 @use "ui-components" as *;
 
-// ─── Profile Hero ───
 .profile-hero {
   padding: 3rem 2.5rem;
   background: linear-gradient(135deg, #fff 0%, #f9f9fb 100%);
@@ -21,7 +20,6 @@
   box-shadow: 0 8px 16px var(--brand-soft);
 }
 
-// ─── Stats Grid ───
 .profile-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -61,7 +59,6 @@
   }
 }
 
-// ─── Activity Stack ───
 .activity-stack {
   display: grid;
   gap: 0.75rem;
@@ -117,7 +114,6 @@
   }
 }
 
-// ─── Contribution Grid (Heatmap) ───
 .contribution-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
@@ -144,16 +140,15 @@
   &.contribution-level-4 { background: var(--contrib-4); }
 }
 
-// ─── Admin Badges & Roles ───
 .pill-badge--admin {
-  background: linear-gradient(135deg, #ff9500 0%, #ffcc00 100%) !important;
-  color: #fff !important;
+  background: var(--warning) !important;
+  color: var(--ink) !important;
   font-weight: 800 !important;
-  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
-  border: none;
+  border: 1.5px solid var(--line-strong) !important;
+  box-shadow: 2px 2px 0px 0px rgba(92, 74, 66, 0.1);
   
   &:hover {
-    box-shadow: 0 6px 16px rgba(255, 149, 0, 0.4);
+    box-shadow: 3px 3px 0px 0px rgba(92, 74, 66, 0.15);
     transform: scale(1.08) rotate(-1deg);
   }
 }

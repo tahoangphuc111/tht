@@ -1,4 +1,4 @@
-// ─── Glass Navbar ───
+
 .app-navbar {
   top: 0;
   left: 0;
@@ -83,7 +83,6 @@
   }
 }
 
-// ─── User Chip ───
 .user-chip {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -102,7 +101,6 @@
   }
 }
 
-// ─── Search Form ───
 .search-form-nav {
   max-width: 420px;
   width: 100%;
@@ -137,14 +135,14 @@
     transition: all 0.3s var(--ease-spring);
     height: 40px;
     box-sizing: border-box;
-    width: 240px; // Default width
+    width: 240px;
 
     &:focus {
       background: var(--panel);
       border-color: var(--brand);
       box-shadow: 0 0 0 4px var(--brand-soft);
       outline: none;
-      width: 320px; // Expand on focus
+      width: 320px;
     }
   }
 }
@@ -196,7 +194,6 @@
   }
 }
 
-// ─── Pill Button (Saved articles etc) — Liquid Glass style ───
 .nav-pill-btn {
   display: flex;
   align-items: center;
@@ -263,7 +260,6 @@
   }
 }
 
-// ─── Dropdown — floating glass card ───
 .dropdown-menu {
   border: 1px solid var(--line) !important;
   border-radius: var(--radius) !important;
@@ -298,7 +294,6 @@
   }
 }
 
-// ─── Navbar Auth Buttons ───
 .navbar-auth {
   display: flex;
   align-items: center;

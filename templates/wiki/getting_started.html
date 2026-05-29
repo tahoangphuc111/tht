@@ -5,38 +5,38 @@
 {% block content %}
 <div class="card border-0 shadow-lg app-card">
     <div class="card-body p-4 p-lg-5">
-        <div class="section-eyebrow mb-2">First Run Guide</div>
-        <h1 class="hero-title-sm mb-4">Hướng dẫn sử dụng lần đầu</h1>
+        <div class="section-eyebrow mb-2">Để chúng mình giới thiệu một chút nhé</div>
+        <h1 class="hero-title-sm mb-4">Làm quen với góc nhỏ này</h1>
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="guide-step">
-                    <h2 class="h5">1. Tạo và đăng nhập tài khoản</h2>
-                    <p>Chọn <strong>Đăng ký</strong> để tạo tài khoản. Sau khi đăng nhập, bạn có thể chỉnh sửa hồ sơ và đổi mật khẩu trong mục <strong>Tài khoản</strong>.</p>
+                    <h2 class="h5">1. Đăng ký & Đăng nhập</h2>
+                    <p>Nhấn Đăng ký để tạo một tài khoản cho riêng bạn nhé. Đăng nhập xong là bạn có thể tự do thay đổi thông tin cá nhân hay đổi mật khẩu rồi.</p>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="guide-step">
-                    <h2 class="h5">2. Tạo bài viết wiki</h2>
-                    <p>Vào trang <strong>Bài viết</strong>, nhấn <strong>Tạo bài viết</strong>, điền tiêu đề, chọn danh mục và viết nội dung. Hệ thống tự lưu tác giả và ngày tạo.</p>
+                    <h2 class="h5">2. Cùng viết bài viết đầu tiên</h2>
+                    <p>Bạn có thể ghé mục Bài viết, bấm Tạo bài viết rồi thỏa sức viết lách nhé. Hệ thống sẽ tự động lưu tên người viết và ngày đăng giúp bạn.</p>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="guide-step">
-                    <h2 class="h5">3. Tìm kiếm kiến thức</h2>
-                    <p>Dùng ô tìm kiếm để tìm theo tiêu đề hoặc nội dung. Bạn cũng có thể lọc theo danh mục như thuật toán, cấu trúc dữ liệu hoặc bài toán thi đấu.</p>
+                    <h2 class="h5">3. Tìm kiếm thông tin dễ dàng</h2>
+                    <p>Bạn có thể tìm mọi thứ qua thanh tìm kiếm ở đầu trang hoặc lọc nhanh theo chuyên mục để thấy đúng chủ đề cần đọc nhé.</p>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="guide-step">
-                    <h2 class="h5">4. Quyền truy cập</h2>
-                    <p>Nhóm <strong>admin</strong>, <strong>editor</strong> và <strong>contributor</strong> có thể đăng bài. Người dùng thường tập trung bình luận, đặt câu hỏi và phản hồi dưới mỗi bài viết.</p>
+                    <h2 class="h5">4. Các vai trò trong góc học tập</h2>
+                    <p>Các thành viên đều có thể tự do bình luận, đặt câu hỏi dưới mỗi bài viết. Chúng ta cùng giữ không gian thật vui vẻ và tôn trọng lẫn nhau nhé.</p>
                 </div>
             </div>
         </div>
         {% if user.is_authenticated and not user.profile.guide_seen %}
             <form method="post" action="{% url 'wiki:dismiss-guide' %}" class="mt-4">
                 {% csrf_token %}
-                <button class="btn btn-dark rounded-pill px-4" type="submit">Đánh dấu đã đọc</button>
+                <button class="btn btn-dark rounded-pill px-4" type="submit">Tôi đã rõ</button>
             </form>
         {% endif %}
     </div>

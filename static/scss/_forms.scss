@@ -1,4 +1,4 @@
-// ─── Shared Input Base ───
+
 %input-base {
   background: var(--panel);
   border: 1.5px solid var(--line-strong);
@@ -36,11 +36,10 @@ textarea:not(.martor) {
   min-height: 8rem;
 }
 
-// ─── Specialized File Input ───
 input[type="file"] {
   @extend %input-base;
-  padding: 0.35rem; // Tighten for pill look
-  border-radius: 999px; // Cohesive pill shape
+  padding: 0.35rem;
+  border-radius: 999px;
   line-height: 1.5;
   cursor: pointer;
   display: flex;

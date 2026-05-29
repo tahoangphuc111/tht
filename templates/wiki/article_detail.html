@@ -115,13 +115,7 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="shortcut-keys">
-                <div class="shortcut-key"><kbd>/</kbd> Tìm kiếm</div>
-                <div class="shortcut-key"><kbd>S</kbd> Lưu bài</div>
-                <div class="shortcut-key"><kbd>F</kbd> Tập trung</div>
-                <div class="shortcut-key"><kbd>Esc</kbd> Thoát</div>
-            </div>
+
 
         </div>
         <div class="article-content markdown-body">{{ article.content|safe_markdown }}</div>
@@ -264,11 +258,13 @@
                             if (selectedInput) {
                                 const wrapper = selectedInput.closest('.choice-wrapper');
                                 wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
+                                wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đúng rùi</span>';
                             }
                         } else {
                             if (selectedInput) {
                                 const wrapper = selectedInput.closest('.choice-wrapper');
                                 wrapper.classList.add('bg-danger-soft', 'border-danger', 'text-danger');
+                                wrapper.querySelector('label').innerHTML += ' <span class="badge bg-danger rounded-pill ms-2">Sai rùi</span>';
                             }
                             if (result.correct_choice_id) {
                                 const correctInput = document.getElementById(`choice_${result.correct_choice_id}`);
@@ -276,6 +272,7 @@
                                     const wrapper = correctInput.closest('.choice-wrapper');
                                     wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
                                     wrapper.classList.add('fw-bold');
+                                    wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng rùi nè</span>';
                                 }
                             }
                         }
