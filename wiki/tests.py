@@ -565,10 +565,10 @@ class WikiFlowTests(TestCase):
         )
         from .models import Notification
         Notification.objects.all().delete()
-        
+
         vote.value = 1
         vote.save()
-        
+
         self.assertTrue(
             Notification.objects.filter(
                 recipient=self.article.author,
@@ -600,14 +600,14 @@ class WikiFlowTests(TestCase):
             response,
             reverse("wiki:article-quiz-manage", args=[self.article.pk]),
         )
-        
+
         question = Question.objects.filter(article=self.article, content="Cau 1: Thu do cua VN la gi?").first()
         self.assertIsNotNone(question)
         self.assertEqual(question.explanation, "Ha Noi la thu do.")
-        
+
         choices = list(question.choices.all())
         self.assertEqual(len(choices), 3)
-        
+
         correct_choices = [c for c in choices if c.is_correct]
         self.assertEqual(len(correct_choices), 1)
         self.assertEqual(correct_choices[0].content, "Ha Noi")
