@@ -13,7 +13,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
 from ..forms import ChoiceFormSet, QuestionForm, extract_quiz_text
-from ..models import Article, Question
+from ..models import Article, Question, Choice
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,99 @@ def submit_quiz_view(request, article_pk):
         return JsonResponse({"success": False, "message": str(error)}, status=400)
 
 
+def parse_question_block(block):
+    """
+    Parses a single block text into:
+    {
+        "question_text": str,
+        "choices": [{"content": str, "is_correct": bool}, ...],
+        "explanation": str
+    }
+    """
+    import re
+    lines = [line.strip() for line in block.splitlines() if line.strip()]
+    if not lines:
+        return None
+        
+    question_lines = []
+    raw_choices = []  # list of tuples (key, content, is_correct)
+    correct_key = None
+    explanation_lines = []
+    in_explanation = False
+    
+    for line in lines:
+        lower_line = line.lower()
+        
+        # Check for explanation
+        if lower_line.startswith("giải thích:") or lower_line.startswith("explanation:"):
+            in_explanation = True
+            parts = line.split(":", 1)
+            if len(parts) > 1 and parts[1].strip():
+                explanation_lines.append(parts[1].strip())
+            continue
+            
+        if in_explanation:
+            explanation_lines.append(line)
+            continue
+            
+        # Check for answer key line: e.g. "Đáp án: A"
+        ans_match = re.match(
+            r'^(đáp án|đáp án đúng|dap an|dap an dung|answer|correct|key)\s*:\s*([A-D]|[a-d]|\*|\+)\b',
+            line,
+            re.IGNORECASE
+        )
+        if ans_match:
+            correct_key = ans_match.group(2).upper()
+            continue
+            
+        # Check if it is a choice line starting with A., B., C., D. (with optional correct marker * or +)
+        choice_match = re.match(
+            r'^(\*|\+|\[x\]|\[X\]|\[\s*\])?\s*([A-D]|[a-d])[\.\)]\s*(.*)',
+            line
+        )
+        if choice_match:
+            marker = choice_match.group(1)
+            key = choice_match.group(2).upper()
+            content = choice_match.group(3).strip()
+            is_correct = bool(marker and marker in ('*', '+', '[x]', '[X]'))
+            raw_choices.append((key, content, is_correct))
+            continue
+            
+        # Fallback choice lines starting with "-" or "+"
+        fallback_choice_match = re.match(r'^([\-\+])\s*(.*)', line)
+        if fallback_choice_match:
+            marker = fallback_choice_match.group(1)
+            content = fallback_choice_match.group(2).strip()
+            is_correct = (marker == '+')
+            raw_choices.append((None, content, is_correct))
+            continue
+            
+        if raw_choices:
+            key, prev_content, is_correct = raw_choices[-1]
+            raw_choices[-1] = (key, prev_content + " " + line, is_correct)
+        else:
+            question_lines.append(line)
+            
+    final_choices = []
+    has_any_correct = False
+    
+    for key, content, is_correct in raw_choices:
+        if correct_key and key == correct_key:
+            is_correct = True
+        if is_correct:
+            has_any_correct = True
+        final_choices.append({"content": content, "is_correct": is_correct})
+        
+    if final_choices and not has_any_correct:
+        final_choices[0]["is_correct"] = True
+        
+    return {
+        "question_text": "\n".join(question_lines).strip(),
+        "choices": final_choices,
+        "explanation": "\n".join(explanation_lines).strip()
+    }
+
+
 @login_required
 def upload_quiz_file_view(request, article_pk):
     """View to upload a file containing quiz questions."""
@@ -107,13 +201,37 @@ def upload_quiz_file_view(request, article_pk):
             return render(request, "wiki/quiz_upload.html", {"article": article})
 
         start_order = article.questions.count()
-        Question.objects.bulk_create(
-            [
-                Question(article=article, content=block, order=start_order + index + 1)
-                for index, block in enumerate(blocks)
-            ]
-        )
-        messages.success(request, f"Đã nhập {len(blocks)} câu hỏi từ file.")
+        questions_created = 0
+
+        try:
+            with transaction.atomic():
+                for index, block in enumerate(blocks):
+                    parsed = parse_question_block(block)
+                    if not parsed:
+                        continue
+                    
+                    content_text = parsed["question_text"] or block
+                    question = Question.objects.create(
+                        article=article,
+                        content=content_text,
+                        explanation=parsed["explanation"],
+                        order=start_order + questions_created + 1
+                    )
+                    
+                    for choice_data in parsed["choices"]:
+                        Choice.objects.create(
+                            question=question,
+                            content=choice_data["content"],
+                            is_correct=choice_data["is_correct"]
+                        )
+                    questions_created += 1
+            
+            messages.success(request, f"Đã nhập {questions_created} câu hỏi từ file.")
+        except Exception as e:
+            logger.exception("Failed to save parsed quiz questions for article %s", article_pk)
+            messages.error(request, f"Lỗi lưu câu hỏi vào cơ sở dữ liệu: {e}")
+            return render(request, "wiki/quiz_upload.html", {"article": article})
+
         return redirect("wiki:article-quiz-manage", article_pk=article.pk)
 
     return render(request, "wiki/quiz_upload.html", {"article": article})

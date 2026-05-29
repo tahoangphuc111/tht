@@ -38,6 +38,20 @@
                 </div>
             {% endfor %}
         </div>
+
+        {% if is_paginated %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link px-4" href="?q={{ query }}&page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-chevron-left me-1"></i> Trước</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link px-4">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link px-4" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Sau <i class="fa-solid fa-chevron-right ms-1"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     {% else %}
         <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-light">
             <div class="display-1 text-muted opacity-25 mb-4">

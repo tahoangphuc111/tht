@@ -40,7 +40,9 @@
       font-size: 1.3rem;
     }
 
-    &:hover { color: var(--ink); }
+    &:hover {
+      color: var(--ink);
+    }
   }
 
   .nav-link {
@@ -57,7 +59,10 @@
     border: none;
     background: transparent;
 
-    i { font-size: 0.85rem; opacity: 0.7; }
+    i {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
 
     &:hover {
       color: var(--brand);
@@ -71,7 +76,9 @@
       box-shadow: 0 6px 16px rgba(92, 96, 245, 0.20);
       transform: translateY(-1px);
 
-      i { opacity: 1; }
+      i {
+        opacity: 1;
+      }
     }
   }
 }
@@ -148,7 +155,6 @@
   align-items: center;
 }
 
-// ─── Icon Button (notification bell etc) — Liquid Glass style ───
 .nav-icon-btn {
   display: flex;
   align-items: center;
@@ -167,8 +173,8 @@
   cursor: pointer;
   padding: 0;
   outline: none;
-  box-shadow: 
-    0 4px 12px rgba(31, 38, 135, 0.04), 
+  box-shadow:
+    0 4px 12px rgba(31, 38, 135, 0.04),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.25) !important;
 
   &:hover {
@@ -176,8 +182,8 @@
     color: var(--ink);
     border-color: rgba(255, 255, 255, 0.6) !important;
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 
-      0 8px 24px rgba(31, 38, 135, 0.08), 
+    box-shadow:
+      0 8px 24px rgba(31, 38, 135, 0.08),
       inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
   }
 
@@ -212,14 +218,14 @@
   white-space: nowrap;
   flex-shrink: 0;
   min-width: max-content;
-  box-shadow: 
-    0 4px 12px rgba(31, 38, 135, 0.04), 
+  box-shadow:
+    0 4px 12px rgba(31, 38, 135, 0.04),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.25) !important;
 
-  i { 
-    opacity: 0.85; 
-    font-size: 1.05rem; 
-    color: var(--brand); 
+  i {
+    opacity: 0.85;
+    font-size: 1.05rem;
+    color: var(--brand);
   }
 
   &.bookmark-btn {
@@ -246,8 +252,8 @@
     border-color: rgba(255, 255, 255, 0.6) !important;
     color: var(--brand);
     transform: translateY(-1px);
-    box-shadow: 
-      0 8px 24px rgba(31, 38, 135, 0.08), 
+    box-shadow:
+      0 8px 24px rgba(31, 38, 135, 0.08),
       inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
   }
 

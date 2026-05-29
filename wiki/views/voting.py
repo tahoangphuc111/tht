@@ -119,10 +119,12 @@ def vote_comment(request, pk):
 @require_POST
 def vote_user(request, username):
     """Handle voting for a user (reputation)."""
-    try:
-        target = User.objects.get(pk=int(username))
-    except (ValueError, User.DoesNotExist):
-        target = get_object_or_404(User, username=username)
+    target = User.objects.filter(username=username).first()
+    if not target:
+        try:
+            target = User.objects.get(pk=int(username))
+        except (ValueError, User.DoesNotExist):
+            return JsonResponse({"success": False, "message": "Người dùng không tồn tại."}, status=404)
 
     if target == request.user:
         return JsonResponse(

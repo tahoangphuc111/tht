@@ -1,11 +1,10 @@
-// ─── Cards with 3D depth — Liquid Glass style ───
 .ui-card {
   background: var(--panel) !important;
   backdrop-filter: var(--glass) !important;
   -webkit-backdrop-filter: var(--glass) !important;
   border: 1px solid rgba(255, 255, 255, 0.48) !important;
   border-radius: var(--radius);
-  box-shadow: 
+  box-shadow:
     0 8px 32px 0 rgba(31, 38, 135, 0.04),
     0 1px 2px rgba(0, 0, 0, 0.02),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.25) !important;
@@ -18,8 +17,8 @@
 
   &.is-interactive:hover {
     transform: translateY(-4px) scale(1.01);
-    box-shadow: 
-      0 16px 40px rgba(31, 38, 135, 0.08), 
+    box-shadow:
+      0 16px 40px rgba(31, 38, 135, 0.08),
       0 4px 12px rgba(0, 0, 0, 0.04),
       inset 0 1px 0 0 rgba(255, 255, 255, 0.35) !important;
     border-color: rgba(255, 255, 255, 0.6) !important;
@@ -46,7 +45,6 @@
     overflow: hidden;
   }
 
-  // subtle inner highlight for 3D look
   &::before {
     content: '';
     position: absolute;
@@ -54,19 +52,19 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255,255,255,0.8) 50%,
-      transparent 100%
-    );
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.8) 50%,
+        transparent 100%);
     pointer-events: none;
     z-index: 1;
   }
 }
 
-// Targeted reset for custom icon/vote buttons only
-.nav-icon-btn, .nav-pill-btn, .tool-btn, .vote-button {
+.nav-icon-btn,
+.nav-pill-btn,
+.tool-btn,
+.vote-button {
   border: none;
   background: none;
   padding: 0;
@@ -80,8 +78,14 @@
 .ui-stack {
   display: grid;
   gap: 1rem;
-  &--tight { gap: 0.5rem; }
-  &--loose { gap: 1.5rem; }
+
+  &--tight {
+    gap: 0.5rem;
+  }
+
+  &--loose {
+    gap: 1.5rem;
+  }
 }
 
 .ui-stack-item {
@@ -102,7 +106,7 @@
 
     &:hover {
       background: var(--panel-hover);
-      border-color: var(--line-strong);
+      border-color: rgba(0, 113, 227, 0.15);
       transform: translateY(-2px);
       box-shadow: var(--shadow);
     }
@@ -159,58 +163,47 @@
   display: block;
 }
 
-// ─── Badges — Liquid Glass style ───
+// ─── Badges ───
 .ui-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.7rem;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: var(--glass) !important;
-  -webkit-backdrop-filter: var(--glass) !important;
+  background: var(--panel-strong);
   color: var(--muted);
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 
-    0 2px 8px rgba(31, 38, 135, 0.03), 
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid var(--line);
   transition: all 0.2s var(--ease);
 
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(31, 38, 135, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.6) !important;
-  }
-
   &--primary {
-    background: var(--brand-soft) !important;
-    color: var(--brand) !important;
-    border-color: rgba(92, 96, 245, 0.15) !important;
+    background: var(--brand-soft);
+    color: var(--brand);
+    border-color: transparent;
   }
 
   &--success {
-    background: var(--success-soft) !important;
-    color: #1a8d47 !important;
-    border-color: rgba(78, 168, 138, 0.15) !important;
+    background: var(--success-soft);
+    color: #1a8d47;
+    border-color: transparent;
   }
 
   &--danger {
-    background: var(--danger-soft) !important;
-    color: var(--brand) !important;
-    border-color: rgba(217, 101, 101, 0.15) !important;
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: transparent;
   }
 
   &--warning {
-    background: var(--warning-soft) !important;
-    color: #b37000 !important;
-    border-color: rgba(225, 161, 74, 0.15) !important;
+    background: var(--warning-soft);
+    color: #b37000;
+    border-color: transparent;
   }
 
   &--outline {
-    background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: transparent;
+    border: 1px solid var(--line-strong);
   }
 }
 
@@ -236,8 +229,8 @@
     color: #fff;
     transform: translateY(-2px) scale(1.02);
     box-shadow:
-      0 4px 14px rgba(92, 96, 245, 0.22),
-      0 2px 6px rgba(92, 96, 245, 0.12);
+      0 4px 14px rgba(0, 113, 227, 0.25),
+      0 2px 6px rgba(0, 113, 227, 0.15);
   }
 
   &:active {
@@ -247,6 +240,7 @@
   &.btn-danger {
     background: var(--danger-soft);
     color: var(--danger);
+
     &:hover {
       background: var(--danger);
       color: #fff;
@@ -278,7 +272,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(rgba(255,255,255,0.1), transparent);
+    background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
     opacity: 0;
     transition: opacity 0.3s var(--ease);
   }
@@ -289,7 +283,10 @@
     box-shadow:
       0 8px 24px rgba(67, 56, 202, 0.35),
       0 2px 8px rgba(67, 56, 202, 0.2) !important;
-    &::after { opacity: 1; }
+
+    &::after {
+      opacity: 1;
+    }
   }
 
   &:active {
@@ -463,9 +460,11 @@
     max-width: 320px;
   }
 }
+
 // ─── Utility: Hover Float ───
 .hover-float {
   transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease) !important;
+
   &:hover {
     transform: translateY(-5px) scale(1.01);
     box-shadow: var(--shadow-lg) !important;
@@ -474,6 +473,7 @@
 
 .shadow-glow {
   box-shadow: var(--shadow-glow) !important;
+
   &:hover {
     box-shadow: 0 0 25px rgba(67, 56, 202, 0.25) !important;
   }
@@ -566,4 +566,6 @@
   }
 }
 
-.cursor-pointer { cursor: pointer; }
+.cursor-pointer {
+  cursor: pointer;
+}

@@ -33,20 +33,20 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto gap-lg-3 gap-1 ms-lg-4">
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}" href="{% url 'wiki:home' %}"><i class="fa-solid fa-house-chimney"></i><span>Home</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'article-list' or request.resolver_match.url_name == 'article-detail' or request.resolver_match.url_name == 'article-create' or request.resolver_match.url_name == 'article-edit' %}is-active{% endif %}" href="{% url 'wiki:article-list' %}"><i class="fa-solid fa-newspaper"></i><span>Bài viết</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'getting-started' %}is-active{% endif %}" href="{% url 'wiki:getting-started' %}"><i class="fa-solid fa-lightbulb"></i><span>Hướng dẫn</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'user-list' or request.resolver_match.url_name == 'public-profile' %}is-active{% endif %}" href="{% url 'wiki:user-list' %}"><i class="fa-solid fa-users"></i><span>Người dùng</span></a></li>
+                <ul class="navbar-nav me-auto gap-lg-2 gap-1 ms-lg-3">
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}" href="{% url 'wiki:home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'article-list' or request.resolver_match.url_name == 'article-detail' or request.resolver_match.url_name == 'article-create' or request.resolver_match.url_name == 'article-edit' %}is-active{% endif %}" href="{% url 'wiki:article-list' %}">Bài viết</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'getting-started' %}is-active{% endif %}" href="{% url 'wiki:getting-started' %}">Hướng dẫn</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'user-list' or request.resolver_match.url_name == 'public-profile' %}is-active{% endif %}" href="{% url 'wiki:user-list' %}">Người dùng</a></li>
                     {% if user.is_authenticated and perms.wiki.add_category %}
-                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'category-list' or request.resolver_match.url_name == 'category-create' or request.resolver_match.url_name == 'category-edit' %}is-active{% endif %}" href="{% url 'wiki:category-list' %}"><i class="fa-solid fa-layer-group"></i><span>Danh mục</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'category-list' or request.resolver_match.url_name == 'category-create' or request.resolver_match.url_name == 'category-edit' %}is-active{% endif %}" href="{% url 'wiki:category-list' %}">Danh mục</a></li>
                     {% endif %}
                     {% if user.is_authenticated and user.is_superuser %}
-                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'moderation-list' %}is-active{% endif %}" href="{% url 'wiki:moderation-list' %}"><i class="fa-solid fa-shield-halved"></i><span>Kiểm duyệt</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'moderation-list' %}is-active{% endif %}" href="{% url 'wiki:moderation-list' %}">Kiểm duyệt</a></li>
                     {% endif %}
                 </ul>
 
-                <form class="d-flex ms-lg-5 me-lg-5 mb-3 mb-lg-0 search-form-nav" action="{% url 'wiki:search' %}" method="get">
+                <form class="d-flex mx-lg-3 mb-3 mb-lg-0 search-form-nav" action="{% url 'wiki:search' %}" method="get">
                     <div class="position-relative w-100">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
                         <input class="form-control search-input" type="search" name="q" placeholder="Tìm kiếm kiến thức..." aria-label="Search" value="{{ query|default:'' }}">
@@ -90,9 +90,9 @@
 
                     {% if user.is_authenticated %}
                         <div class="dropdown">
-                            <button class="nav-pill-btn dropdown-toggle px-4" type="button" data-bs-toggle="dropdown">
-                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 20px; height: 20px; font-size: 0.6rem;">{{ user.username.0|upper }}</div>
-                                {{ user.username }}
+                            <button class="nav-pill-btn dropdown-toggle px-3 px-xl-4" type="button" data-bs-toggle="dropdown">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 20px; height: 20px; font-size: 0.6rem; margin-right: 0.25rem;">{{ user.username.0|upper }}</div>
+                                <span class="d-none d-xl-inline text-truncate" style="max-width: 120px;">{{ user.username }}</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end p-2 mt-2">
                                 <li><a class="dropdown-item rounded-3 py-2 mb-1 d-flex align-items-center gap-2" href="{% url 'wiki:profile' %}"><i class="fa-solid fa-user-circle opacity-50"></i>Hồ sơ cá nhân</a></li>

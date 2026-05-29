@@ -467,8 +467,10 @@ def _execute_submission(submission):
                     subtask_max_scores[sid] = tc.score
                 else:
                     subtask_max_scores[sid] = max(subtask_max_scores[sid], tc.score)
-                if sid not in subtask_scores:
-                    subtask_scores[sid] = subtask_max_scores[sid]  # Assume max initially
+            
+            # Khởi tạo điểm ban đầu cho mỗi subtask
+            for sid, max_score in subtask_max_scores.items():
+                subtask_scores[sid] = max_score
 
             for testcase in queryset:
                 res = _run_testcase(

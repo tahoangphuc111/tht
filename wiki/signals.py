@@ -66,10 +66,26 @@ def notify_on_article_status_change(sender, instance, created, **kwargs):
             )
 
 
+@receiver(pre_save, sender=ArticleVote)
+def store_old_vote_value(sender, instance, **kwargs):
+    if instance.pk:
+        try:
+            old_instance = ArticleVote.objects.get(pk=instance.pk)
+            instance._old_value = old_instance.value
+        except ArticleVote.DoesNotExist:
+            instance._old_value = None
+    else:
+        instance._old_value = None
+
+
 @receiver(post_save, sender=ArticleVote)
 def notify_on_article_vote(sender, instance, created, **kwargs):
     """Notify author when their article gets an upvote."""
-    if created and instance.value == 1 and instance.user != instance.article.author:
+    old_value = getattr(instance, "_old_value", None)
+    is_upvote = instance.value == 1
+    became_upvote = (created and is_upvote) or (not created and old_value != 1 and is_upvote)
+
+    if became_upvote and instance.user != instance.article.author:
         Notification.objects.create(
             recipient=instance.article.author,
             sender=instance.user,

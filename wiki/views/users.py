@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import ListView
 
@@ -27,10 +28,12 @@ def profile_view(request):
 
 def public_profile_view(request, username):
     """View for a user's public profile, accessible by others."""
-    try:
-        user = User.objects.get(pk=int(username))
-    except (ValueError, User.DoesNotExist):
-        user = get_object_or_404(User, username=username)
+    user = User.objects.filter(username=username).first()
+    if not user:
+        try:
+            user = User.objects.get(pk=int(username))
+        except (ValueError, User.DoesNotExist):
+            raise Http404("Không tìm thấy người dùng")
     return render(
         request, "wiki/profile.html", build_profile_stats(user, viewer=request.user)
     )
@@ -73,8 +76,8 @@ class UserListView(ListView):
                 article_count=Count("articles", distinct=True),
                 comment_count=Count("comments", distinct=True),
                 vote_score=(
-                    Count("user_votes", filter=Q(user_votes__value=1))
-                    - Count("user_votes", filter=Q(user_votes__value=-1))
+                    Count("user_votes", filter=Q(user_votes__value=1), distinct=True)
+                    - Count("user_votes", filter=Q(user_votes__value=-1), distinct=True)
                 ),
             )
             .order_by("-vote_score")
@@ -103,6 +106,6 @@ class LeaderboardView(ListView):
 
     def get_queryset(self):
         return User.objects.annotate(
-            accepted_count=Count('coding_submissions', filter=Q(coding_submissions__status='accepted')),
+            accepted_count=Count('coding_submissions', filter=Q(coding_submissions__status='accepted'), distinct=True),
             total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions', filter=Q(coding_submissions__status='accepted'), distinct=True) * 5
         ).order_by('-total_score', '-accepted_count')

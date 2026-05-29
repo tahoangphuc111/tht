@@ -527,3 +527,87 @@ class WikiFlowTests(TestCase):
         """Saved articles endpoint should stay protected for guests."""
         response = self.client.get(reverse("wiki:saved-articles-json"))
         self.assertEqual(response.status_code, 302)
+
+    def test_numeric_username_collision_profile_view(self):
+        """Test that profile view prioritizes username over numeric ID to prevent collisions."""
+        numeric_user = User.objects.create_user(
+            username="999",
+            password="StrongPass123",
+        )
+        response = self.client.get(reverse("wiki:public-profile", args=["999"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_user"], numeric_user)
+
+    def test_user_list_vote_score_distinct_count(self):
+        """Test that UserListView's vote_score is not inflated by Cartesian product."""
+        Article.objects.create(
+            title="Extra Article 1",
+            content="Content",
+            author=self.author,
+        )
+        from .models import UserVote
+        UserVote.objects.create(
+            voter=self.other_user,
+            target=self.author,
+            value=1
+        )
+        response = self.client.get(reverse("wiki:user-list"))
+        self.assertEqual(response.status_code, 200)
+        users = {u.username: u.vote_score for u in response.context["users"]}
+        self.assertEqual(users.get("author"), 1)
+
+    def test_vote_update_triggers_notification(self):
+        """Test that updating a vote from downvote to upvote sends a notification."""
+        vote = ArticleVote.objects.create(
+            user=self.other_user,
+            article=self.article,
+            value=-1
+        )
+        from .models import Notification
+        Notification.objects.all().delete()
+        
+        vote.value = 1
+        vote.save()
+        
+        self.assertTrue(
+            Notification.objects.filter(
+                recipient=self.article.author,
+                sender=self.other_user,
+                message__contains="upvote"
+            ).exists()
+        )
+
+    def test_upload_quiz_file_parses_choices(self):
+        """Test that uploading a formatted quiz file imports choices and answers correctly."""
+        self.client.login(username="author", password="StrongPass123")
+        quiz_content = (
+            "Cau 1: Thu do cua VN la gi?\n"
+            "*A. Ha Noi\n"
+            "B. HCM\n"
+            "C. Da Nang\n"
+            "Explanation: Ha Noi la thu do.\n"
+        )
+        upload = SimpleUploadedFile(
+            "quiz_formatted.txt",
+            quiz_content.encode("utf-8"),
+            content_type="text/plain",
+        )
+        response = self.client.post(
+            reverse("wiki:upload-quiz-file", args=[self.article.pk]),
+            {"quiz_file": upload},
+        )
+        self.assertRedirects(
+            response,
+            reverse("wiki:article-quiz-manage", args=[self.article.pk]),
+        )
+        
+        question = Question.objects.filter(article=self.article, content="Cau 1: Thu do cua VN la gi?").first()
+        self.assertIsNotNone(question)
+        self.assertEqual(question.explanation, "Ha Noi la thu do.")
+        
+        choices = list(question.choices.all())
+        self.assertEqual(len(choices), 3)
+        
+        correct_choices = [c for c in choices if c.is_correct]
+        self.assertEqual(len(correct_choices), 1)
+        self.assertEqual(correct_choices[0].content, "Ha Noi")
