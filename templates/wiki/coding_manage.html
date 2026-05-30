@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
+
 {% block title %}Cấu hình bài tập · {{ article.title }} | CP Wiki{% endblock %}
 
 {% block content %}
-<div class="row g-4">
+<div class="row g-4" data-aos="fade-up">
+    <!-- Left Column: OJ Exercise Editor -->
     <div class="col-lg-7">
         <div class="card border-0 shadow-sm app-card">
             <div class="card-body p-4 p-lg-5">
-                <a href="{{ article.get_absolute_url }}" class="back-link mb-3">&larr; Quay lại bài viết</a>
+                <a href="{{ article.get_absolute_url }}" class="back-link mb-3 d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại bài viết
+                </a>
                 <div class="section-eyebrow mb-2">Mini OJ</div>
-                <h1 class="hero-title-sm mb-2">Cấu hình bài tập</h1>
-                <p class="text-secondary mb-4">Bật chế độ chấm bài, chọn ngôn ngữ cho phép, cài đặt giới hạn và code mẫu.</p>
+                <h1 class="hero-title-sm mb-2">Cấu hình bài tập lập trình</h1>
+                <p class="text-secondary mb-4 small">Bật chế độ chấm bài, thiết lập giới hạn thời gian/bộ nhớ và viết mã nguồn ban đầu.</p>
 
                 <form method="post">
                     {% csrf_token %}
@@ -18,101 +22,112 @@
                             {% if field.name == 'is_enabled' %}
                                 <div class="form-check form-switch mb-2">
                                     {{ field }}
-                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    <label class="form-check-label fw-bold small ms-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 </div>
-                                <div class="form-text text-primary mb-3"><i class="fa-solid fa-circle-info me-1"></i>Bật công tắc này để hiển thị bài tập code trên trang bài viết.</div>
+                                <div class="form-text text-primary mb-3">
+                                    <i class="fa-solid fa-circle-info me-1"></i>Bật công tắc này để kích hoạt khung soạn thảo code và chấm điểm bài viết.
+                                </div>
                             {% elif 'starter_code_' in field.name %}
-                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                                <label class="form-label fw-bold small" for="{{ field.id_for_label }}">
                                     <i class="fa-solid fa-code me-1 text-muted"></i>{{ field.label }}
                                 </label>
                                 {{ field }}
                                 {% if field.help_text %}
-                                    <div class="form-text">{{ field.help_text }}</div>
+                                    <div class="form-text mt-1">{{ field.help_text }}</div>
                                 {% endif %}
                             {% else %}
-                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                <label class="form-label fw-bold small" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
                             {% endif %}
+                            
                             {% if field.help_text and 'starter_code_' not in field.name %}
-                                <div class="form-text">{{ field.help_text }}</div>
+                                <div class="form-text mt-1">{{ field.help_text }}</div>
                             {% endif %}
                             {% for error in field.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <div class="action-row mt-4">
-                        <button type="submit" class="btn btn-dark rounded-pill px-4">
-                            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu cấu hình
+                    
+                    <div class="d-flex gap-2 mt-5">
+                        <button type="submit" class="btn btn-primary px-4 shadow-glow">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu cấu hình
                         </button>
-                        <a href="{{ article.get_absolute_url }}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-outline-secondary px-4">Hủy</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Right Column: Testcases & Runtime status -->
     <div class="col-lg-5">
-        <div class="card border-0 shadow-sm app-card h-100">
+        <div class="card border-0 shadow-sm app-card mb-4">
             <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                     <div>
-                        <div class="section-eyebrow mb-1">Testcases</div>
-                        <h2 class="h4 mb-0">Bộ test</h2>
+                        <div class="section-eyebrow mb-1">Bộ kiểm thử</div>
+                        <h2 class="h5 mb-0">Bộ testcase chấm bài</h2>
                     </div>
-                    <a href="{% url 'wiki:coding-testcase-create' exercise.pk %}" class="btn btn-primary rounded-pill px-3">
-                        <i class="fa-solid fa-plus me-1"></i>Thêm test
+                    <a href="{% url 'wiki:coding-testcase-create' exercise.pk %}" class="btn btn-sm btn-primary px-3 shadow-sm">
+                        <i class="fa-solid fa-plus me-1"></i>Thêm testcase
                     </a>
                 </div>
+                
                 <div class="stack-list">
                     {% for testcase in testcases %}
-                        <div class="stack-item">
+                        <div class="stack-item p-3 border rounded-4 d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <div class="fw-semibold">{{ testcase.name }}</div>
-                                <div class="stack-item__meta">
+                                <div class="fw-bold small text-dark">{{ testcase.name }}</div>
+                                <div class="text-secondary" style="font-size: 0.75rem;">
                                     {% if testcase.is_sample %}
-                                        <span class="ui-badge ui-badge--primary me-1">sample</span>
+                                        <span class="ui-badge ui-badge--success py-0 px-2 me-1" style="font-size: 0.65rem;">Sample</span>
                                     {% else %}
-                                        <span class="ui-badge me-1">hidden</span>
+                                        <span class="ui-badge py-0 px-2 me-1" style="font-size: 0.65rem;">Hidden</span>
                                     {% endif %}
-                                    order {{ testcase.order }} · {{ testcase.score }} điểm
+                                    Thứ tự {{ testcase.order }} &middot; {{ testcase.score }} điểm
                                 </div>
                             </div>
-                            <div class="stack-item__actions">
-                                <a href="{% url 'wiki:coding-testcase-edit' testcase.pk %}" class="btn btn-sm btn-outline-secondary px-3">Sửa</a>
-                                <a href="{% url 'wiki:coding-testcase-delete' testcase.pk %}" class="btn btn-sm btn-outline-danger px-3">Xóa</a>
+                            <div class="d-flex gap-1">
+                                <a href="{% url 'wiki:coding-testcase-edit' testcase.pk %}" class="btn btn-sm btn-soft px-3 py-1 text-dark" style="font-size: 0.8rem;">Sửa</a>
+                                <a href="{% url 'wiki:coding-testcase-delete' testcase.pk %}" class="btn btn-sm btn-outline-danger px-3 py-1" style="font-size: 0.8rem;">Xóa</a>
                             </div>
                         </div>
                     {% empty %}
-                        <div class="empty-state">
-                            <div class="ui-empty-state__icon"><i class="fa-solid fa-flask-vial"></i></div>
-                            <div class="ui-empty-state__text">Chưa có testcase nào. Thêm test đầu tiên để bắt đầu chấm bài.</div>
+                        <div class="empty-state p-4 text-center border border-dashed rounded-4 bg-light">
+                            <div class="ui-empty-state__icon mb-2"><i class="fa-solid fa-flask-vial text-muted opacity-50"></i></div>
+                            <div class="ui-empty-state__text small text-secondary">Chưa có testcase nào. Hãy thêm testcase mẫu để bắt đầu chấm điểm.</div>
                         </div>
                     {% endfor %}
                 </div>
+            </div>
+        </div>
 
-                <hr class="my-4">
-                <div class="section-eyebrow mb-2">Runtime Status</div>
-                <div class="d-flex gap-2 flex-wrap mb-3">
+        <div class="card border-0 shadow-sm app-card soft-panel">
+            <div class="card-body p-4">
+                <div class="section-eyebrow mb-1">Môi trường</div>
+                <h3 class="h5 mb-4">Trình chấm trên máy</h3>
+                
+                <div class="d-flex gap-2 flex-wrap mb-4">
                     {% for lang in all_languages %}
                         {% if lang.detected %}
-                            <span class="pill-badge" title="{{ lang.binary_path }}">
-                                <i class="fa-solid fa-circle-check text-success me-1" style="font-size:.7em"></i>{{ lang.label }}
+                            <span class="ui-badge ui-badge--success py-1 px-3 d-flex align-items-center gap-1" title="{{ lang.binary_path }}">
+                                <i class="fa-solid fa-circle-check text-success" style="font-size: 0.8rem;"></i>{{ lang.label }}
                             </span>
                         {% else %}
-                            <span class="pill-badge" style="opacity:.45" title="Not installed">
-                                <i class="fa-solid fa-circle-xmark text-danger me-1" style="font-size:.7em"></i>{{ lang.label }}
+                            <span class="ui-badge py-1 px-3 d-flex align-items-center gap-1 opacity-50" title="Chưa cài đặt">
+                                <i class="fa-solid fa-circle-xmark text-danger" style="font-size: 0.8rem;"></i>{{ lang.label }}
                             </span>
                         {% endif %}
                     {% empty %}
-                        <span class="text-secondary small">No languages configured.</span>
+                        <span class="text-secondary small">Không cấu hình trình biên dịch nào.</span>
                     {% endfor %}
                 </div>
+                
                 {% if all_languages %}
-                    <div class="form-text">
-                        <i class="fa-solid fa-terminal me-1"></i>
-                        <code>python scripts/scan.py</code> &mdash; scan &amp; install guide<br>
-                        <i class="fa-solid fa-download me-1"></i>
-                        <code>scripts/install.bat</code> (Win) &middot; <code>scripts/install.sh</code> (Linux/Mac)
+                    <div class="bg-light p-3 rounded-4 font-monospace" style="font-size: 0.75rem;">
+                        <div class="mb-2"><i class="fa-solid fa-terminal me-1"></i><code>python scripts/scan.py</code> &mdash; scan &amp; cài đặt</div>
+                        <div><i class="fa-solid fa-download me-1"></i><code>scripts/install.sh</code> (Linux/Mac) &middot; <code>install.bat</code> (Win)</div>
                     </div>
                 {% endif %}
             </div>
@@ -138,10 +153,11 @@
             const container = document.createElement('div');
             container.className = 'monaco-starter-container';
             container.style.height = '240px';
-            container.style.border = '1px solid var(--line)';
-            container.style.borderRadius = '0.75rem';
+            container.style.border = '2px solid var(--line-strong)';
+            container.style.borderRadius = '1rem';
             container.style.overflow = 'hidden';
-            container.style.marginBottom = '1rem';
+            container.style.marginBottom = '1.5rem';
+            container.style.boxShadow = 'var(--shadow-sm)';
             
             textarea.parentNode.insertBefore(container, textarea);
             textarea.style.display = 'none';

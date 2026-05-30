@@ -3,41 +3,115 @@
 {% block title %}Hướng dẫn sử dụng | CP Wiki{% endblock %}
 
 {% block content %}
-<div class="card border-0 shadow-lg app-card">
+<div class="card border-0 shadow-sm app-card mb-5 overflow-hidden" data-aos="fade-up">
     <div class="card-body p-4 p-lg-5">
-        <div class="section-eyebrow mb-2">Để chúng mình giới thiệu một chút nhé</div>
-        <h1 class="hero-title-sm mb-4">Làm quen với góc nhỏ này</h1>
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="guide-step">
-                    <h2 class="h5">1. Đăng ký & Đăng nhập</h2>
-                    <p>Nhấn Đăng ký để tạo một tài khoản cho riêng bạn nhé. Đăng nhập xong là bạn có thể tự do thay đổi thông tin cá nhân hay đổi mật khẩu rồi.</p>
+        <div class="section-eyebrow mb-2 text-center text-md-start">Bắt đầu nhanh thôi nào! 🚀</div>
+        <h1 class="hero-title-sm mb-4 text-center text-md-start">Làm quen với góc nhỏ này nhé</h1>
+        
+        <div class="row g-4 mt-2">
+            <!-- Step 1 -->
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="guide-step-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="guide-step-card__icon-box guide-step-card__icon-box--peach">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </div>
+                        <span class="guide-step-card__badge">1</span>
+                    </div>
+                    <div>
+                        <h3 class="guide-step-card__title mb-2">Đăng ký & Đăng nhập</h3>
+                        <p class="guide-step-card__desc">Nhấp chọn Đăng ký để gia nhập. Khi đăng nhập xong, bạn có thể tự thiết lập lại mật khẩu và trang cá nhân.</p>
+                    </div>
+                    
+                    <div class="guide-mock guide-mock--login mt-auto">
+                        <div class="mock-input"></div>
+                        <div class="mock-input"></div>
+                        <div class="mock-btn"></div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="guide-step">
-                    <h2 class="h5">2. Cùng viết bài viết đầu tiên</h2>
-                    <p>Bạn có thể ghé mục Bài viết, bấm Tạo bài viết rồi thỏa sức viết lách nhé. Hệ thống sẽ tự động lưu tên người viết và ngày đăng giúp bạn.</p>
+            
+            <!-- Step 2 -->
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="guide-step-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="guide-step-card__icon-box guide-step-card__icon-box--teal">
+                            <i class="fa-solid fa-pen-nib"></i>
+                        </div>
+                        <span class="guide-step-card__badge">2</span>
+                    </div>
+                    <div>
+                        <h3 class="guide-step-card__title mb-2">Viết bài đầu tiên</h3>
+                        <p class="guide-step-card__desc">Vào mục Bài viết, nhấn Tạo bài viết rồi thỏa sức viết lách nhé. Hệ thống sẽ tự lưu tên tác giả.</p>
+                    </div>
+                    
+                    <div class="guide-mock guide-mock--editor mt-auto">
+                        <div class="mock-title"></div>
+                        <div class="mock-body-line"></div>
+                        <div class="mock-body-line"></div>
+                        <div class="mock-body-line mock-body-line--short"></div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="guide-step">
-                    <h2 class="h5">3. Tìm kiếm thông tin dễ dàng</h2>
-                    <p>Bạn có thể tìm mọi thứ qua thanh tìm kiếm ở đầu trang hoặc lọc nhanh theo chuyên mục để thấy đúng chủ đề cần đọc nhé.</p>
+
+            <!-- Step 3 -->
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="guide-step-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="guide-step-card__icon-box guide-step-card__icon-box--indigo">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <span class="guide-step-card__badge">3</span>
+                    </div>
+                    <div>
+                        <h3 class="guide-step-card__title mb-2">Tìm kiếm dễ dàng</h3>
+                        <p class="guide-step-card__desc">Tìm mọi thứ qua ô tìm kiếm đầu trang hoặc nhấn vào các tag chuyên mục để xem đúng chủ đề nhé.</p>
+                    </div>
+                    
+                    <div class="guide-mock guide-mock--search mt-auto">
+                        <div class="mock-search-bar"></div>
+                        <div class="mock-tag">DP</div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="guide-step">
-                    <h2 class="h5">4. Các vai trò trong góc học tập</h2>
-                    <p>Các thành viên đều có thể tự do bình luận, đặt câu hỏi dưới mỗi bài viết. Chúng ta cùng giữ không gian thật vui vẻ và tôn trọng lẫn nhau nhé.</p>
+
+            <!-- Step 4 -->
+            <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="400">
+                <div class="guide-step-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="guide-step-card__icon-box guide-step-card__icon-box--butter">
+                            <i class="fa-solid fa-shield-cat"></i>
+                        </div>
+                        <span class="guide-step-card__badge">4</span>
+                    </div>
+                    <div>
+                        <h3 class="guide-step-card__title mb-2">Quyền & Vai trò</h3>
+                        <p class="guide-step-card__desc">Các thành viên có thể bình luận hoặc đặt câu hỏi. Hãy giữ môi trường học tập lịch sự và văn minh nha.</p>
+                    </div>
+                    
+                    <div class="guide-mock guide-mock--roles mt-auto">
+                        <div class="mock-user">
+                            <div class="mock-avatar"></div>
+                            <div class="mock-badge"></div>
+                        </div>
+                        <div class="mock-user mock-user--mod">
+                            <div class="mock-avatar"></div>
+                            <div class="mock-badge"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
         {% if user.is_authenticated and not user.profile.guide_seen %}
-            <form method="post" action="{% url 'wiki:dismiss-guide' %}" class="mt-4">
-                {% csrf_token %}
-                <button class="btn btn-dark rounded-pill px-4" type="submit">Tôi đã rõ</button>
-            </form>
+            <div class="text-center mt-5">
+                <form method="post" action="{% url 'wiki:dismiss-guide' %}" class="m-0">
+                    {% csrf_token %}
+                    <button class="btn btn-primary px-5 py-2 shadow-sm rounded-pill" type="submit">
+                        <i class="fa-solid fa-check me-2"></i>Tôi đã hiểu rõ rồi nhé
+                    </button>
+                </form>
+            </div>
         {% endif %}
     </div>
 </div>

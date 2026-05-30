@@ -1,7 +1,7 @@
 
 .article-shell {
   background: var(--panel) !important;
-  border: 1px solid var(--line) !important;
+  border: 2.5px solid var(--line-strong) !important;
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-lg) !important;
   position: relative;
@@ -82,11 +82,13 @@
   }
 
   blockquote {
-    border-left: 3px solid var(--brand);
+    border: 2px solid var(--line-strong);
+    border-left: 6px solid var(--brand);
+    box-shadow: 2px 2px 0 var(--line-strong);
     padding: 0.85rem 1.35rem;
     margin: 1.5rem 0;
     background: var(--brand-soft);
-    border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+    border-radius: var(--radius-xs);
     color: var(--ink-light);
   }
 
@@ -289,12 +291,13 @@
 
 #comment-section {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 2.5px solid var(--line-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  padding: 2rem;
 
   .comment-item {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 2px dashed var(--line);
     padding: 1.5rem 0;
 
     &:last-child { border-bottom: none; }

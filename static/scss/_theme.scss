@@ -1,69 +1,70 @@
 
 :root {
 
-  --bg: #faf6eb;
-  --bg-warm: #fcf9f0;
-  --bg-soft: #f4eee1;
-  --panel: rgba(255, 255, 255, 0.85);
+  --bg: #fdf8f4;
+  --bg-warm: #fffbf9;
+  --bg-soft: #fcf0e4;
+  --panel: rgba(255, 255, 255, 0.92);
   --panel-strong: #ffffff;
-  --panel-hover: #fcf8ee;
-  --panel-glass: rgba(255, 255, 255, 0.75);
+  --panel-hover: #fff8f3;
+  --panel-glass: rgba(255, 255, 255, 0.85);
 
-  --ink: #3c2f2f;
-  --ink-light: #5a4747;
-  --muted: #8c7373;
-  --muted-light: #b09e9e;
+  --ink: #4a3a3a;
+  --ink-light: #6e5959;
+  --muted: #9c8383;
+  --muted-light: #cfaeae;
 
-  --line: #e6dfd3;
-  --line-strong: #5c4a42;
+  --line: #f1e2d7;
+  --line-strong: #5c4d4d;
 
-  --brand: #ff6f69;
-  --brand-soft: rgba(255, 111, 105, 0.08);
-  --brand-dark: #d4524c;
-  --brand-hover: #ff8883;
+  --brand: #ff7b90;
+  --brand-soft: rgba(255, 123, 144, 0.09);
+  --brand-dark: #e05c71;
+  --brand-hover: #ff9ebb;
 
-  --accent-teal: #b5ead7;
-  --accent-purple: #c7ceea;
-  --accent-indigo: #e2f0cb;
+  --accent-teal: #b8f2e6;
+  --accent-purple: #dcd3ff;
+  --accent-indigo: #cfe8fc;
   --accent-peach: #ffb7b2;
   --accent-butter: #ffdac1;
 
-  --success: #67c2a1;
-  --success-soft: rgba(103, 194, 161, 0.12);
-  --danger: #ff8b8b;
-  --danger-soft: rgba(255, 139, 139, 0.12);
-  --warning: #f8c27a;
-  --warning-soft: rgba(248, 194, 122, 0.12);
-  --purple: #e0a3d4;
-  --purple-soft: rgba(224, 163, 212, 0.12);
-  --teal: #9ad6cd;
-  --teal-soft: rgba(154, 214, 205, 0.12);
+  --success: #7cdbb8;
+  --success-soft: rgba(124, 219, 184, 0.12);
+  --danger: #ff9494;
+  --danger-soft: rgba(255, 148, 148, 0.12);
+  --warning: #fed093;
+  --warning-soft: rgba(254, 208, 147, 0.12);
+  --purple: #f3a8e2;
+  --purple-soft: rgba(243, 168, 226, 0.12);
+  --teal: #aae0d8;
+  --teal-soft: rgba(170, 224, 216, 0.12);
 
-  --shadow-xs: 0 1px 1px rgba(92, 74, 66, 0.03);
+  --shadow-xs: 0 1px 1px rgba(92, 77, 77, 0.03);
   --shadow-sm:
-    0 1px 2px rgba(92, 74, 66, 0.03),
-    0 4px 0px rgba(92, 74, 66, 0.05);
+    0 2px 0px rgba(92, 77, 77, 0.06),
+    3px 3px 0px rgba(92, 77, 77, 0.1);
   --shadow:
-    0 4px 0px 0px rgba(92, 74, 66, 0.06);
+    4px 4px 0px 0px rgba(92, 77, 77, 0.15);
   --shadow-lg:
-    0 8px 0px 0px rgba(92, 74, 66, 0.06);
+    6px 6px 0px 0px rgba(92, 77, 77, 0.15);
   --shadow-xl:
-    0 12px 0px 0px rgba(92, 74, 66, 0.08);
+    8px 8px 0px 0px rgba(92, 77, 77, 0.18);
   --shadow-float:
-    0 6px 0px 0px rgba(92, 74, 66, 0.08);
-  --shadow-focus: 0 0 0 4px rgba(255, 111, 105, 0.15);
-  --shadow-glow: 0 0 24px rgba(255, 111, 105, 0.12);
+    0 8px 16px rgba(92, 77, 77, 0.08),
+    4px 12px 0px 0px rgba(92, 77, 77, 0.15);
+  --shadow-focus: 0 0 0 4px rgba(255, 123, 144, 0.2);
+  --shadow-glow: 0 0 24px rgba(255, 123, 144, 0.2);
 
-  --radius-xs: 10px;
-  --radius-sm: 14px;
-  --radius: 20px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
+  --radius-xs: 12px;
+  --radius-sm: 16px;
+  --radius: 24px;
+  --radius-lg: 32px;
+  --radius-xl: 40px;
 
   --glass: saturate(180%) blur(20px);
 
   --font-sans: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Itim", "Fredoka", "Lexend", sans-serif;
+  --font-display: "Fredoka", "Itim", "Lexend", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -71,11 +72,11 @@
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-  --contrib-0: #f1f5f9;
-  --contrib-1: #e0e7ff;
-  --contrib-2: #c7d2fe;
-  --contrib-3: #818cf8;
-  --contrib-4: #4f46e5;
+  --contrib-0: #fbf6f1;
+  --contrib-1: #ffe4e6;
+  --contrib-2: #fecdd3;
+  --contrib-3: #fda4af;
+  --contrib-4: #f43f5e;
 }
 
 *,
@@ -136,6 +137,19 @@ body.app-shell {
   25%      { border-radius: 70% 30% 46% 54% / 30% 58% 42% 70%; }
   50%      { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
   75%      { border-radius: 55% 27% 38% 62% / 42% 48% 52% 58%; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+
+.hover-wiggle {
+  &:hover i, &:hover svg, &:hover img {
+    display: inline-block;
+    animation: wiggle 0.25s ease-in-out infinite;
+  }
 }
 
 .fade-in-up {

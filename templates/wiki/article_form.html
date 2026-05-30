@@ -4,73 +4,145 @@
 {% block extra_head %}{{ form.media }}{% endblock %}
 
 {% block content %}
-<div class="row g-4 align-items-start">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-lg app-card">
-            <div class="card-body p-4 p-lg-5 pt-lg-4">
-                <div class="section-eyebrow mb-1">Markdown Editor</div>
-                <h1 class="hero-title-sm mb-2">{% if form.instance.pk %}Chỉnh sửa bài viết{% else %}Tạo bài viết mới{% endif %}</h1>
-                <p class="text-secondary mb-4 small">Martor đã được tích hợp để bạn soạn nội dung bằng Markdown với live preview, code block và hỗ trợ công thức KaTeX.</p>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% for field in form %}
-                        <div class="mb-3">
-                            {% if field.name == 'allow_comments' %}
-                                <div class="form-check article-form-check">
-                                    {{ field }}
-                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                </div>
-                            {% else %}
-                                <label class="form-label fw-semibold mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                {{ field }}
-                            {% endif %}
-                            {% if field.help_text %}
-                                <div class="form-text mt-1">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="text-danger small mt-1">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold mb-1" for="id_attachments">Tệp đính kèm</label>
-                        <input type="file" name="attachments" id="id_attachments" class="form-control" multiple>
-                        <div class="form-text mt-1">Tối đa 5 file (pdf/docx/png/jpg), mỗi file 15MB.</div>
-                    </div>
+<form method="post" enctype="multipart/form-data" class="mb-5">
+    {% csrf_token %}
+    
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger mb-4 rounded-4">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Left column: Main Content Editor -->
+        <div class="col-lg-8" data-aos="fade-right">
+            <div class="card border-0 shadow-sm app-card">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="section-eyebrow mb-1">Soạn thảo</div>
+                    <h1 class="hero-title-sm mb-4">{% if form.instance.pk %}Chỉnh sửa bài viết{% else %}Viết bài mới{% endif %}</h1>
+                    
                     <div class="mb-4">
-                        <div class="alert alert-info py-2 px-3 small border-0 bg-light">
-                            <i class="fa-solid fa-circle-info me-1"></i> Chèn file: `![Tên]({{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}path/to/file.png)`
-                        </div>
+                        <label class="form-label fw-bold small" for="{{ form.title.id_for_label }}">Tiêu đề bài viết</label>
+                        {{ form.title }}
+                        {% if form.title.help_text %}
+                            <div class="form-text mt-1">{{ form.title.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.title.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
                     </div>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button class="btn btn-dark rounded-pill px-4" type="submit">Lưu bài viết</button>
-                        <a class="btn btn-outline-secondary rounded-pill px-4" href="{% url 'wiki:article-list' %}">Hủy</a>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small" for="{{ form.slug.id_for_label }}">Đường dẫn bài viết (Slug)</label>
+                        {{ form.slug }}
+                        {% if form.slug.help_text %}
+                            <div class="form-text mt-1">{{ form.slug.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.slug.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
                     </div>
-                </form>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small" for="{{ form.content.id_for_label }}">Nội dung bài viết (Markdown)</label>
+                        {{ form.content }}
+                        {% if form.content.help_text %}
+                            <div class="form-text mt-1">{{ form.content.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.content.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small" for="{{ form.change_summary.id_for_label }}">Mô tả thay đổi (Tùy chọn)</label>
+                        {{ form.change_summary }}
+                        {% if form.change_summary.help_text %}
+                            <div class="form-text mt-1">{{ form.change_summary.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.change_summary.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column: Settings, Uploads, Tips -->
+        <div class="col-lg-4" data-aos="fade-left">
+            <!-- Metadata Settings -->
+            <div class="card border-0 shadow-sm app-card mb-4">
+                <div class="card-body p-4">
+                    <div class="section-eyebrow mb-1">Cấu hình</div>
+                    <h3 class="h5 mb-4">Thông tin bổ sung</h3>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small" for="{{ form.category.id_for_label }}">Chuyên mục</label>
+                        {{ form.category }}
+                        {% if form.category.help_text %}
+                            <div class="form-text mt-1">{{ form.category.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.category.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small" for="{{ form.tags.id_for_label }}">Thẻ phân loại</label>
+                        {{ form.tags }}
+                        {% if form.tags.help_text %}
+                            <div class="form-text mt-1">{{ form.tags.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.tags.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-2 form-check article-form-check py-2">
+                        {{ form.allow_comments }}
+                        <label class="form-check-label fw-bold small ms-2" for="{{ form.allow_comments.id_for_label }}">Cho phép thảo luận</label>
+                        {% for error in form.allow_comments.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload attachments -->
+            <div class="card border-0 shadow-sm app-card mb-4">
+                <div class="card-body p-4">
+                    <div class="section-eyebrow mb-1">Tài liệu</div>
+                    <h3 class="h5 mb-4">Tệp đính kèm</h3>
+                    <div class="mb-2">
+                        <input type="file" name="attachments" id="id_attachments" class="form-control" multiple>
+                        <div class="form-text mt-2"><i class="fa-solid fa-circle-info me-1"></i>Hỗ trợ pdf, docx, png, jpg (tối đa 15MB/file).</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formatting Helper Sheet -->
+            <div class="card border-0 shadow-sm app-card soft-panel mb-4">
+                <div class="card-body p-4">
+                    <div class="section-eyebrow mb-1">Gợi ý</div>
+                    <h3 class="h5 mb-3">Mẹo soạn thảo</h3>
+                    <ul class="small text-secondary mb-0 ps-3">
+                        <li class="mb-2">Dùng <code>#</code>, <code>##</code> chia tiêu đề bài viết.</li>
+                        <li class="mb-2">Chèn code khối bằng cặp ba dấu backtick.</li>
+                        <li class="mb-2">Viết công thức toán bằng kí hiệu đô la <code>$n$</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary px-4 w-100 shadow-glow" type="submit">
+                    <i class="fa-solid fa-floppy-disk me-1"></i>Lưu bài viết
+                </button>
+                <a class="btn btn-outline-secondary px-4" href="{% url 'wiki:article-list' %}">Hủy</a>
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm app-card soft-panel">
-            <div class="card-body p-4">
-                <div class="section-eyebrow mb-2">Mẹo Soạn Thảo</div>
-                <h2 class="h4 mb-3">Viết ghi chú rõ ràng</h2>
-                <ul class="helper-list mb-0">
-                    <li>Dùng `#`, `##` để chia tiêu đề lớn và nhỏ.</li>
-                    <li>Chèn code bằng block ba dấu backtick để Martor highlight tốt hơn.</li>
-                    <li>Viết công thức inline bằng <code>$n$</code> và block math bằng <code>$$...$$</code>.</li>
-                    <li>Ghi rõ ý tưởng, độ phức tạp, và khi nào nên áp dụng.</li>
-                    <li>Thêm ví dụ input/output hoặc edge cases để bài viết dễ tra cứu hơn.</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+</form>
 {% endblock %}

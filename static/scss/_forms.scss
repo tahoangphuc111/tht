@@ -1,16 +1,17 @@
 
 %input-base {
   background: var(--panel);
-  border: 1.5px solid var(--line-strong);
+  border: 2px solid var(--line-strong);
   border-radius: var(--radius-sm);
   min-height: 2.75rem;
   width: 100%;
   font-size: 0.92rem;
   transition: all 0.25s var(--ease);
   padding: 0.5rem 1rem;
+  color: var(--ink);
 
   &:hover {
-    border-color: var(--muted-light);
+    border-color: var(--brand);
   }
 
   &:focus {

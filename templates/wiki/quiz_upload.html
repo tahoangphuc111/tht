@@ -1,38 +1,61 @@
 {% extends 'base.html' %}
 
-{% block title %}Upload Quiz | {{ article.title }}{% endblock %}
+{% block title %}Upload Trắc nghiệm | {{ article.title }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="card border-0 shadow-lg app-card">
+<div class="row justify-content-center mb-5" data-aos="zoom-in">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm app-card">
             <div class="card-body p-4 p-lg-5">
-                <div class="section-eyebrow mb-2">Quiz Management</div>
-                <h2 class="h4 mb-4">Upload câu hỏi từ file</h2>
+                <a href="{% url 'wiki:article-quiz-manage' article.pk %}" class="back-link mb-4 d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại quản lý câu hỏi
+                </a>
                 
-                <div class="alert bg-primary-soft border-0 rounded-4 p-4 mb-4">
-                    <h5 class="h6 fw-bold mb-3"><i class="fa-solid fa-circle-info me-2"></i>Hướng dẫn định dạng file</h5>
-                    <ul class="small mb-0 ps-3">
-                        <li class="mb-2">Hệ thống chấp nhận file <strong>.docx</strong>, <strong>.pdf</strong> hoặc <strong>.txt</strong>.</li>
-                        <li class="mb-2">Mỗi câu hỏi phải được phân tách bằng <strong>2 lần xuống dòng</strong> (một dòng trống ở giữa).</li>
-                        <li class="mb-2">Hệ thống sẽ chỉ trích xuất những đoạn văn bản dài hơn 10 ký tự.</li>
-                        <li>Đảm bảo file không được đặt mật khẩu bảo vệ.</li>
-                    </ul>
+                <div class="text-center mb-4">
+                    <div class="guide-step-card__icon-box guide-step-card__icon-box--indigo mx-auto mb-3">
+                        <i class="fa-solid fa-file-import"></i>
+                    </div>
+                    <h1 class="h4 fw-bold">Nhập câu hỏi từ file tài liệu</h1>
+                    <p class="text-secondary small">Trích xuất câu hỏi trắc nghiệm tự động từ file Word, PDF hoặc Text.</p>
                 </div>
-                
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-4">
-                        <label for="quiz_file" class="form-label fw-semibold">Chọn file câu hỏi</label>
-                        <input type="file" name="quiz_file" id="quiz_file" class="form-control" accept=".docx,.pdf,.txt" required>
-                        <div class="form-text mt-2">Dung lượng tối đa 5MB.</div>
+
+                <div class="row g-4 align-items-stretch">
+                    <!-- Column 1: Guidelines -->
+                    <div class="col-md-6">
+                        <div class="h-100 p-4 rounded-4 bg-warm border border-light">
+                            <h5 class="h6 fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Quy tắc định dạng</h5>
+                            <ul class="small text-secondary ps-3 mb-0">
+                                <li class="mb-3">Chấp nhận file định dạng <strong>.docx</strong>, <strong>.pdf</strong>, hoặc <strong>.txt</strong>.</li>
+                                <li class="mb-3">Mỗi câu hỏi phải cách nhau bằng <strong>1 dòng trống</strong> (2 lần xuống dòng).</li>
+                                <li class="mb-3">Nội dung câu hỏi tối thiểu phải dài hơn 10 ký tự.</li>
+                                <li>Hãy đảm bảo file của bạn không bị khóa mật khẩu bảo mật nhé.</li>
+                            </ul>
+                        </div>
                     </div>
-                    
-                    <div class="d-flex gap-3 mt-4">
-                        <button type="submit" class="btn btn-premium rounded-pill px-5">Bắt đầu trích xuất</button>
-                        <a href="{% url 'wiki:article-quiz-manage' article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy bỏ</a>
+
+                    <!-- Column 2: Upload Zone -->
+                    <div class="col-md-6">
+                        <form method="post" enctype="multipart/form-data" class="d-flex flex-column justify-content-between h-100">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label for="quiz_file" class="form-label fw-bold small">Chọn tệp của bạn</label>
+                                <div class="border border-2 border-dashed rounded-4 p-4 text-center bg-light transition-all hover-float cursor-pointer" onclick="document.getElementById('quiz_file').click()">
+                                    <i class="fa-solid fa-cloud-arrow-up fs-2 text-primary opacity-75 mb-2"></i>
+                                    <div class="fw-semibold small">Nhấn để tải file lên</div>
+                                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">DOCX, PDF, TXT tối đa 5MB</div>
+                                    <input type="file" name="quiz_file" id="quiz_file" class="d-none" accept=".docx,.pdf,.txt" required onchange="document.getElementById('file-chosen-name').innerText = this.files[0].name">
+                                </div>
+                                <div id="file-chosen-name" class="text-primary fw-bold text-center small mt-3"></div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary rounded-pill py-2 shadow-glow">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Bắt đầu trích xuất
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

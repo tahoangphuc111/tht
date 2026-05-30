@@ -9,7 +9,7 @@
 .profile-avatar {
   width: 68px;
   height: 68px;
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  background: var(--brand);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -17,7 +17,8 @@
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 700;
-  box-shadow: 0 8px 16px var(--brand-soft);
+  border: 2.5px solid var(--line-strong);
+  box-shadow: 3px 3px 0 var(--line-strong);
 }
 
 .profile-stats {
@@ -30,16 +31,16 @@
   padding: 1.25rem;
   background: var(--bg-soft);
   border-radius: 1rem;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line-strong);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  transition: all 0.3s var(--ease);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
     background: white;
-    border-color: var(--brand-soft);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
   }
 
   &__value {
@@ -69,14 +70,15 @@
   gap: 1rem;
   padding: 1rem;
   background: white;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line-strong);
   border-radius: 1rem;
-  transition: all 0.2s var(--ease);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
-    border-color: var(--brand-soft);
     background: var(--bg-soft);
-    transform: translateX(4px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
   }
 
   .activity-icon {
@@ -85,6 +87,7 @@
     background: var(--bg-soft);
     color: var(--brand);
     border-radius: 10px;
+    border: 1.5px solid var(--line-strong);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -123,14 +126,15 @@
 
 .contribution-cell {
   aspect-ratio: 1;
-  border-radius: 3px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
   background: var(--contrib-0);
-  transition: transform 0.1s ease;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
-    transform: scale(1.2);
+    transform: scale(1.3);
     z-index: 2;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    box-shadow: 2px 2px 0 var(--line-strong);
   }
 
   &.contribution-level-0 { background: var(--contrib-0); }
@@ -144,12 +148,12 @@
   background: var(--warning) !important;
   color: var(--ink) !important;
   font-weight: 800 !important;
-  border: 1.5px solid var(--line-strong) !important;
-  box-shadow: 2px 2px 0px 0px rgba(92, 74, 66, 0.1);
+  border: 2px solid var(--line-strong) !important;
+  box-shadow: 2px 2px 0px var(--line-strong);
   
   &:hover {
-    box-shadow: 3px 3px 0px 0px rgba(92, 74, 66, 0.15);
-    transform: scale(1.08) rotate(-1deg);
+    box-shadow: 4px 4px 0px var(--line-strong);
+    transform: scale(1.08) rotate(-2deg);
   }
 }
 
@@ -158,25 +162,26 @@
   height: 48px;
   background: var(--brand-soft) !important;
   color: var(--brand) !important;
-  border: 1.5px solid rgba(92, 96, 245, 0.15) !important;
+  border: 2px solid var(--line-strong) !important;
+  box-shadow: 2px 2px 0 var(--line-strong);
   border-radius: 12px;
   font-size: 1.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s var(--ease-spring);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   &:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px) scale(1.08) rotate(3deg);
+    box-shadow: 4px 4px 0 var(--line-strong);
     background: var(--brand) !important;
     color: white !important;
   }
 }
 
 .badge-icon--admin {
-  background: rgba(255, 149, 0, 0.1) !important;
+  background: var(--warning-soft) !important;
   color: #ff9500 !important;
-  border: 1.5px solid rgba(255, 149, 0, 0.2) !important;
+  border: 2px solid var(--line-strong) !important;
   animation: pulse-glow 2s infinite ease-in-out;
 }
