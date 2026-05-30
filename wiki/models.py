@@ -543,13 +543,13 @@ class CodingTestCase(models.Model):
 
 class CodingSubmission(models.Model):
     STATUS_CHOICES = (
-        ("accepted", "Accepted"),
-        ("wrong_answer", "Wrong Answer"),
-        ("compile_error", "Compile Error"),
-        ("runtime_error", "Runtime Error"),
-        ("time_limit_exceeded", "Time Limit Exceeded"),
-        ("internal_error", "Internal Error"),
-        ("running", "Running"),
+        ("accepted", "Chấp nhận"),
+        ("wrong_answer", "Sai kết quả"),
+        ("compile_error", "Lỗi biên dịch"),
+        ("runtime_error", "Lỗi thực thi"),
+        ("time_limit_exceeded", "Quá giới hạn thời gian"),
+        ("internal_error", "Lỗi hệ thống"),
+        ("running", "Đang chấm bài"),
     )
     exercise = models.ForeignKey(
         CodingExercise, on_delete=models.CASCADE, related_name="submissions"
@@ -581,6 +581,19 @@ class CodingSubmission(models.Model):
     def __str__(self):
         return f"{self.exercise.article.title} - {self.user} - {self.status}"
 
+    @property
+    def get_status_label(self):
+        status_map = {
+            "accepted": "Chấp nhận",
+            "wrong_answer": "Sai kết quả",
+            "time_limit_exceeded": "Quá giới hạn thời gian",
+            "runtime_error": "Lỗi thực thi",
+            "compile_error": "Lỗi biên dịch",
+            "internal_error": "Lỗi hệ thống",
+            "running": "Đang chấm bài",
+        }
+        return status_map.get(self.status, self.status.replace("_", " ").title())
+
 
 class CodingSubmissionResult(models.Model):
     submission = models.ForeignKey(
@@ -606,6 +619,19 @@ class CodingSubmissionResult(models.Model):
 
     def __str__(self):
         return f"{self.case_name}: {self.status}"
+
+    @property
+    def get_status_label(self):
+        status_map = {
+            "accepted": "Chấp nhận",
+            "wrong_answer": "Sai kết quả",
+            "time_limit_exceeded": "Quá giới hạn thời gian",
+            "runtime_error": "Lỗi thực thi",
+            "compile_error": "Lỗi biên dịch",
+            "internal_error": "Lỗi hệ thống",
+            "running": "Đang chấm bài",
+        }
+        return status_map.get(self.status, self.status.replace("_", " ").title())
 
 
 class UserAnswer(models.Model):

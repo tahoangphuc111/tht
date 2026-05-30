@@ -1,21 +1,14 @@
-"""
-Utility functions for the wiki application.
-"""
-
 from collections import defaultdict
 from datetime import timedelta
-
 from django.contrib.auth import get_user_model
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
-
 from .models import ArticleRevision, Profile
 
 User = get_user_model()
 
 
 def save_article_revision(article, user, change_summary):
-    """Save a snapshot of an article for revision history."""
     ArticleRevision.objects.create(
         article=article,
         title=article.title,
@@ -26,7 +19,6 @@ def save_article_revision(article, user, change_summary):
 
 
 def can_publish_articles(user):
-    """Check if the user has permission to publish or edit articles."""
     if not user.is_authenticated:
         return False
     profile, _ = Profile.objects.get_or_create(user=user)
@@ -41,20 +33,17 @@ def can_publish_articles(user):
 
 
 def can_manage_wiki(user):
-    """Check if the user has administrative permissions for the wiki."""
     return user.is_authenticated and (
         user.is_superuser or user.has_perm("wiki.manage_all_articles")
     )
 
 
 def get_profile_name(user):
-    """Return a displayable name for the user."""
     profile, _ = Profile.objects.get_or_create(user=user)
     return profile.display_name or user.get_full_name() or user.username
 
 
 def get_safe_redirect_url(request, candidate, fallback="/"):
-    """Return a local redirect target or the provided fallback."""
     if candidate and url_has_allowed_host_and_scheme(
         candidate,
         allowed_hosts={request.get_host()},
@@ -65,7 +54,6 @@ def get_safe_redirect_url(request, candidate, fallback="/"):
 
 
 def build_profile_stats(user, viewer=None):
-    """Generate statistics and contribution data for a user's profile."""
     is_owner = viewer == user
     is_admin = bool(viewer and viewer.is_superuser)
     profile, _ = Profile.objects.get_or_create(user=user)
@@ -102,7 +90,6 @@ def build_profile_stats(user, viewer=None):
 
     try:
         from .models import CodingSubmission
-
         coding_submissions = CodingSubmission.objects.filter(
             user=user, created_at__date__gte=start_date, is_sample_run=False
         )

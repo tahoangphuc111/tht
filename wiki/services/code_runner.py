@@ -607,13 +607,13 @@ def _execute_submission(submission):
 
 def serialize_submission(submission):
     status_map = {
-        "accepted": "Accepted",
-        "wrong_answer": "Wrong Answer",
-        "time_limit_exceeded": "Time Limit Exceeded",
-        "runtime_error": "Runtime Error",
-        "compile_error": "Compile Error",
-        "internal_error": "Internal Error",
-        "running": "Running",
+        "accepted": "Chấp nhận",
+        "wrong_answer": "Sai kết quả",
+        "time_limit_exceeded": "Quá giới hạn thời gian",
+        "runtime_error": "Lỗi thực thi",
+        "compile_error": "Lỗi biên dịch",
+        "internal_error": "Lỗi hệ thống",
+        "running": "Đang chấm bài",
     }
     status_label = status_map.get(submission.status, submission.status.replace("_", " ").title())
     if submission.status == "accepted":
@@ -630,6 +630,8 @@ def serialize_submission(submission):
         message = f"Sai kết quả tại test case thứ {submission.passed_tests + 1}."
     elif submission.status == "time_limit_exceeded":
         message = f"Vượt quá giới hạn thời gian ({submission.runtime_ms}ms)."
+    elif submission.status == "runtime_error":
+        message = "Lỗi thực thi trong quá trình chạy bài."
     else:
         message = status_label
     return {

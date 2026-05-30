@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="profile-avatar">{{ profile_name|first|upper }}</div>
                 {% endif %}
                 <div>
-                    <div class="section-eyebrow mb-1">Profile</div>
+                    <div class="section-eyebrow mb-1">Hồ sơ</div>
                     <h1 class="hero-title-sm mb-1">{{ profile_name }}</h1>
                     <p class="text-secondary mb-0">@{{ profile_user.username }}{% if public_email %} • {{ public_email }}{% endif %}</p>
                     <div class="d-flex gap-2 flex-wrap mt-2">
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm app-card h-100">
             <div class="card-body p-4">
-                <div class="section-eyebrow mb-2">Overview</div>
+                <div class="section-eyebrow mb-2">Tổng quan</div>
                 <div class="profile-stats">
                     <div class="profile-stat">
                         <span class="profile-stat__value">{{ article_count }}</span>
@@ -128,11 +128,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                     <div class="profile-stat">
                         <span class="profile-stat__value">{{ total_contributions }}</span>
-                        <span class="profile-stat__label">Contribution 12 tuần</span>
+                        <span class="profile-stat__label">Đóng góp 12 tuần</span>
                     </div>
                     <div class="profile-stat">
                         <span class="profile-stat__value" id="user-{{ profile_user.pk }}-score">{{ user_vote_score }}</span>
-                        <span class="profile-stat__label">Điểm vote</span>
+                        <span class="profile-stat__label">Điểm bình chọn</span>
                     </div>
 
                 </div>
@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
                     <div>
-                        <h2 class="h4 mb-0">Contribution theo tháng</h2>
+                        <h2 class="h4 mb-0">Đóng góp theo tháng</h2>
                     </div>
                     <span class="text-secondary small">Đăng bài và chỉnh sửa trong 6 tháng gần đây</span>
                 </div>
@@ -205,10 +205,10 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
                     <div>
-                        <div class="section-eyebrow mb-1">Contribution Table</div>
+                        <div class="section-eyebrow mb-1">Bảng đóng góp</div>
                         <h2 class="h4 mb-0">84 ngày gần đây</h2>
                     </div>
-                    <span class="text-secondary small">Đăng bài và chỉnh sửa đều được tính là contribution</span>
+                    <span class="text-secondary small">Đăng bài và chỉnh sửa đều được tính là đóng góp</span>
                 </div>
                 <div class="contribution-grid">
                     {% for day in contribution_days %}
@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm app-card h-100">
             <div class="card-body p-4">
-                <div class="section-eyebrow mb-1">Activity</div>
+                <div class="section-eyebrow mb-1">Hoạt động</div>
                 <h2 class="h4 mb-3">Hoạt động gần đây</h2>
                 <div class="activity-stack">
                     {% for article in recent_articles %}
@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
                 {% if recent_uploads %}
                     <hr>
-                    <div class="section-eyebrow mb-1">Uploads</div>
+                    <div class="section-eyebrow mb-1">Tệp tải lên</div>
                     <h2 class="h5 mb-3">Tệp gần đây</h2>
                     <div class="stack-list">
                         {% for upload in recent_uploads %}

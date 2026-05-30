@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Upload File | CP Wiki{% endblock %}
+{% block title %}Tải tệp lên | CP Wiki{% endblock %}
 
 {% block content %}
 <div class="page-shell">
     <div class="page-header">
         <div class="page-header__content">
-            <div class="section-eyebrow mb-2">Uploads</div>
+            <div class="section-eyebrow mb-2">Tệp tải lên</div>
             <h1 class="hero-title-sm mb-1">Quản lý tệp đính kèm</h1>
             <p class="text-secondary mb-0">Tải file PDF, DOCX hoặc ảnh để gắn vào bài viết và chia sẻ tài liệu tham khảo.</p>
         </div>
@@ -16,7 +16,7 @@
         <form method="post" enctype="multipart/form-data" class="mb-4">
             {% csrf_token %}
             <div class="mb-3">
-                <label class="form-label" for="id_file">File</label>
+                <label class="form-label" for="id_file">Tệp</label>
                 {{ form.file }}
                 {% if form.file.help_text %}
                     <div class="form-text">{{ form.file.help_text }}</div>
@@ -29,7 +29,7 @@
                 {% for error in form.description.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
             </div>
             <div class="action-row">
-                <button type="submit" class="btn btn-accent px-4">Upload</button>
+                <button type="submit" class="btn btn-accent px-4">Tải lên</button>
                 <a class="btn btn-outline-secondary px-4" href="{% url 'wiki:article-list' %}">Hủy</a>
             </div>
         </form>
@@ -37,8 +37,8 @@
 
     <section class="app-card card border-0 shadow-sm page-card stack-shell">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h2 class="h4 mb-0">File đã upload</h2>
-            <span class="pill-badge">{{ uploads|length }} file</span>
+            <h2 class="h4 mb-0">Tệp đã tải lên</h2>
+            <span class="pill-badge">{{ uploads|length }} tệp</span>
         </div>
         <div class="stack-list">
             {% for upload in uploads %}
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             {% empty %}
-                <div class="empty-state centered">Chưa có file nào được upload.</div>
+                <div class="empty-state centered">Chưa có tệp nào được tải lên.</div>
             {% endfor %}
         </div>
     </section>

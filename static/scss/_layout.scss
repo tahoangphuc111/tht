@@ -63,6 +63,15 @@ main.app-main {
     right: 8%;
     animation: float 20s ease-in-out infinite 0.5s;
   }
+  &.decor-5 {
+    animation: float-gentle 12s ease-in-out infinite;
+  }
+  &.decor-6 {
+    animation: pulse-soft 8s ease-in-out infinite;
+  }
+  &.decor-7 {
+    animation: float 16s ease-in-out infinite 3s;
+  }
 }
 
 .hero-panel {
@@ -95,7 +104,7 @@ main.app-main {
 }
 
 .stat-card {
-  @extend .ui-card;
+  @extend .marshmallow-effect;
   min-height: 7rem;
   padding: 1.25rem;
   display: flex;
@@ -103,12 +112,11 @@ main.app-main {
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: var(--panel);
   transition: all 0.3s var(--ease-spring);
 
   &:hover {
     transform: translateY(-3px) scale(1.02);
-    box-shadow: var(--shadow);
+    box-shadow: 12px 12px 0 var(--line-strong), inset -4px -4px 0 rgba(0,0,0,0.05) !important;
   }
 }
 

@@ -8,7 +8,7 @@
     <div class="col-xl-10">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <div class="section-eyebrow mb-1">Submission Detail</div>
+                <div class="section-eyebrow mb-1">Chi tiết bài nộp</div>
                 <h1 class="hero-title-sm mb-0">Bài nộp #{{ submission.pk }}</h1>
             </div>
             <a href="{% url 'wiki:submissions-history' %}" class="btn btn-outline-secondary rounded-pill px-4">Quay lại lịch sử</a>
@@ -18,25 +18,25 @@
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm app-card mb-4">
                     <div class="card-body p-4">
-                        <div class="section-eyebrow mb-3">Overview</div>
+                        <div class="section-eyebrow mb-3">Tổng quan</div>
                         <div class="mb-4">
                             {% if submission.status == 'accepted' %}
                                 <div class="badge bg-success-soft text-success p-2 rounded-3 w-100 text-center mb-3">
-                                    <i class="fa-solid fa-check-circle me-2"></i><strong>Accepted</strong>
+                                    <i class="fa-solid fa-check-circle me-2"></i><strong>Chấp nhận</strong>
                                 </div>
                             {% elif submission.status == 'running' %}
                                 <div class="badge bg-primary-soft text-primary p-2 rounded-3 w-100 text-center mb-3">
-                                    <i class="fa-solid fa-spinner fa-spin me-2"></i><strong>Running</strong>
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i><strong>Đang chạy</strong>
                                 </div>
                             {% else %}
                                 <div class="badge bg-danger-soft text-danger p-2 rounded-3 w-100 text-center mb-3">
-                                    <i class="fa-solid fa-circle-xmark me-2"></i><strong>{{ submission.status|title }}</strong>
+                                    <i class="fa-solid fa-circle-xmark me-2"></i><strong>{{ submission.get_status_label }}</strong>
                                 </div>
                             {% endif %}
                             
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-secondary">Người nộp:</span>
-                                <span class="fw-bold">{{ submission.user.username }}</span>
+                                <span class="fw-bold">@{{ submission.user.username }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-secondary">Bài tập:</span>
@@ -61,7 +61,7 @@
                         </div>
 
                         {% if submission.compile_output %}
-                            <div class="section-eyebrow mb-2">Compile Output</div>
+                            <div class="section-eyebrow mb-2">Kết quả biên dịch</div>
                             <pre class="bg-white text-dark border p-3 rounded-3 small shadow-inner" style="max-height: 200px; overflow-y: auto;">{{ submission.compile_output }}</pre>
                         {% endif %}
                     </div>
@@ -71,22 +71,22 @@
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm app-card mb-4">
                     <div class="card-body p-4">
-                        <div class="section-eyebrow mb-3">Source Code</div>
+                        <div class="section-eyebrow mb-3">Mã nguồn</div>
                         <pre class="bg-light p-4 rounded-4 border" style="font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.5; max-height: 600px; overflow-y: auto;">{{ submission.source_code }}</pre>
                     </div>
                 </div>
 
                 <div class="card border-0 shadow-sm app-card">
                     <div class="card-body p-4">
-                        <div class="section-eyebrow mb-3">Test Case Results</div>
+                        <div class="section-eyebrow mb-3">Kết quả Test Case</div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Case</th>
-                                        <th>Status</th>
-                                        <th>Time</th>
-                                        <th class="text-end">Details</th>
+                                        <th>Bộ kiểm thử</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian chạy</th>
+                                        <th class="text-end">Chi tiết</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -95,9 +95,9 @@
                                             <td class="fw-medium">{{ result.case_name }}</td>
                                             <td>
                                                 {% if result.status == 'accepted' %}
-                                                    <span class="badge bg-success-soft text-success">Accepted</span>
+                                                    <span class="badge bg-success-soft text-success">Chấp nhận</span>
                                                 {% else %}
-                                                    <span class="badge bg-danger-soft text-danger">{{ result.status|title }}</span>
+                                                    <span class="badge bg-danger-soft text-danger">{{ result.get_status_label }}</span>
                                                 {% endif %}
                                             </td>
                                             <td>{{ result.runtime_ms }} ms</td>
@@ -111,16 +111,16 @@
                                             <td colspan="4" class="p-3 bg-light rounded-bottom">
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
-                                                        <div class="small text-secondary mb-1">Expected:</div>
+                                                        <div class="small text-secondary mb-1">Kết quả kỳ vọng:</div>
                                                         <pre class="bg-white p-2 rounded border small mb-0">{{ result.expected_preview }}</pre>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <div class="small text-secondary mb-1">Actual:</div>
+                                                        <div class="small text-secondary mb-1">Kết quả thực tế:</div>
                                                         <pre class="bg-white p-2 rounded border small mb-0">{{ result.actual_preview }}</pre>
                                                     </div>
                                                     {% if result.stderr_preview %}
                                                     <div class="col-12">
-                                                        <div class="small text-danger mb-1">Error Stream:</div>
+                                                        <div class="small text-danger mb-1">Luồng lỗi (stderr):</div>
                                                         <pre class="bg-white p-2 rounded border small mb-0 text-danger">{{ result.stderr_preview }}</pre>
                                                     </div>
                                                     {% endif %}

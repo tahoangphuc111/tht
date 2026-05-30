@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}500 - Lỗi hệ thống | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="text-center py-5" data-aos="zoom-in">
+    <div class="display-1 fw-bold text-danger mb-2">500</div>
+    <div style="font-size: 5rem; margin-bottom: 2rem;">(╥﹏╥)</div>
+    <h1 class="h3 mb-3">Huhu! Đã có lỗi xảy ra mất rồi...</h1>
+    <p class="text-secondary mb-5">Máy chủ đang gặp một chút vấn đề nhỏ. Bạn vui lòng thử lại sau vài phút nữa nhé!</p>
+    <div class="d-flex justify-content-center">
+        <a href="{% url 'wiki:home' %}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">Quay về trang chủ</a>
+    </div>
+</div>
+{% endblock %}

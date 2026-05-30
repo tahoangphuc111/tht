@@ -21,7 +21,8 @@ async def websocket_app(scope, receive, send):
         return
 
     await send({"type": "websocket.accept"})
-    connected_websockets.add(send)
+    loop = asyncio.get_running_loop()
+    connected_websockets.add((send, loop))
     try:
         while True:
             event = await receive()
@@ -35,13 +36,14 @@ async def websocket_app(scope, receive, send):
             elif event["type"] == "websocket.disconnect":
                 break
     finally:
-        connected_websockets.discard(send)
+        connected_websockets.discard((send, loop))
 
 
 async def application(scope, receive, send):
     """Main entry point for ASGI application."""
     if scope["type"] == "websocket":
-        if scope.get("path") == "/ws/votes/":
+        path = scope.get("path", "")
+        if path.rstrip("/") == "/ws/votes":
             await websocket_app(scope, receive, send)
         else:
             await send({"type": "websocket.close", "code": 1000})

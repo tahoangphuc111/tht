@@ -36,9 +36,9 @@
                                 <td class="ps-4 py-3 text-secondary small">#{{ submission.pk }}</td>
                                 <td class="py-3">
                                     {% if submission.status == 'accepted' %}
-                                        <span class="ui-badge ui-badge--success"><i class="fa-solid fa-check-circle me-1"></i>Accepted</span>
+                                        <span class="ui-badge ui-badge--success"><i class="fa-solid fa-check-circle me-1"></i>Chấp nhận</span>
                                     {% elif submission.status == 'running' %}
-                                        <span class="ui-badge ui-badge--primary"><i class="fa-solid fa-spinner fa-spin me-1"></i>Running</span>
+                                        <span class="ui-badge ui-badge--primary"><i class="fa-solid fa-spinner fa-spin me-1"></i>Đang chạy</span>
                                     {% else %}
                                         <span class="ui-badge ui-badge--danger"><i class="fa-solid fa-times-circle me-1"></i>{{ submission.status|title }}</span>
                                     {% endif %}

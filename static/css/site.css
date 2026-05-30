@@ -7,38 +7,33 @@
   font-display: swap;
 }
 :root {
-  --bg: #fdf8f4;
-  --bg-warm: #fffbf9;
-  --bg-soft: #fcf0e4;
-  --panel: rgba(255, 255, 255, 0.92);
+  --bg: #fffdfa;
+  --bg-warm: #fff9f2;
+  --bg-soft: #fff1e6;
+  --panel: rgba(255, 255, 255, 0.95);
   --panel-strong: #ffffff;
-  --panel-hover: #fff8f3;
-  --panel-glass: rgba(255, 255, 255, 0.85);
-  --ink: #4a3a3a;
-  --ink-light: #6e5959;
-  --muted: #9c8383;
-  --muted-light: #cfaeae;
-  --line: #f1e2d7;
-  --line-strong: #5c4d4d;
-  --brand: #ff7b90;
-  --brand-soft: rgba(255, 123, 144, 0.09);
-  --brand-dark: #e05c71;
-  --brand-hover: #ff9ebb;
-  --accent-teal: #b8f2e6;
-  --accent-purple: #dcd3ff;
-  --accent-indigo: #cfe8fc;
-  --accent-peach: #ffb7b2;
-  --accent-butter: #ffdac1;
-  --success: #7cdbb8;
-  --success-soft: rgba(124, 219, 184, 0.12);
-  --danger: #ff9494;
-  --danger-soft: rgba(255, 148, 148, 0.12);
-  --warning: #fed093;
-  --warning-soft: rgba(254, 208, 147, 0.12);
-  --purple: #f3a8e2;
-  --purple-soft: rgba(243, 168, 226, 0.12);
-  --teal: #aae0d8;
-  --teal-soft: rgba(170, 224, 216, 0.12);
+  --panel-hover: #fff5eb;
+  --panel-glass: rgba(255, 255, 255, 0.88);
+  --ink: #5a4a42;
+  --ink-light: #7a6a62;
+  --muted: #a6968e;
+  --muted-light: #d6cdc7;
+  --line: #e8ddd5;
+  --line-strong: #4a3a32;
+  --brand: #ff8fa3;
+  --brand-soft: rgba(255, 143, 163, 0.12);
+  --brand-dark: #e67589;
+  --brand-hover: #ffacbc;
+  --accent-teal: #c1f2e8;
+  --accent-purple: #e0d9ff;
+  --accent-indigo: #d9edff;
+  --accent-peach: #ffc9c5;
+  --accent-butter: #ffe4d1;
+  --success: #98e5ca;
+  --danger: #ffabab;
+  --warning: #ffdeae;
+  --purple: #f7c1eb;
+  --teal: #c1eee7;
   --shadow-xs: 0 1px 1px rgba(92, 77, 77, 0.03);
   --shadow-sm:
     0 2px 0px rgba(92, 77, 77, 0.06),
@@ -61,7 +56,7 @@
   --radius-xl: 40px;
   --glass: saturate(180%) blur(20px);
   --font-sans: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Patrick Hand", "Pangolin", "Itim", "Mali", "Fredoka", sans-serif;
+  --font-display: "Baloo 2", "Fredoka", "Patrick Hand", "Pangolin", "Itim", "Mali", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -74,6 +69,54 @@
   --contrib-4: #f43f5e;
 }
 
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0) rotate(0);
+  }
+  33% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+@keyframes pulse-soft {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
+}
+@keyframes bubble-up {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1.5);
+    opacity: 0;
+  }
+}
+@keyframes rainbow-glow {
+  0% {
+    text-shadow: 0 0 10px rgba(255, 123, 144, 0.3);
+  }
+  33% {
+    text-shadow: 0 0 10px rgba(184, 242, 230, 0.3);
+  }
+  66% {
+    text-shadow: 0 0 10px rgba(220, 211, 255, 0.3);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(255, 123, 144, 0.3);
+  }
+}
 *,
 *::before,
 *::after {
@@ -182,9 +225,15 @@ body.app-shell {
   animation: fadeIn 0.4s var(--ease-out) forwards;
 }
 
+h1, .h1, .hero-title, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-weight: 700;
+}
+
 h1, .h1, .hero-title {
   filter: url(#crayon-effect);
-  font-family: var(--font-display);
+  animation: rainbow-glow 8s ease-in-out infinite;
 }
 
 .hero-title {
@@ -270,16 +319,16 @@ a {
 
 .ui-card, .guide-step-card, .ui-card--glass, .ui-card--strong {
   background: var(--panel) !important;
-  border: 2.5px solid var(--line-strong) !important;
+  border: 3px solid var(--line-strong) !important;
   border-radius: 255px 15px 225px 15px/15px 225px 15px 255px !important;
-  box-shadow: var(--shadow) !important;
+  box-shadow: 6px 6px 0px var(--line-strong) !important;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
   position: relative;
 }
 .ui-card.is-interactive:hover, .is-interactive.guide-step-card:hover, .is-interactive.ui-card--glass:hover, .is-interactive.ui-card--strong:hover {
-  transform: translate(-4px, -4px) rotate(-0.8deg) scale(1.005);
-  box-shadow: var(--shadow-lg) !important;
+  transform: translate(-4px, -4px) rotate(-1.5deg) scale(1.01);
+  box-shadow: 10px 10px 0px var(--line-strong) !important;
 }
 .ui-card--strong {
   background: var(--panel-strong) !important;
@@ -401,20 +450,20 @@ a {
 .ui-badge, .pill-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.35rem 0.9rem;
-  border-radius: 12px 6px 12px 6px/6px 12px 6px 12px;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
   background: var(--bg-soft);
   color: var(--ink);
   text-decoration: none;
-  border: 2px solid var(--line-strong);
-  box-shadow: 2px 2px 0px var(--line-strong);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 2.5px solid var(--line-strong);
+  box-shadow: 3px 3px 0px var(--line-strong);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .ui-badge:hover, .pill-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 4px 4px 0px var(--line-strong);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 5px 5px 0px var(--line-strong);
 }
 .ui-badge--primary {
   background: var(--accent-peach) !important;
@@ -438,26 +487,66 @@ a {
 }
 
 .btn {
-  border: 2px solid var(--line-strong) !important;
+  border: 2.5px solid var(--line-strong) !important;
   border-radius: 999px !important;
   font-weight: 700 !important;
-  padding: 0.65rem 1.6rem !important;
-  box-shadow: 0 4px 0px var(--line-strong) !important;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  padding: 0.75rem 1.8rem !important;
+  box-shadow: 0 5px 0px var(--line-strong) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   color: var(--ink);
+  overflow: hidden;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0px var(--line-strong) !important;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 0px var(--line-strong) !important;
+}
+.btn:hover::after {
+  opacity: 1;
 }
 .btn:active {
-  transform: translateY(2px) !important;
+  transform: translateY(2px) scale(0.98) !important;
   box-shadow: 0 2px 0px var(--line-strong) !important;
+}
+
+.btn-bubble {
+  background: white !important;
+  color: var(--brand) !important;
+  border-color: var(--brand) !important;
+  box-shadow: 0 5px 0px var(--brand) !important;
+}
+.btn-bubble:hover {
+  background: var(--brand-soft) !important;
+  box-shadow: 0 8px 0px var(--brand) !important;
+}
+
+.marshmallow-effect {
+  border-radius: 30px !important;
+  background: white !important;
+  border: 3px solid var(--line-strong) !important;
+  box-shadow: 8px 8px 0 var(--line-strong), inset -4px -4px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.kawaii-icon {
+  display: inline-block;
+  animation: float-gentle 3s ease-in-out infinite;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.1));
 }
 
 .btn-soft {
@@ -562,7 +651,7 @@ a {
 }
 
 .btn-premium {
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%) !important;
+  background: linear-gradient(135deg, var(--brand) 0%, #ff9ebb 100%) !important;
   color: #fff !important;
 }
 .btn-premium:hover {

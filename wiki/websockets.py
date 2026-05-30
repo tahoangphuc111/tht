@@ -13,25 +13,34 @@ async def _send_message(send_callable, text):
         await send_callable({"type": "websocket.send", "text": text})
     except Exception:
         logger.exception("Websocket send failed")
-        connected_websockets.discard(send_callable)
+        # Safely remove the connection from list
+        for item in list(connected_websockets):
+            if isinstance(item, tuple) and item[0] == send_callable:
+                connected_websockets.discard(item)
+            elif item == send_callable:
+                connected_websockets.discard(item)
 
 
 def broadcast_vote_update(payload):
     message = {"type": "vote_update", "payload": payload}
     text_data = json.dumps(message)
 
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    if loop.is_running():
-        for send_callable in list(connected_websockets):
-            loop.create_task(_send_message(send_callable, text_data))
-    else:
-        async def _run_all():
-            tasks = [_send_message(s, text_data) for s in list(connected_websockets)]
-            if tasks:
-                await asyncio.gather(*tasks)
-        loop.run_until_complete(_run_all())
+    for item in list(connected_websockets):
+        if isinstance(item, tuple):
+            send_callable, loop = item
+            if loop.is_running():
+                asyncio.run_coroutine_threadsafe(_send_message(send_callable, text_data), loop)
+        else:
+            # Fallback for direct ASGI calls
+            send_callable = item
+            try:
+                loop = asyncio.get_running_loop()
+                if loop.is_running():
+                    loop.create_task(_send_message(send_callable, text_data))
+            except RuntimeError:
+                # Synchronous fallback
+                new_loop = asyncio.new_event_loop()
+                try:
+                    new_loop.run_until_complete(_send_message(send_callable, text_data))
+                finally:
+                    new_loop.close()

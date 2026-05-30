@@ -5,23 +5,22 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count, Q
 from django.http import HttpResponse, Http404
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
-
-from ..models import Article, Category, ArticleRevision, Bookmark, UploadedFile, Profile, Comment
+from ..models import (
+    Article, Category, ArticleRevision, Bookmark, UploadedFile, Profile, Comment
+)
 from ..forms import ArticleForm, CommentForm
 from ..services.code_runner import get_enabled_language_choices, get_language_config
 from ..utils import save_article_revision, can_publish_articles, can_manage_wiki
 
 
 def _validate_article_attachments(form, files):
-    """Validate article attachment uploads before saving the article."""
     if len(files) > 5:
         form.add_error(None, "Chỉ được upload tối đa 5 file đính kèm.")
         return False
-
     is_valid = True
     for upload in files:
         candidate = UploadedFile(file=upload)
@@ -34,7 +33,6 @@ def _validate_article_attachments(form, files):
 
 
 def _save_article_attachments(article, user, files):
-    """Persist validated attachments for an article."""
     for upload in files:
         UploadedFile.objects.create(article=article, user=user, file=upload)
 
@@ -128,26 +126,21 @@ class ArticleDetailView(DetailView):
         article = self.object
         user = self.request.user
         can_manage = can_manage_wiki(user)
-        coding_exercise = getattr(article, "coding_exercise", None)
-        coding_language_choices = []
-        coding_starter_map = {}
-        coding_monaco_map = {}
-        coding_samples = []
+        coding_ex = getattr(article, "coding_exercise", None)
+        coding_language_choices, coding_starter_map, coding_monaco_map, coding_samples = [], {}, {}, []
         coding_frontend_config = None
-        if coding_exercise and coding_exercise.is_enabled:
+        if coding_ex and coding_ex.is_enabled:
             for language in get_enabled_language_choices():
-                if language["key"] in (coding_exercise.allowed_languages or []):
+                if language["key"] in (coding_ex.allowed_languages or []):
                     coding_language_choices.append(language)
                     coding_monaco_map[language["key"]] = language["monaco_language"]
-                    coding_starter_map[language["key"]] = coding_exercise.starter_code_map.get(
-                        language["key"],
-                        get_language_config(language["key"]).get("starter_code", ""),
+                    coding_starter_map[language["key"]] = coding_ex.starter_code_map.get(
+                        language["key"], get_language_config(language["key"]).get("starter_code", "")
                     )
-            coding_samples = [{
-                "name": testcase.name,
-                "input": testcase.get_input_data(),
-                "output": testcase.get_expected_output_data(),
-            } for testcase in coding_exercise.testcases.filter(is_sample=True)]
+            coding_samples = [
+                {"name": tc.name, "input": tc.get_input_data(), "output": tc.get_expected_output_data()}
+                for tc in coding_ex.testcases.filter(is_sample=True)
+            ]
             coding_frontend_config = {
                 "articleId": article.pk,
                 "runUrl": reverse("wiki:run-code", args=[article.pk]),
@@ -155,29 +148,27 @@ class ArticleDetailView(DetailView):
                 "statusUrl": reverse("wiki:submission-status", args=[0]),
                 "starterCodeMap": coding_starter_map,
                 "monacoMap": coding_monaco_map,
-                "samples": coding_samples,
+                "samples": coding_samples
             }
-        # Only show questions that have choices and at least one correct choice
         quiz_questions = article.questions.prefetch_related("choices").annotate(
             correct_count=Count("choices", filter=Q(choices__is_correct=True))
         ).filter(correct_count__gt=0)
-
         context.update({
             "quiz_questions": quiz_questions,
             "comments": article.comments.select_related("author").filter(is_approved=True),
-            "related_articles": Article.objects.filter(
-                category=article.category, status="published"
-            ).exclude(pk=article.pk).select_related("author", "category").annotate(comment_count=Count("comments", distinct=True))[:3],
+            "related_articles": Article.objects.filter(category=article.category, status="published").exclude(
+                pk=article.pk).select_related("author", "category").annotate(
+                comment_count=Count("comments", distinct=True))[:3],
             "comment_form": kwargs.get("comment_form", CommentForm()),
             "can_comment": (article.allow_comments and user.is_authenticated and user.has_perm("wiki.add_comment")),
             "commenting_locked": not article.allow_comments,
-            "can_edit_article": (can_manage or (user.is_authenticated and article.author == user
-                                                and user.has_perm("wiki.change_article"))),
-            "can_delete_article": (can_manage or (user.is_authenticated and article.author == user
-                                                  and user.has_perm("wiki.delete_article"))),
+            "can_edit_article": (can_manage or (user.is_authenticated and article.author == user and user.has_perm(
+                "wiki.change_article"))),
+            "can_delete_article": (can_manage or (user.is_authenticated and article.author == user and user.has_perm(
+                "wiki.delete_article"))),
             "article_vote_score": getattr(article, "vote_balance", article.vote_score),
             "is_bookmarked": user.is_authenticated and Bookmark.objects.filter(user=user, article=article).exists(),
-            "coding_exercise": coding_exercise if coding_exercise and coding_exercise.is_enabled else None,
+            "coding_exercise": coding_ex if coding_ex and coding_ex.is_enabled else None,
             "coding_language_choices": coding_language_choices,
             "coding_starter_map": coding_starter_map,
             "coding_monaco_map": coding_monaco_map,
@@ -188,51 +179,34 @@ class ArticleDetailView(DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if (
-            not self.object.allow_comments
-            or not request.user.is_authenticated
-            or not request.user.has_perm("wiki.add_comment")
-        ):
+        if not self.object.allow_comments or not request.user.is_authenticated or not request.user.has_perm(
+                "wiki.add_comment"):
             return redirect(self.object.get_absolute_url())
-
-        # 1. Check suspension status
         profile, _ = Profile.objects.get_or_create(user=request.user)
         if profile.is_suspended:
             messages.error(request, "Tài khoản của bạn đang bị khóa các chức năng tương tác.")
             return redirect(self.object.get_absolute_url())
-
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
-            comment.article = self.object
-            comment.author = request.user
-
-            # 2. Rate-limiting (prevent rapid spam posting)
+            comment.article, comment.author = self.object, request.user
             from django.utils import timezone
             last_comment = Comment.objects.filter(author=request.user).order_by("-created_at").first()
-            if last_comment:
-                time_diff = (timezone.now() - last_comment.created_at).total_seconds()
-                if time_diff < 10:
-                    messages.error(request, "Bạn đang bình luận quá nhanh. Vui lòng đợi vài giây.")
-                    return redirect(self.object.get_absolute_url())
-
-            # 3. Spam filtering
+            if last_comment and (timezone.now() - last_comment.created_at).total_seconds() < 10:
+                messages.error(request, "Bạn đang bình luận quá nhanh. Vui lòng đợi vài giây.")
+                return redirect(self.object.get_absolute_url())
             import re
             content_lower = comment.content.lower()
-            spam_keywords = ["cờ bạc", "cá độ", "casino", "nhà cái", "chơi bài", "viagra", "mua bán tài khoản", "kiếm tiền online"]
-            is_spam = any(keyword in content_lower for keyword in spam_keywords)
-
-            # Detect more than 2 links
-            links_count = len(re.findall(r'https?://', content_lower))
-            if links_count > 2:
-                is_spam = True
-
+            spam_keywords = [
+                "cờ bạc", "cá độ", "casino", "nhà cái", "chơi bài", "viagra", "mua bán tài khoản", "kiếm tiền online"
+            ]
+            is_spam = any(keyword in content_lower for keyword in spam_keywords) or len(
+                re.findall(r'https?://', content_lower)) > 2
             if is_spam:
                 comment.is_approved = False
                 comment.save()
-                messages.warning(request, "Bình luận của bạn chứa nội dung nghi ngờ là spam và đang được chờ kiểm duyệt.")
+                messages.warning(request, "Bình luận chứa nội dung nghi ngờ là spam và đang được chờ kiểm duyệt.")
                 return redirect(self.object.get_absolute_url())
-
             comment.save()
             return redirect(self.object.get_absolute_url())
         return self.render_to_response(self.get_context_data(comment_form=form))
@@ -273,14 +247,13 @@ class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self._cached_object
 
     def test_func(self):
-        article = self.get_object()
-        user = self.request.user
+        article, user = self.get_object(), self.request.user
         if user.is_authenticated:
             profile, _ = Profile.objects.get_or_create(user=user)
             if profile.is_suspended:
                 return False
-        return (user.is_superuser or user.has_perm("wiki.manage_all_articles")
-                or (article.author == user and user.has_perm("wiki.change_article")))
+        return (user.is_superuser or user.has_perm("wiki.manage_all_articles") or (
+                article.author == user and user.has_perm("wiki.change_article")))
 
     def handle_no_permission(self):
         return redirect("wiki:article-list")
@@ -310,10 +283,9 @@ class ArticleDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self._cached_object
 
     def test_func(self):
-        article = self.get_object()
-        user = self.request.user
-        return (user.is_superuser or user.has_perm("wiki.manage_all_articles")
-                or (article.author == user and user.has_perm("wiki.delete_article")))
+        article, user = self.get_object(), self.request.user
+        return (user.is_superuser or user.has_perm("wiki.manage_all_articles") or (
+                article.author == user and user.has_perm("wiki.delete_article")))
 
     def handle_no_permission(self):
         return redirect("wiki:article-list")
@@ -326,9 +298,8 @@ class ArticleHistoryView(DetailView):
 
     def get_object(self, queryset=None):
         article = get_object_or_404(Article, pk=self.kwargs.get("pk"))
-        user = self.request.user
-        if (article.status != "published" and not can_manage_wiki(user)
-                and (not user.is_authenticated or article.author != user)):
+        if (article.status != "published" and not can_manage_wiki(self.request.user) and (
+                not self.request.user.is_authenticated or article.author != self.request.user)):
             raise Http404
         return article
 
@@ -345,12 +316,16 @@ class ArticleRevisionDetailView(DetailView):
 
     def get_object(self, queryset=None):
         revision = get_object_or_404(ArticleRevision, pk=self.kwargs.get("pk"))
-        article = revision.article
-        user = self.request.user
-        if (article.status != "published" and not can_manage_wiki(user)
-                and (not user.is_authenticated or article.author != user)):
+        if (revision.article.status != "published" and not can_manage_wiki(self.request.user) and (
+                not self.request.user.is_authenticated or revision.article.author != self.request.user)):
             raise Http404
         return revision
+
+
+@login_required
+def my_articles_view(request):
+    articles = Article.objects.filter(author=request.user).order_by("-updated_at")
+    return render(request, "wiki/my_articles.html", {"articles": articles})
 
 
 class ModerationListView(LoginRequiredMixin, UserPassesTestMixin, ListView):

@@ -76,7 +76,7 @@
                     {% endif %}
                     <div>
                         <strong class="author-name"><a class="article-link" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a></strong>
-                        <div class="author-date">{{ article.created_at|date:"d/m/Y" }}</div>
+                        <div class="author-date">{{ article.created_at|date:"d/m/Y" }} • <i class="fa-solid fa-mug-hot me-1 opacity-50"></i>{{ article.reading_time_minutes }} phút đọc</div>
                     </div>
                 </div>
 
@@ -118,6 +118,12 @@
 
 
         </div>
+        <div id="article-toc" class="mb-4 d-none">
+            <div class="ui-card p-4" style="border-radius: 20px; background: var(--bg-warm) !important; border-style: dashed;">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-ul me-2"></i>Mục lục</h5>
+                <nav id="toc-list" class="small"></nav>
+            </div>
+        </div>
         <div class="article-content markdown-body">{{ article.content|safe_markdown }}</div>
         <div class="mt-4 article-section-note">
             Cập nhật lần cuối: {{ article.updated_at|date:"d/m/Y H:i" }}
@@ -143,7 +149,7 @@
         <div class="mt-5 border-top pt-5" id="quiz-section">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <div class="section-eyebrow mb-1">Knowledge Check</div>
+                    <div class="section-eyebrow mb-1">Kiểm tra kiến thức</div>
                     <h3 class="h4 mb-0">Bài tập trắc nghiệm</h3>
                 </div>
                 <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-2">
@@ -342,7 +348,7 @@
                     <div id="coding-editor" style="height: 420px; border: 1px solid rgba(0,0,0,.08); border-radius: 1rem; overflow: hidden;"></div>
                     <div class="d-flex gap-2 flex-wrap mt-3">
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4" id="coding-format-btn" onclick="if(window.editor) window.editor.getAction('editor.action.formatDocument').run();">
-                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Format
+                            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Định dạng
                         </button>
                         <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="coding-run-btn">
                             <i class="fa-solid fa-play me-2"></i>Chạy
@@ -354,7 +360,7 @@
                 </div>
                 <div class="col-lg-4">
                     <div class="mb-4">
-                        <label class="form-label fw-semibold" for="coding-custom-input">Custom input</label>
+                        <label class="form-label fw-semibold" for="coding-custom-input">Nhập liệu tùy chỉnh</label>
                         <textarea id="coding-custom-input" class="form-control font-monospace" rows="8" placeholder="Nhập input để run thử..."></textarea>
                         <div class="form-text">Để trống nếu muốn run nhanh trên sample test.</div>
                     </div>
@@ -395,7 +401,7 @@
     <div class="card-body p-4 p-lg-5">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
             <div>
-                <div class="section-eyebrow mb-2">Discussion</div>
+                <div class="section-eyebrow mb-2">Thảo luận</div>
                 <h2 class="hero-title-sm mb-0">Bình luận</h2>
             </div>
             <span class="pill-badge">{{ comments|length }} phản hồi</span>
@@ -433,13 +439,13 @@
                             <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:comment-vote' comment.pk %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="vote" value="1" />
-                                <button class="vote-button is-up" type="submit" title="Ủng hộ"><i class="bi bi-caret-up-fill"></i></button>
+                                <button class="vote-button is-up" type="submit" title="Ủng hộ"><i class="fa-solid fa-caret-up"></i></button>
                             </form>
                             <span class="vote-score" id="comment-{{ comment.pk }}-score" title="Ủng hộ: {{ comment.upvotes }} | Giảm điểm: {{ comment.downvotes }}">{{ comment.vote_score }}</span>
                             <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:comment-vote' comment.pk %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="vote" value="-1" />
-                                <button class="vote-button is-down" type="submit" title="Giảm điểm"><i class="bi bi-caret-down-fill"></i></button>
+                                <button class="vote-button is-down" type="submit" title="Giảm điểm"><i class="fa-solid fa-caret-down"></i></button>
                             </form>
                         </div>
                     </div>
@@ -455,7 +461,7 @@
 {% if related_articles %}
 <section class="card border-0 shadow-sm app-card mt-4" id="related-articles">
     <div class="card-body p-4 p-lg-5">
-        <div class="section-eyebrow mb-1">Related</div>
+        <div class="section-eyebrow mb-1">Liên quan</div>
         <h2 class="h4 mb-3">Bài viết cùng danh mục</h2>
         <div class="row g-3">
             {% for related in related_articles %}
@@ -468,7 +474,7 @@
                                 <span>• {{ related.comment_count }} bình luận</span>
                             </div>
                         </div>
-                        <i class="bi bi-arrow-up-right"></i>
+                        <i class="fa-solid fa-arrow-up-right-from-square small opacity-50"></i>
                     </div>
                 </div>
             {% endfor %}
@@ -609,6 +615,35 @@ document.addEventListener("DOMContentLoaded", function () {
                 minimumResultsForSearch: Infinity
             });
         });
+    // ToC Generator
+    const articleContent = document.querySelector('.article-content');
+    const tocContainer = document.getElementById('article-toc');
+    const tocList = document.getElementById('toc-list');
+    
+    if (articleContent && tocContainer && tocList) {
+        const headings = articleContent.querySelectorAll('h2, h3');
+        if (headings.length >= 2) {
+            tocContainer.classList.remove('d-none');
+            const ul = document.createElement('ul');
+            ul.className = 'list-unstyled mb-0';
+            
+            headings.forEach((heading, index) => {
+                const id = `heading-${index}`;
+                heading.setAttribute('id', id);
+                
+                const li = document.createElement('li');
+                li.className = heading.tagName === 'H3' ? 'ms-4 mt-1' : 'mt-2 fw-semibold';
+                
+                const link = document.createElement('a');
+                link.href = `#${id}`;
+                link.className = 'text-decoration-none article-link d-flex align-items-center gap-2';
+                link.innerHTML = `<i class="fa-solid fa-caret-right small opacity-50"></i><span>${heading.innerText}</span>`;
+                
+                li.appendChild(link);
+                ul.appendChild(li);
+            });
+            tocList.appendChild(ul);
+        }
     }
 });
 </script>
