@@ -12,6 +12,7 @@ from django.views.generic import ListView
 
 from ..forms import UserUpdateForm, ProfileForm
 from ..utils import build_profile_stats
+from ..models import Profile
 
 User = get_user_model()
 
@@ -42,9 +43,10 @@ def public_profile_view(request, username):
 @login_required
 def profile_edit_view(request):
     """View to edit the current user's profile and user information."""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
     if request.method == "POST":
         u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        p_form = ProfileForm(request.POST, request.FILES, instance=profile)
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
@@ -52,7 +54,7 @@ def profile_edit_view(request):
             return redirect("wiki:profile")
     else:
         u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileForm(instance=request.user.profile)
+        p_form = ProfileForm(instance=profile)
 
     return render(
         request, "wiki/profile_edit.html", {"user_form": u_form, "profile_form": p_form}

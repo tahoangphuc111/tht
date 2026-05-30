@@ -4,14 +4,14 @@
 
 {% block content %}
 <div class="row justify-content-center mb-5" data-aos="zoom-in">
-    <div class="col-lg-8">
+    <div class="col-lg-10">
         <div class="card border-0 shadow-sm app-card">
             <div class="card-body p-4 p-lg-5">
                 <a href="{% url 'wiki:article-quiz-manage' article.pk %}" class="back-link mb-4 d-inline-flex align-items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại quản lý câu hỏi
                 </a>
                 
-                <div class="text-center mb-4">
+                <div class="text-center mb-5">
                     <div class="guide-step-card__icon-box guide-step-card__icon-box--indigo mx-auto mb-3">
                         <i class="fa-solid fa-file-import"></i>
                     </div>
@@ -19,42 +19,153 @@
                     <p class="text-secondary small">Trích xuất câu hỏi trắc nghiệm tự động từ file Word, PDF hoặc Text.</p>
                 </div>
 
-                <div class="row g-4 align-items-stretch">
-                    <!-- Column 1: Guidelines -->
+                <div class="row g-4 align-items-stretch mb-5">
+                    <!-- Column 1: Guidelines Summary -->
                     <div class="col-md-6">
-                        <div class="h-100 p-4 rounded-4 bg-warm border border-light">
-                            <h5 class="h6 fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Quy tắc định dạng</h5>
-                            <ul class="small text-secondary ps-3 mb-0">
-                                <li class="mb-3">Chấp nhận file định dạng <strong>.docx</strong>, <strong>.pdf</strong>, hoặc <strong>.txt</strong>.</li>
-                                <li class="mb-3">Mỗi câu hỏi phải cách nhau bằng <strong>1 dòng trống</strong> (2 lần xuống dòng).</li>
-                                <li class="mb-3">Nội dung câu hỏi tối thiểu phải dài hơn 10 ký tự.</li>
-                                <li>Hãy đảm bảo file của bạn không bị khóa mật khẩu bảo mật nhé.</li>
-                            </ul>
+                        <div class="h-100 p-4 rounded-4 bg-warm border border-light d-flex flex-column justify-content-between">
+                            <div>
+                                <h5 class="h6 fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Quy tắc tải file</h5>
+                                <ul class="small text-secondary ps-3 mb-0">
+                                    <li class="mb-2">Hỗ trợ các định dạng: <strong>.docx</strong>, <strong>.pdf</strong>, hoặc <strong>.txt</strong>.</li>
+                                    <li class="mb-2">Dung lượng file tối đa: <strong>15MB</strong>.</li>
+                                    <li class="mb-2">Mỗi câu hỏi phải cách nhau bằng <strong>1 dòng trống</strong> (nhấn Enter 2 lần).</li>
+                                    <li class="mb-2">Nội dung câu hỏi tối thiểu phải dài hơn <strong>10 ký tự</strong>.</li>
+                                    <li>Đảm bảo file không bị khóa hoặc đặt mật khẩu bảo mật.</li>
+                                </ul>
+                            </div>
+                            <div class="mt-4 pt-3 border-top border-light-subtle">
+                                <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i> Xem hướng dẫn soạn thảo chi tiết ở bên dưới.</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Column 2: Upload Zone -->
                     <div class="col-md-6">
-                        <form method="post" enctype="multipart/form-data" class="d-flex flex-column justify-content-between h-100">
-                            {% csrf_token %}
-                            <div class="mb-4">
-                                <label for="quiz_file" class="form-label fw-bold small">Chọn tệp của bạn</label>
-                                <div class="border border-2 border-dashed rounded-4 p-4 text-center bg-light transition-all hover-float cursor-pointer" onclick="document.getElementById('quiz_file').click()">
-                                    <i class="fa-solid fa-cloud-arrow-up fs-2 text-primary opacity-75 mb-2"></i>
-                                    <div class="fw-semibold small">Nhấn để tải file lên</div>
-                                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">DOCX, PDF, TXT tối đa 5MB</div>
-                                    <input type="file" name="quiz_file" id="quiz_file" class="d-none" accept=".docx,.pdf,.txt" required onchange="document.getElementById('file-chosen-name').innerText = this.files[0].name">
+                        <div class="h-100 p-4 rounded-4 bg-light border border-light-subtle d-flex flex-column justify-content-between">
+                            <form method="post" enctype="multipart/form-data" class="d-flex flex-column justify-content-between h-100">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    <label for="quiz_file" class="form-label fw-bold small">Chọn tệp tài liệu câu hỏi</label>
+                                    <div class="border border-2 border-dashed rounded-4 p-4 text-center bg-white transition-all hover-float cursor-pointer" onclick="document.getElementById('quiz_file').click()">
+                                        <i class="fa-solid fa-cloud-arrow-up fs-2 text-primary opacity-75 mb-2"></i>
+                                        <div class="fw-semibold small">Nhấn để tải file lên</div>
+                                        <div class="text-muted small mt-1" style="font-size: 0.75rem;">DOCX, PDF, TXT tối đa 15MB</div>
+                                        <input type="file" name="quiz_file" id="quiz_file" class="d-none" accept=".docx,.pdf,.txt" required onchange="document.getElementById('file-chosen-name').innerText = this.files[0].name">
+                                    </div>
+                                    <div id="file-chosen-name" class="text-primary fw-bold text-center small mt-3"></div>
                                 </div>
-                                <div id="file-chosen-name" class="text-primary fw-bold text-center small mt-3"></div>
-                            </div>
-                            
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary rounded-pill py-2 shadow-glow">
-                                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Bắt đầu trích xuất
-                                </button>
-                            </div>
-                        </form>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary rounded-pill py-2 shadow-glow">
+                                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Bắt đầu trích xuất
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Formatting Guide Details -->
+                <div class="border-top border-light-subtle pt-5">
+                    <h4 class="h5 fw-bold mb-4"><i class="fa-solid fa-book-open text-primary me-2"></i>Hướng dẫn định dạng file trắc nghiệm</h4>
+                    <p class="text-secondary small mb-4">Hệ thống hỗ trợ tự động nhận dạng câu hỏi, các lựa chọn, đáp án đúng và lời giải thích dựa trên các quy tắc định dạng dưới đây. Hãy chọn tab phù hợp với cách soạn thảo của bạn:</p>
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-pills nav-fill bg-light p-1 rounded-pill mb-4" id="guideTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active rounded-pill py-2 px-3 small" id="mark-tab" data-bs-toggle="tab" data-bs-target="#mark" type="button" role="tab" aria-controls="mark" aria-selected="true">
+                                <i class="fa-solid fa-star text-warning me-1"></i> Cách 1: Đánh dấu sao (*)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill py-2 px-3 small" id="key-tab" data-bs-toggle="tab" data-bs-target="#key" type="button" role="tab" aria-controls="key" aria-selected="false">
+                                <i class="fa-solid fa-key text-success me-1"></i> Cách 2: Ghi "Đáp án:"
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill py-2 px-3 small" id="sign-tab" data-bs-toggle="tab" data-bs-target="#sign" type="button" role="tab" aria-controls="sign" aria-selected="false">
+                                <i class="fa-solid fa-plus-minus text-info me-1"></i> Cách 3: Định dạng Cộng/Trừ (+/-)
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content border rounded-4 p-4 bg-white shadow-xs" id="guideTabsContent">
+                        <!-- Tab 1: Star marker -->
+                        <div class="tab-pane fade show active" id="mark" role="tabpanel" aria-labelledby="mark-tab">
+                            <h6 class="fw-bold mb-2 text-dark">Sử dụng ký tự đặc biệt trước lựa chọn đúng</h6>
+                            <p class="text-secondary small mb-3">Đánh dấu lựa chọn đúng bằng cách thêm ký tự dấu sao <code>*</code>, dấu cộng <code>+</code>, hoặc <code>[x]</code> trước chữ cái thứ tự của phương án (A, B, C, D, ...).</p>
+                            <div class="position-relative">
+                                <pre class="bg-dark text-light p-3 rounded-3 small m-0 shadow-sm" style="font-family: 'JetBrains Mono', monospace; line-height: 1.6;">Câu hỏi 1: Thủ đô của Việt Nam là gì?
+A. Thành phố Hồ Chí Minh
+*B. Hà Nội
+C. Đà Nẵng
+D. Hải Phòng
+Giải thích: Hà Nội là thủ đô của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam.</pre>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Key marker -->
+                        <div class="tab-pane fade" id="key" role="tabpanel" aria-labelledby="key-tab">
+                            <h6 class="fw-bold mb-2 text-dark">Ghi đáp án ở cuối mỗi câu hỏi</h6>
+                            <p class="text-secondary small mb-3">Để các phương án bình thường (A, B, C, D, ...), sau đó ghi rõ đáp án đúng ở dòng tiếp theo bằng cú pháp <code>Đáp án: [Chữ cái]</code> (ví dụ: <code>Đáp án: C</code> hoặc <code>Answer: C</code>).</p>
+                            <div class="position-relative">
+                                <pre class="bg-dark text-light p-3 rounded-3 small m-0 shadow-sm" style="font-family: 'JetBrains Mono', monospace; line-height: 1.6;">Câu hỏi 2: Trái Đất mất bao lâu để quay quanh Mặt Trời một vòng?
+A. 24 giờ
+B. 30 ngày
+C. 365 ngày
+D. 12 tháng
+Đáp án: C
+Giải thích: Trái Đất quay quanh Mặt Trời mất khoảng 365.25 ngày (khoảng 1 năm).</pre>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Sign marker -->
+                        <div class="tab-pane fade" id="sign" role="tabpanel" aria-labelledby="sign-tab">
+                            <h6 class="fw-bold mb-2 text-dark">Sử dụng dấu cộng (+) và trừ (-) cho các tùy chọn</h6>
+                            <p class="text-secondary small mb-3">Định dạng không cần dùng ký tự A, B, C, D. Sử dụng dấu <code>+</code> cho lựa chọn đúng và dấu <code>-</code> cho các lựa chọn sai.</p>
+                            <div class="position-relative">
+                                <pre class="bg-dark text-light p-3 rounded-3 small m-0 shadow-sm" style="font-family: 'JetBrains Mono', monospace; line-height: 1.6;">Câu hỏi 3: Đâu là ngôn ngữ lập trình phổ biến trong Khoa học dữ liệu?
++ Python
+- HTML
+- CSS
+- SQL
+Giải thích: Python cung cấp nhiều thư viện mạnh mẽ cho khoa học dữ liệu và học máy như Pandas, NumPy, Scikit-learn.</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional formatting tips -->
+                    <div class="mt-4 p-4 rounded-4 bg-light border border-light-subtle">
+                        <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-list-check text-primary me-2"></i>Lưu ý khi soạn thảo</h6>
+                        <div class="row g-3 small text-secondary">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                                    <div><strong>Đa dạng số lựa chọn:</strong> Hệ thống hỗ trợ từ 2 đến nhiều lựa chọn (không bắt buộc phải luôn là 4 lựa chọn A-D).</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                                    <div><strong>Phần giải thích:</strong> Bạn có thể thêm <code>Giải thích: [Nội dung]</code> ở dòng cuối cùng của câu hỏi. Đây là phần không bắt buộc.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                                    <div><strong>Ký tự ngắt câu:</strong> Lựa chọn có thể định dạng dạng <code>A. Lựa chọn</code> hoặc <code>A) Lựa chọn</code>.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                                    <div><strong>Xuống dòng:</strong> Đảm bảo giữa câu hỏi này và câu hỏi tiếp theo có **ít nhất 1 dòng trống hoàn toàn** để phân biệt giữa các block câu hỏi.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

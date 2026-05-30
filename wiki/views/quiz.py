@@ -111,7 +111,7 @@ def parse_question_block(block):
 
         # Check for answer key line: e.g. "Đáp án: A"
         ans_match = re.match(
-            r'^(đáp án|đáp án đúng|dap an|dap an dung|answer|correct|key)\s*:\s*([A-D]|[a-d]|\*|\+)\b',
+            r'^(đáp án|đáp án đúng|dap an|dap an dung|answer|correct|key)\s*:\s*([A-Z]|[a-z]|\*|\+)\b',
             line,
             re.IGNORECASE
         )
@@ -119,9 +119,9 @@ def parse_question_block(block):
             correct_key = ans_match.group(2).upper()
             continue
 
-        # Check if it is a choice line starting with A., B., C., D. (with optional correct marker * or +)
+        # Check if it is a choice line starting with A., B., C., D. etc. (with optional correct marker * or +)
         choice_match = re.match(
-            r'^(\*|\+|\[x\]|\[X\]|\[\s*\])?\s*([A-D]|[a-d])[\.\)]\s*(.*)',
+            r'^(\*|\+|\[x\]|\[X\]|\[\s*\])?\s*([A-Z]|[a-z])[\.\)]\s*(.*)',
             line
         )
         if choice_match:
@@ -178,6 +178,18 @@ def upload_quiz_file_view(request, article_pk):
         upload = request.FILES.get("quiz_file")
         if not upload:
             messages.error(request, "Vui lòng chọn file câu hỏi.")
+            return render(request, "wiki/quiz_upload.html", {"article": article})
+
+        # Validate file extension and size
+        from pathlib import Path
+        allowed_extensions = {".pdf", ".docx", ".txt"}
+        file_ext = Path(upload.name).suffix.lower()
+        if file_ext not in allowed_extensions:
+            messages.error(request, "Chỉ hỗ trợ file PDF, DOCX hoặc TXT.")
+            return render(request, "wiki/quiz_upload.html", {"article": article})
+
+        if upload.size > 15 * 1024 * 1024:
+            messages.error(request, "File quá lớn. Vui lòng upload tối đa 15MB.")
             return render(request, "wiki/quiz_upload.html", {"article": article})
 
         try:

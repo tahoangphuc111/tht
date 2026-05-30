@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from ..models import Article, Category, Comment, Bookmark, Notification
+from ..models import Article, Category, Comment, Bookmark, Notification, Profile
 from ..forms import SignUpForm
 from ..utils import can_publish_articles
 
@@ -75,7 +75,7 @@ def getting_started_view(request):
 @login_required
 def dismiss_guide_view(request):
     """Mark the getting-started guide as seen by the user."""
-    profile = request.user.profile
+    profile, _ = Profile.objects.get_or_create(user=request.user)
     profile.guide_seen = True
     profile.save(update_fields=["guide_seen"])
     next_url = request.POST.get("next") or reverse_lazy("wiki:article-list")

@@ -409,7 +409,7 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
         source_code=source_code,
         status="running",
         custom_input=custom_input,
-        is_sample_run=sample_only,
+        is_sample_run=sample_only or bool(custom_input),
     )
 
     # Import ở đây để tránh circular import

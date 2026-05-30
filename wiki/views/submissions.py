@@ -11,11 +11,7 @@ class SubmissionHistoryView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            qs = CodingSubmission.objects.filter(is_sample_run=False)
-        else:
-            qs = CodingSubmission.objects.filter(user=self.request.user, is_sample_run=False)
-
+        qs = CodingSubmission.objects.filter(is_sample_run=False)
         qs = qs.select_related("exercise__article", "user").order_by("-created_at")
 
         exercise_id = self.request.GET.get("exercise")

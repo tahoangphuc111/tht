@@ -22,9 +22,7 @@
                                 <th class="ps-4 py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">ID</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Trạng thái</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Bài tập</th>
-                                {% if user.is_superuser %}
-                                    <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Người nộp</th>
-                                {% endif %}
+                                <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Người nộp</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Ngôn ngữ</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Thời gian chạy</th>
                                 <th class="py-3 text-secondary fw-semibold small text-uppercase text-end" style="letter-spacing: 0.5px;">Điểm</th>
@@ -48,14 +46,16 @@
                                 <td class="py-3 fw-medium">
                                     <a href="{{ submission.exercise.article.get_absolute_url }}" class="text-decoration-none text-dark">{{ submission.exercise.article.title }}</a>
                                 </td>
-                                {% if user.is_superuser %}
-                                    <td class="py-3 text-muted">@{{ submission.user.username }}</td>
-                                {% endif %}
+                                <td class="py-3 text-muted">@{{ submission.user.username }}</td>
                                 <td class="py-3 text-muted">{{ submission.language }}</td>
                                 <td class="py-3 text-muted">{{ submission.runtime_ms }} ms</td>
                                 <td class="py-3 text-end fw-semibold">{{ submission.score }}</td>
                                 <td class="py-3 text-end">
-                                    <a href="{% url 'wiki:submission-detail' submission.pk %}" class="btn btn-sm btn-soft">Chi tiết</a>
+                                    {% if request.user.is_superuser or submission.user == request.user %}
+                                        <a href="{% url 'wiki:submission-detail' submission.pk %}" class="btn btn-sm btn-soft">Chi tiết</a>
+                                    {% else %}
+                                        <span class="text-muted small">-</span>
+                                    {% endif %}
                                 </td>
                                 <td class="pe-4 py-3 text-end text-muted small">{{ submission.created_at|date:"d/m/Y H:i" }}</td>
                             </tr>

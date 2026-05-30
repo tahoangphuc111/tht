@@ -51,10 +51,10 @@
                     <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'article-list' or request.resolver_match.url_name == 'article-detail' or request.resolver_match.url_name == 'article-create' or request.resolver_match.url_name == 'article-edit' %}is-active{% endif %}" href="{% url 'wiki:article-list' %}">Bài viết</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'getting-started' %}is-active{% endif %}" href="{% url 'wiki:getting-started' %}">Hướng dẫn</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'user-list' or request.resolver_match.url_name == 'public-profile' %}is-active{% endif %}" href="{% url 'wiki:user-list' %}">Thành viên</a></li>
-                    {% if user.is_authenticated and perms.wiki.add_category %}
+                    {% if request.user.is_authenticated and perms.wiki.add_category %}
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'category-list' or request.resolver_match.url_name == 'category-create' or request.resolver_match.url_name == 'category-edit' %}is-active{% endif %}" href="{% url 'wiki:category-list' %}">Danh mục</a></li>
                     {% endif %}
-                    {% if user.is_authenticated and user.is_superuser %}
+                    {% if request.user.is_authenticated and request.user.is_superuser %}
                         <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'moderation-list' %}is-active{% endif %}" href="{% url 'wiki:moderation-list' %}">Kiểm duyệt</a></li>
                     {% endif %}
                 </ul>
@@ -95,17 +95,17 @@
                         </div>
                     {% endif %}
                     
-                    <button class="nav-pill-btn bookmark-btn" type="button" {% if user.is_authenticated %}data-bs-toggle="modal" data-bs-target="#savedArticlesModal"{% else %}onclick="window.location.href='{% url 'wiki:login' %}?next={{ request.path }}'"{% endif %}>
+                    <button class="nav-pill-btn bookmark-btn" type="button" {% if request.user.is_authenticated %}data-bs-toggle="modal" data-bs-target="#savedArticlesModal"{% else %}onclick="window.location.href='{% url 'wiki:login' %}?next={{ request.path }}'"{% endif %}>
                         <i class="fa-solid fa-bookmark"></i>
                         <span class="d-none d-xl-inline">Đã lưu</span>
                         <span class="badge rounded-pill" id="saved-articles-count">0</span>
                     </button>
 
-                    {% if user.is_authenticated %}
+                    {% if request.user.is_authenticated %}
                         <div class="dropdown">
                             <button class="nav-pill-btn dropdown-toggle px-3 px-xl-4" type="button" data-bs-toggle="dropdown">
-                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 20px; height: 20px; font-size: 0.6rem; margin-right: 0.25rem;">{{ user.username.0|upper }}</div>
-                                <span class="d-none d-xl-inline text-truncate" style="max-width: 120px;">{{ user.username }}</span>
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 20px; height: 20px; font-size: 0.6rem; margin-right: 0.25rem;">{{ request.user.username.0|upper }}</div>
+                                <span class="d-none d-xl-inline text-truncate" style="max-width: 120px;">{{ request.user.username }}</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end p-2 mt-2">
                                 <li><a class="dropdown-item rounded-3 py-2 mb-1 d-flex align-items-center gap-2" href="{% url 'wiki:profile' %}"><i class="fa-solid fa-user-circle opacity-50"></i>Hồ sơ cá nhân</a></li>

@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 
-from .models import ArticleRevision
+from .models import ArticleRevision, Profile
 
 User = get_user_model()
 
@@ -44,7 +44,8 @@ def can_manage_wiki(user):
 
 def get_profile_name(user):
     """Return a displayable name for the user."""
-    return user.profile.display_name or user.get_full_name() or user.username
+    profile, _ = Profile.objects.get_or_create(user=user)
+    return profile.display_name or user.get_full_name() or user.username
 
 
 def get_safe_redirect_url(request, candidate, fallback="/"):
@@ -62,7 +63,8 @@ def build_profile_stats(user, viewer=None):
     """Generate statistics and contribution data for a user's profile."""
     is_owner = viewer == user
     is_admin = bool(viewer and viewer.is_superuser)
-    can_view = not user.profile.is_profile_private or is_owner or is_admin
+    profile, _ = Profile.objects.get_or_create(user=user)
+    can_view = not profile.is_profile_private or is_owner or is_admin
 
     article_queryset = user.articles.select_related("category").order_by("-updated_at")
     if not (is_owner or is_admin):
@@ -125,7 +127,7 @@ def build_profile_stats(user, viewer=None):
         curr += timedelta(days=1)
 
     return {
-        "profile": user.profile,
+        "profile": profile,
         "profile_user": user,
         "profile_name": get_profile_name(user),
         "can_view_profile": can_view,
@@ -139,7 +141,7 @@ def build_profile_stats(user, viewer=None):
         "chart_labels": [d["date"].strftime("%m/%Y") for d in contribution_days[::14]],
         "chart_posts": [sum(d["posts"] for d in contribution_days[i : i + 14]) for i in range(0, len(contribution_days), 14)],
         "chart_edits": [sum(d["edits"] for d in contribution_days[i : i + 14]) for i in range(0, len(contribution_days), 14)],
-        "user_vote_score": user.profile.vote_score,
+        "user_vote_score": profile.vote_score,
         "role_names": list(set([g.name for g in user.groups.all()] + (["admin"] if user.is_superuser else []))) or ["user"],
         "edited_articles_count": ArticleRevision.objects.filter(author=user)
         .values("article")
@@ -150,6 +152,6 @@ def build_profile_stats(user, viewer=None):
         "badges": user.badges.select_related("badge").all(),
         "joined_date": user.date_joined,
         "upload_count": user.uploaded_files.count(),
-        "public_email": user.email if user.profile.show_email_publicly and can_view else "",
+        "public_email": user.email if profile.show_email_publicly and can_view else "",
         "author_articles_url": f"/articles/?author={user.username}",
     }
