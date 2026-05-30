@@ -115,6 +115,7 @@ class ArticleForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["status"].widget.attrs.update({"class": "form-select"})
         self.fields["status"].choices = [c for c in Article.STATUS_CHOICES if c[0] in ("draft", "pending")]
+        self.fields["status"].required = False
         self.fields["tags"].widget.attrs.update({"class": "form-control", "placeholder": "Gắn thẻ (ví dụ: segment-tree, dp, math)"})
         self.fields["tags"].help_text = "Các thẻ cách nhau bằng dấu phẩy."
         self.fields["title"].widget.attrs.update({"class": "form-control form-control-lg", "placeholder": "Ví dụ: Segment Tree cơ bản"})
@@ -126,6 +127,14 @@ class ArticleForm(forms.ModelForm):
         self.fields["category"].help_text = "Có thể để trống, bài viết sẽ tự chuyển vào danh mục Chưa phân loại."
         self.fields["allow_comments"].widget.attrs.update({"class": "form-check-input"})
         self.fields["allow_comments"].help_text = "Bật để người dùng có quyền được phép bình luận dưới bài viết này."
+
+    def clean_status(self):
+        status = self.cleaned_data.get("status")
+        if status:
+            return status
+        if self.instance and self.instance.pk:
+            return self.instance.status
+        return Article._meta.get_field("status").get_default()
 
 
 class CommentForm(forms.ModelForm):
