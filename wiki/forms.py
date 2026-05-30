@@ -311,8 +311,10 @@ class BaseChoiceFormSet(forms.models.BaseInlineFormSet):
         if completed_forms > 0:
             if completed_forms < 2:
                 raise forms.ValidationError("Một câu hỏi cần có ít nhất 2 lựa chọn.")
-            if correct_count != 1:
-                raise forms.ValidationError("Cần chọn duy nhất một đáp án đúng.")
+            if correct_count == 0:
+                raise forms.ValidationError("Cần chọn ít nhất một lựa chọn làm đáp án đúng.")
+            elif correct_count > 1:
+                raise forms.ValidationError("Chỉ được chọn duy nhất một đáp án đúng.")
         elif not has_file:
             raise forms.ValidationError("Một câu hỏi cần có ít nhất 2 lựa chọn.")
 
