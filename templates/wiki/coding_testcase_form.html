@@ -1,43 +1,98 @@
 {% extends 'base.html' %}
-{% block title %}{% if form.instance.pk %}sửa testcase{% else %}thêm testcase{% endif %} | CP Wiki{% endblock %}
+{% block title %}{% if form.instance.pk %}Sửa testcase{% else %}Thêm testcase{% endif %} | CP Wiki{% endblock %}
 
 {% block content %}
-<div class="row form-shell">
+<div class="row g-4 form-shell" data-aos="fade-up">
+    <!-- Left Column: The Form -->
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm app-card form-card">
             <div class="card-body p-4 p-lg-5">
-                <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="back-link mb-3">&larr; Quay lại mini OJ</a>
-                <div class="section-eyebrow mb-2">Testcase</div>
-                <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Sửa testcase{% else %}Thêm testcase{% endif %}</h1>
+                <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="back-link mb-3 d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại mini OJ
+                </a>
+                <div class="section-eyebrow mb-2">Cấu hình Testcase</div>
+                <h1 class="hero-title-sm mb-3">{% if form.instance.pk %}Sửa testcase{% else %}Thêm testcase mới{% endif %}</h1>
+                
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="mb-4">
                             {% if field.name == 'is_sample' %}
-                                <div class="form-check">
+                                <div class="form-check form-switch p-0 ps-5 mt-2">
                                     {{ field }}
-                                    <label class="form-check-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    <label class="form-check-label fw-bold small ms-2" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 </div>
                             {% else %}
-                                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                <label class="form-label fw-bold small" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
                             {% endif %}
+                            
                             {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
+                                <div class="form-text mt-1 text-muted small"><i class="fa-solid fa-circle-question me-1 opacity-75"></i>{{ field.help_text }}</div>
                             {% endif %}
                             {% for error in field.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <div class="alert alert-info small">
-                        Có thể nhập raw text hoặc upload file `.inp/.out/.txt/.ans/.in`. Nếu điền cả hai, runner sẽ ưu tiên file upload.
+                    
+                    <div class="alert alert-info small rounded-4 p-3 d-flex gap-2 align-items-start">
+                        <i class="fa-solid fa-circle-info mt-1 text-info"></i>
+                        <div>
+                            Có thể nhập văn bản trực tiếp (raw text) hoặc tải lên tệp tin dạng <code>.inp/.out/.txt/.ans/.in</code>. 
+                            Nếu điền cả hai, trình chạy code (runner) sẽ ưu tiên tệp tải lên.
+                        </div>
                     </div>
-                    <div class="action-row">
-                        <button type="submit" class="btn btn-dark rounded-pill px-4">Lưu testcase</button>
-                        <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy</a>
+                    
+                    <div class="action-row mt-4">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-glow">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu cấu hình
+                        </button>
+                        <a href="{% url 'wiki:article-coding-manage' article.pk %}" class="btn btn-outline-secondary rounded-pill px-4">Hủy bỏ</a>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Explanations Guidance Card -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm app-card soft-panel">
+            <div class="card-body p-4">
+                <div class="section-eyebrow mb-2">Hướng dẫn tham số</div>
+                <h4 class="h5 mb-4 fw-bold">Giải nghĩa các thông số</h4>
+                
+                <div class="mb-4">
+                    <span class="badge bg-primary-soft text-primary rounded-3 px-2.5 py-1.5 fw-bold mb-2">Subtask (Cụm bài phụ)</span>
+                    <p class="small text-secondary mb-0" style="line-height: 1.6;">
+                        Subtask là phương pháp phân loại điểm số dựa trên độ khó của thuật toán. Ví dụ: 
+                        <br>• <strong>Subtask 1:</strong> Dành cho thuật toán ngây thơ với giới hạn nhỏ (ví dụ N ≤ 100).
+                        <br>• <strong>Subtask 2:</strong> Dành cho thuật toán tối ưu với giới hạn lớn (ví dụ N ≤ 10^5).
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <span class="badge bg-indigo-soft text-indigo rounded-3 px-2.5 py-1.5 fw-bold mb-2">Subtask ID</span>
+                    <p class="small text-secondary mb-0" style="line-height: 1.6;">
+                        Số thứ tự định danh cho nhóm Subtask (ví dụ: 1, 2). 
+                        Các testcase có <strong>cùng Subtask ID</strong> sẽ tự động gom chung thành 1 cụm để chấm điểm. 
+                        Người dùng bắt buộc phải giải đúng <strong>TẤT CẢ</strong> các testcase trong cùng một subtask để nhận điểm của Subtask đó (chấm điểm theo cụm).
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <span class="badge bg-success-soft text-success rounded-3 px-2.5 py-1.5 fw-bold mb-2">Testcase mẫu (Is Sample)</span>
+                    <p class="small text-secondary mb-0" style="line-height: 1.6;">
+                        Nếu được bật, dữ liệu input và output mẫu của testcase này sẽ được hiển thị công khai ngay trên bài viết để làm ví dụ thực tế giúp người dùng dễ dàng hình dung đề bài.
+                    </p>
+                </div>
+                
+                <div class="mb-0">
+                    <span class="badge bg-warning-soft text-warning rounded-3 px-2.5 py-1.5 fw-bold mb-2">Thứ tự (Order)</span>
+                    <p class="small text-secondary mb-0" style="line-height: 1.6;">
+                        Thứ tự sắp xếp và thực thi của testcase. Hệ thống sẽ ưu tiên chạy các testcase có số Order nhỏ hơn trước.
+                    </p>
+                </div>
             </div>
         </div>
     </div>

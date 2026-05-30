@@ -113,17 +113,44 @@ def _run_custom_checker(job_dir, exercise, input_data, expected_output, actual_o
     checker_path = job_dir / f"checker.{checker_ext}"
     checker_path.write_text(exercise.checker_code or "", encoding="utf-8")
 
-    if checker_lang != "python":
+    if checker_lang == "python":
+        command = [
+            sys.executable,
+            checker_path.name,
+            "stdin.txt",
+            "actual_out.txt",
+            "expected_out.txt",
+        ]
+    elif checker_lang == "cpp":
+        cpp_config = get_language_config("cpp")
+        if not cpp_config or not cpp_config.get("enabled"):
+            logger.warning("C++ compiler is not configured or enabled.")
+            return "internal_error"
+
+        executable_path = job_dir / "checker_exec"
+        replacements = {
+            "source_path": checker_path,
+            "executable_path": executable_path,
+            "workdir": job_dir,
+            "source_name": checker_path.name,
+            "memory_limit_mb": 512,
+            "time_limit_ms": 5000,
+        }
+        compile_result = _compile_source(job_dir, "cpp", cpp_config, replacements)
+        if not compile_result["ok"]:
+            logger.warning("Failed to compile C++ checker: %s", compile_result["stderr"])
+            return "internal_error"
+
+        command = [
+            str(executable_path),
+            "stdin.txt",
+            "actual_out.txt",
+            "expected_out.txt",
+        ]
+    else:
         logger.warning("Unsupported checker language configured: %s", checker_lang)
         return "internal_error"
 
-    command = [
-        sys.executable,
-        checker_path.name,
-        "stdin.txt",
-        "actual_out.txt",
-        "expected_out.txt",
-    ]
     process_result = _run_process(
         command,
         job_dir,
@@ -136,7 +163,7 @@ def _run_custom_checker(job_dir, exercise, input_data, expected_output, actual_o
         return "accepted"
     if process_result["timed_out"]:
         return "internal_error"
-    if completed and completed.returncode == 1:
+    if completed and completed.returncode in (1, 2):
         return "wrong_answer"
     return "internal_error"
 
@@ -591,7 +618,10 @@ def serialize_submission(submission):
     status_label = status_map.get(submission.status, submission.status.replace("_", " ").title())
     if submission.status == "accepted":
         if submission.is_sample_run:
-            message = f"Tất cả sample tests đã vượt qua ({submission.runtime_ms}ms)."
+            if submission.custom_input:
+                message = f"Chạy thử với dữ liệu tùy chỉnh thành công ({submission.runtime_ms}ms)."
+            else:
+                message = f"Tất cả sample tests đã vượt qua ({submission.runtime_ms}ms)."
         else:
             message = f"Chấp nhận! Vượt qua {submission.passed_tests}/{submission.total_tests} test cases trong {submission.runtime_ms}ms."
     elif submission.status == "compile_error":

@@ -5,7 +5,7 @@
     "minify:css": "cleancss -o static/css/site.min.css static/css/site.css && cleancss -o static/css/base.min.css static/css/base.css",
     "build": "npm run build:css",
     "build:prod": "npm run build && npm run minify:css",
-    "dev": "concurrently \"npm run watch:css\" \"python manage.py runserver\""
+    "dev": "concurrently \"npm run watch:css\" \"uvicorn config.asgi:application --port 8000 --reload\""
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",

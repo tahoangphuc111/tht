@@ -32,6 +32,7 @@ urlpatterns = [
     path("saved-articles/", base.saved_articles_view, name="saved-articles-json"),
     path("notifications/", base.NotificationListView.as_view(), name="notification-list"),
     path("notification/<int:pk>/read/", base.mark_notification_read, name="notification-read"),
+    path("notifications/read-all/", base.mark_all_notifications_read, name="notifications-read-all"),
 
     # Articles (Specific management routes first)
     path("articles/", articles.ArticleListView.as_view(), name="article-list"),

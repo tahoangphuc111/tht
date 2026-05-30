@@ -61,7 +61,7 @@
   --radius-xl: 40px;
   --glass: saturate(180%) blur(20px);
   --font-sans: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Fredoka", "Itim", "Lexend", sans-serif;
+  --font-display: "Patrick Hand", "Pangolin", "Itim", "Mali", "Fredoka", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1549,9 +1549,9 @@ a {
 }
 
 textarea.font-monospace {
-  background: #1a1b26 !important;
-  color: #c0caf5 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: #ffffff !important;
+  color: #1a1b26 !important;
+  border: 1.5px solid var(--line) !important;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono) !important;
   font-size: 0.88rem !important;
@@ -1564,10 +1564,10 @@ textarea.font-monospace {
   box-shadow: var(--shadow) inset;
 }
 textarea.font-monospace::-moz-placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(0, 0, 0, 0.3) !important;
 }
 textarea.font-monospace::placeholder {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(0, 0, 0, 0.3) !important;
 }
 textarea.font-monospace:focus {
   border-color: var(--brand) !important;

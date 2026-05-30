@@ -18,7 +18,7 @@
                 <form method="post">
                     {% csrf_token %}
                     {% for field in form.visible_fields %}
-                        <div class="mb-4">
+                        <div class="mb-4 field-group-{{ field.name }}">
                             {% if field.name == 'is_enabled' %}
                                 <div class="form-check form-switch mb-2">
                                     {{ field }}
@@ -140,6 +140,28 @@
 {{ all_languages|json_script:"all-languages-data" }}
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const compareModeSelect = document.querySelector('select[name="compare_mode"]');
+        const checkerCodeDiv = document.querySelector('.field-group-checker_code');
+        const checkerLangDiv = document.querySelector('.field-group-checker_language');
+
+        function toggleCheckerFields() {
+            if (!compareModeSelect) return;
+            const isCustom = compareModeSelect.value === 'custom_checker';
+            if (checkerCodeDiv) {
+                checkerCodeDiv.style.display = isCustom ? 'block' : 'none';
+            }
+            if (checkerLangDiv) {
+                checkerLangDiv.style.display = isCustom ? 'block' : 'none';
+            }
+        }
+
+        if (compareModeSelect) {
+            compareModeSelect.addEventListener('change', toggleCheckerFields);
+            toggleCheckerFields();
+        }
+    });
+
     const allLanguages = JSON.parse(document.getElementById('all-languages-data').textContent);
     const monacoMap = {};
     allLanguages.forEach(lang => {

@@ -106,6 +106,6 @@ class LeaderboardView(ListView):
 
     def get_queryset(self):
         return User.objects.annotate(
-            accepted_count=Count('coding_submissions', filter=Q(coding_submissions__status='accepted'), distinct=True),
-            total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions', filter=Q(coding_submissions__status='accepted'), distinct=True) * 5
+            accepted_count=Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True),
+            total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True) * 5
         ).order_by('-total_score', '-accepted_count')

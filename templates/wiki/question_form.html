@@ -33,6 +33,14 @@
                     <h5 class="mb-3">Các lựa chọn (Choices)</h5>
                     {{ choice_formset.management_form }}
                     
+                    {% if choice_formset.non_form_errors %}
+                        <div class="alert alert-danger rounded-4 mb-3">
+                            {% for error in choice_formset.non_form_errors %}
+                                <div><i class="fa-solid fa-circle-exclamation me-2"></i>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
                     <div id="choice-formset-container">
                     {% for form in choice_formset %}
                         <div class="choice-form card bg-light border-0 mb-3 p-3 app-card">

@@ -611,3 +611,111 @@ class WikiFlowTests(TestCase):
         correct_choices = [c for c in choices if c.is_correct]
         self.assertEqual(len(correct_choices), 1)
         self.assertEqual(correct_choices[0].content, "Ha Noi")
+
+    def test_leaderboard_counts_distinct_solved_exercises(self):
+        """Test that the leaderboard counts only unique coding exercises solved by a user."""
+        from .models import CodingExercise, CodingSubmission
+
+        # Create a coding exercise
+        exercise = CodingExercise.objects.create(
+            article=self.article,
+            title="Algorithm Quiz",
+            is_enabled=True,
+            allowed_languages=["python"],
+        )
+
+        # Submit twice for the same exercise and get accepted both times
+        CodingSubmission.objects.create(
+            exercise=exercise,
+            user=self.other_user,
+            language="python",
+            status="accepted",
+            score=100,
+        )
+        CodingSubmission.objects.create(
+            exercise=exercise,
+            user=self.other_user,
+            language="python",
+            status="accepted",
+            score=100,
+        )
+
+        response = self.client.get(reverse("wiki:leaderboard"))
+        self.assertEqual(response.status_code, 200)
+
+        # The other_user is in context['users']
+        other_user_data = None
+        for u in response.context["users"]:
+            if u.username == self.other_user.username:
+                other_user_data = u
+                break
+
+        self.assertIsNotNone(other_user_data)
+        # It should count only 1 solved exercise (not 2)
+        self.assertEqual(other_user_data.accepted_count, 1)
+
+        # total_score = articles (0) * 10 + solved (1) * 5 = 5
+        self.assertEqual(other_user_data.total_score, 5)
+
+    def test_choice_formset_validation_enforces_choices_count_and_correctness(self):
+        """Test that ChoiceFormSet validation requires at least 2 choices and exactly 1 correct choice."""
+        self.client.login(username="author", password="StrongPass123")
+
+        # Case A: Less than 2 choices (e.g. 1 choice)
+        response = self.client.post(
+            reverse("wiki:question-create", args=[self.article.pk]),
+            {
+                "content": "Cau hoi test?",
+                "explanation": "",
+                "order": "1",
+                "choices-TOTAL_FORMS": "1",
+                "choices-INITIAL_FORMS": "0",
+                "choices-MIN_NUM_FORMS": "0",
+                "choices-MAX_NUM_FORMS": "1000",
+                "choices-0-content": "Lựa chọn 1",
+                "choices-0-is_correct": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 200)  # Form invalid, re-renders page
+        formset = response.context["choice_formset"]
+        self.assertIn("Một câu hỏi cần có ít nhất 2 lựa chọn.", formset.non_form_errors())
+
+        # Case B: 2 choices but 0 correct choice
+        response = self.client.post(
+            reverse("wiki:question-create", args=[self.article.pk]),
+            {
+                "content": "Cau hoi test?",
+                "explanation": "",
+                "order": "1",
+                "choices-TOTAL_FORMS": "2",
+                "choices-INITIAL_FORMS": "0",
+                "choices-MIN_NUM_FORMS": "0",
+                "choices-MAX_NUM_FORMS": "1000",
+                "choices-0-content": "Lựa chọn 1",
+                "choices-1-content": "Lựa chọn 2",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        formset = response.context["choice_formset"]
+        self.assertIn("Cần chọn ít nhất một lựa chọn làm đáp án đúng.", formset.non_form_errors())
+
+        # Case C: 2 choices but multiple correct choices
+        response = self.client.post(
+            reverse("wiki:question-create", args=[self.article.pk]),
+            {
+                "content": "Cau hoi test?",
+                "explanation": "",
+                "order": "1",
+                "choices-TOTAL_FORMS": "2",
+                "choices-INITIAL_FORMS": "0",
+                "choices-MIN_NUM_FORMS": "0",
+                "choices-MAX_NUM_FORMS": "1000",
+                "choices-0-content": "Lựa chọn 1",
+                "choices-0-is_correct": "on",
+                "choices-1-content": "Lựa chọn 2",
+                "choices-1-is_correct": "on",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        formset = response.context["choice_formset"]
+        self.assertIn("Chỉ được chọn duy nhất một đáp án đúng.", formset.non_form_errors())

@@ -64,7 +64,7 @@
   --glass: saturate(180%) blur(20px);
 
   --font-sans: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Fredoka", "Itim", "Lexend", sans-serif;
+  --font-display: "Patrick Hand", "Pangolin", "Itim", "Mali", "Fredoka", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -94,7 +94,7 @@ html {
 body,
 body.app-shell {
   background-color: var(--bg) !important;
-  background-image: 
+  background-image:
     linear-gradient(rgba(92, 74, 66, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(92, 74, 66, 0.035) 1px, transparent 1px);
   background-size: 24px 24px;

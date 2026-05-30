@@ -189,9 +189,9 @@
 }
 
 textarea.font-monospace {
-  background: #1a1b26 !important;
-  color: #c0caf5 !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: #ffffff !important;
+  color: #1a1b26 !important;
+  border: 1.5px solid var(--line) !important;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono) !important;
   font-size: 0.88rem !important;
@@ -202,7 +202,7 @@ textarea.font-monospace {
   box-shadow: var(--shadow) inset;
 
   &::placeholder {
-    color: rgba(255,255,255,0.2);
+    color: rgba(0,0,0,0.3) !important;
   }
 
   &:focus {

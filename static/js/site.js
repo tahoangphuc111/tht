@@ -141,10 +141,44 @@ const initArticleActions = () => {
     });
 };
 
+const initVoteWebsocket = () => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/votes/`;
+    const socket = new WebSocket(wsUrl);
+
+    socket.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'vote_update' && data.payload) {
+                const p = data.payload;
+                if (p.article_score !== undefined) {
+                    const el = document.getElementById('article-score');
+                    if (el) el.textContent = p.article_score;
+                }
+                if (p.comment_score !== undefined && p.comment_pk !== undefined) {
+                    const el = document.getElementById(`comment-${p.comment_pk}-score`);
+                    if (el) el.textContent = p.comment_score;
+                }
+                if (p.target_user_score !== undefined && p.target_user_pk !== undefined) {
+                    const el = document.getElementById(`user-${p.target_user_pk}-score`);
+                    if (el) el.textContent = p.target_user_score;
+                }
+            }
+        } catch (err) {
+            console.error("Error parsing websocket message:", err);
+        }
+    };
+
+    socket.onclose = () => {
+        setTimeout(initVoteWebsocket, 3000);
+    };
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     initAjaxVotes();
     initArticleActions();
     fetchSaved();
+    initVoteWebsocket();
 
     document.querySelectorAll(".saved-articles-trigger").forEach(b => b.onclick = fetchSaved);
     document.querySelectorAll(".article-copy-link").forEach(btn => {

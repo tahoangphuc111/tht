@@ -3,42 +3,191 @@
 {% block title %}Thông báo | CP Wiki{% endblock %}
 
 {% block content %}
-<section class="app-card mb-4">
-    <div class="section-eyebrow mb-1">Activity</div>
-    <h1 class="hero-title-sm mb-0">Thông báo của bạn</h1>
-</section>
+<style>
+.notifications-container {
+    --purple-soft: rgba(147, 51, 234, 0.08);
+    --teal-soft: rgba(20, 184, 166, 0.08);
+    --red-soft: rgba(239, 68, 68, 0.08);
+    --yellow-soft: rgba(234, 179, 8, 0.08);
+}
 
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="app-card page-card p-4">
-            <div class="notification-list">
+.custom-filter-tabs .nav-link {
+    color: var(--muted);
+    border: 2px solid transparent;
+    transition: all 0.25s var(--ease);
+    background: transparent;
+}
+
+.custom-filter-tabs .nav-link:hover {
+    color: var(--brand);
+    background: var(--bg-soft);
+}
+
+.custom-filter-tabs .nav-link.active {
+    color: white !important;
+    background: var(--brand) !important;
+    box-shadow: var(--shadow-glow);
+}
+
+.notification-card {
+    background: white;
+    border: 2px solid var(--line-strong);
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--line-strong);
+}
+
+.notification-card.is-unread {
+    background: linear-gradient(135deg, rgba(255, 123, 144, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+    border-left: 5px solid var(--brand);
+}
+
+.notification-card.is-unread::after {
+    content: '';
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 10px;
+    height: 10px;
+    background-color: var(--brand);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--brand);
+}
+
+.notification-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    border: 1.5px solid var(--line-strong);
+}
+
+.notification-icon-wrapper.icon-comment {
+    background: var(--purple-soft);
+    color: var(--accent-purple);
+}
+
+.notification-icon-wrapper.icon-upvote {
+    background: var(--red-soft);
+    color: var(--brand);
+}
+
+.notification-icon-wrapper.icon-default {
+    background: var(--teal-soft);
+    color: var(--accent-teal);
+}
+
+.btn-mark-read {
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    border: 1.5px solid var(--line-strong);
+    background: white;
+    transition: all 0.2s var(--ease);
+}
+
+.btn-mark-read:hover {
+    color: #10b981;
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.btn-read-detail {
+    transition: all 0.2s var(--ease);
+}
+.btn-read-detail:hover {
+    transform: scale(1.05);
+}
+</style>
+
+<div class="row justify-content-center notifications-container" data-aos="fade-up">
+    <div class="col-lg-10 col-xl-10">
+        <!-- Header block -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <div class="section-eyebrow mb-1">Activity</div>
+                <h1 class="hero-title-sm mb-0">Thông báo của bạn</h1>
+            </div>
+            
+            {% if unread_notifications_count > 0 %}
+                <button class="btn btn-primary btn-sm rounded-pill px-4 py-2 shadow-glow" id="btn-read-all" onclick="markAllAsRead()">
+                    <i class="fa-solid fa-check-double me-1"></i> Đánh dấu tất cả đã đọc
+                </button>
+            {% endif %}
+        </div>
+
+        <div class="app-card page-card p-4 p-md-5">
+            <!-- Tabs filters -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-wrap gap-3">
+                <div class="nav nav-pills custom-filter-tabs gap-2" id="v-pills-tab" role="tablist">
+                    <button class="nav-link active px-4 py-2 rounded-pill fw-bold" id="filter-all-btn" onclick="filterNotifications('all')">
+                        Tất cả <span class="badge bg-secondary ms-2 opacity-75" id="count-all">{{ notifications|length }}</span>
+                    </button>
+                    <button class="nav-link px-4 py-2 rounded-pill fw-bold position-relative" id="filter-unread-btn" onclick="filterNotifications('unread')">
+                        Chưa đọc
+                        <span class="badge bg-danger ms-2 {% if unread_notifications_count == 0 %}d-none{% endif %}" id="count-unread">{{ unread_notifications_count }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notifications stack -->
+            <div class="notification-list" id="notifications-wrapper">
                 {% for note in notifications %}
-                    <div class="activity-item p-3 mb-2 rounded-3 {% if not note.is_read %}bg-light border-primary{% else %}border{% endif %}" style="border-left: 4px solid {% if not note.is_read %}var(--brand){% else %} transparent {% endif %};">
-                        <div class="d-flex justify-content-between align-items-start"
-                            <div class="d-flex gap-3">
-                                <div class="activity-icon bg-white">
-                                    <i class="fa-solid {% if 'bình luận' in note.message %}fa-comment-dots{% elif 'upvote' in note.message %}fa-circle-up{% else %}fa-bell{% endif %}"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">{{ note.message }}</div>
-                                    <div class="text-muted small">{{ note.created_at|date:"d/m/Y H:i" }} ({{ note.created_at|timesince }} trước)</div>
-                                    {% if note.link %}
-                                        <a href="{{ note.link }}" class="btn btn-sm btn-soft mt-2 rounded-pill px-3" onclick="markAsRead({{ note.id }})">Xem chi tiết</a>
-                                    {% endif %}
-                                </div>
+                    <div class="notification-card p-4 mb-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 {% if not note.is_read %}is-unread{% endif %}" data-id="{{ note.id }}" data-is-read="{{ note.is_read|yesno:'true,false' }}">
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="notification-icon-wrapper {% if 'bình luận' in note.message %}icon-comment{% elif 'upvote' in note.message %}icon-upvote{% else %}icon-default{% endif %}">
+                                <i class="fa-solid {% if 'bình luận' in note.message %}fa-comment-dots{% elif 'upvote' in note.message %}fa-circle-up{% else %}fa-bell{% endif %}"></i>
                             </div>
-                            {% if not note.is_read %}
-                                <button class="btn btn-sm btn-link text-decoration-none" onclick="markReadInline(this, {{ note.id }})">Đánh dấu đã đọc</button>
-                            {% endif %}
+                            <div>
+                                <div class="fw-semibold text-dark mb-1">{{ note.message }}</div>
+                                <div class="text-muted small d-flex align-items-center gap-1">
+                                    <i class="fa-regular fa-clock"></i>
+                                    <span>{{ note.created_at|date:"d/m/Y H:i" }} ({{ note.created_at|timesince }} trước)</span>
+                                </div>
+                                {% if note.link %}
+                                    <a href="{{ note.link }}" class="btn btn-sm btn-soft mt-2 rounded-pill px-3 py-1 btn-read-detail text-decoration-none d-inline-block" onclick="markAsRead({{ note.id }})">
+                                        Xem chi tiết <i class="fa-solid fa-chevron-right ms-1 small"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
                         </div>
+                        {% if not note.is_read %}
+                            <button class="btn btn-mark-read fw-bold d-flex align-items-center gap-1 mt-2 mt-sm-0" onclick="markReadInline(this, {{ note.id }})">
+                                <i class="fa-solid fa-check"></i> Đánh dấu đã đọc
+                            </button>
+                        {% endif %}
                     </div>
                 {% empty %}
-                    <div class="empty-state centered">Bạn không có thông báo nào.</div>
+                    <div class="empty-state centered py-5 text-center">
+                        <div class="display-1 text-muted mb-3 opacity-25"><i class="fa-regular fa-bell-slash"></i></div>
+                        <h3 class="h5 fw-bold text-dark">Bạn không có thông báo nào</h3>
+                        <p class="text-muted small">Chúng tôi sẽ báo cho bạn khi có bình luận hoặc lượt ủng hộ mới.</p>
+                    </div>
                 {% endfor %}
             </div>
 
+            <!-- Empty unread state -->
+            <div id="empty-unread-state" class="empty-state centered py-5 text-center d-none">
+                <div class="display-1 text-muted mb-3 opacity-25"><i class="fa-regular fa-circle-check"></i></div>
+                <h3 class="h5 fw-bold text-dark">Tuyệt vời!</h3>
+                <p class="text-muted small">Bạn đã xem hết tất cả thông báo của mình.</p>
+            </div>
+
             {% if is_paginated %}
-                <nav class="mt-4">
+                <nav class="mt-4" id="pagination-nav">
                     <ul class="pagination justify-content-center">
                         {% if page_obj.has_previous %}
                             <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Trước</a></li>
@@ -55,6 +204,39 @@
 </div>
 
 <script>
+let currentFilter = 'all';
+
+function filterNotifications(filterType) {
+    currentFilter = filterType;
+    
+    // Toggle active classes on buttons
+    document.getElementById('filter-all-btn').classList.toggle('active', filterType === 'all');
+    document.getElementById('filter-unread-btn').classList.toggle('active', filterType === 'unread');
+    
+    const items = document.querySelectorAll('.notification-card');
+    let visibleCount = 0;
+    
+    items.forEach(item => {
+        const isRead = item.getAttribute('data-is-read') === 'true';
+        if (filterType === 'all' || (filterType === 'unread' && !isRead)) {
+            item.classList.remove('d-none');
+            visibleCount++;
+        } else {
+            item.classList.add('d-none');
+        }
+    });
+    
+    // Show/hide empty states depending on visibility counts
+    const emptyState = document.getElementById('empty-unread-state');
+    if (filterType === 'unread' && visibleCount === 0) {
+        emptyState.classList.remove('d-none');
+        document.getElementById('pagination-nav')?.classList.add('d-none');
+    } else {
+        emptyState.classList.add('d-none');
+        document.getElementById('pagination-nav')?.classList.remove('d-none');
+    }
+}
+
 async function markReadInline(btn, id) {
     try {
         const r = await fetch(`/notification/${id}/read/`, {
@@ -63,11 +245,75 @@ async function markReadInline(btn, id) {
         });
         const d = await r.json();
         if (d.success) {
-            const item = btn.closest('.activity-item');
-            item.style.borderLeftColor = 'transparent';
-            item.classList.remove('bg-light', 'border-primary');
-            item.classList.add('border');
+            const card = btn.closest('.notification-card');
+            card.classList.remove('is-unread');
+            card.setAttribute('data-is-read', 'true');
             btn.remove();
+            
+            // Decrement unread badges
+            const countUnreadBadge = document.getElementById('count-unread');
+            if (countUnreadBadge) {
+                let currentVal = parseInt(countUnreadBadge.textContent) || 0;
+                if (currentVal > 1) {
+                    countUnreadBadge.textContent = currentVal - 1;
+                } else {
+                    countUnreadBadge.classList.add('d-none');
+                    countUnreadBadge.textContent = '0';
+                    document.getElementById('btn-read-all')?.remove();
+                }
+            }
+            
+            // Decrement navigation badge
+            const navBadge = document.querySelector('.nav-icon-btn .badge');
+            if (navBadge) {
+                let currentVal = parseInt(navBadge.textContent) || 0;
+                if (currentVal > 1) {
+                    navBadge.textContent = currentVal - 1;
+                } else {
+                    navBadge.remove();
+                }
+            }
+            
+            filterNotifications(currentFilter);
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function markAllAsRead() {
+    try {
+        const r = await fetch('{% url "wiki:notifications-read-all" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const d = await r.json();
+        if (d.success) {
+            // Update UI status on all cards
+            const cards = document.querySelectorAll('.notification-card');
+            cards.forEach(card => {
+                card.classList.remove('is-unread');
+                card.setAttribute('data-is-read', 'true');
+                card.querySelector('.btn-mark-read')?.remove();
+            });
+            
+            // Remove top action button
+            document.getElementById('btn-read-all')?.remove();
+            
+            // Clear page badge
+            const countUnreadBadge = document.getElementById('count-unread');
+            if (countUnreadBadge) {
+                countUnreadBadge.classList.add('d-none');
+                countUnreadBadge.textContent = '0';
+            }
+            
+            // Clear navbar icon badge
+            const navBadge = document.querySelector('.nav-icon-btn .badge');
+            if (navBadge) navBadge.remove();
+            
+            filterNotifications(currentFilter);
+            
+            Swal.fire({ icon: 'success', title: 'Đã đánh dấu tất cả là đã đọc', timer: 1500, showConfirmButton: false });
         }
     } catch (err) {
         console.error(err);

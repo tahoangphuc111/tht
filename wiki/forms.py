@@ -436,6 +436,16 @@ class CodingExerciseForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
     )
 
+    checker_language = forms.ChoiceField(
+        choices=[
+            ("python", "Python 3"),
+            ("cpp", "C++17"),
+        ],
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        label="Ngôn ngữ checker",
+    )
+
     class Meta:
         """Metadata for CodingExerciseForm."""
 
@@ -449,11 +459,15 @@ class CodingExerciseForm(forms.ModelForm):
             "time_limit_ms",
             "memory_limit_mb",
             "compare_mode",
+            "checker_code",
+            "checker_language",
         )
         labels = {
             "compare_mode": "Checker",
             "time_limit_ms": "Time limit (ms)",
             "memory_limit_mb": "Memory limit (MB)",
+            "checker_code": "Mã nguồn checker",
+            "checker_language": "Ngôn ngữ checker",
         }
         widgets = {
             "description": forms.Textarea(
@@ -468,6 +482,13 @@ class CodingExerciseForm(forms.ModelForm):
             "time_limit_ms": forms.NumberInput(attrs={"class": "form-control"}),
             "memory_limit_mb": forms.NumberInput(attrs={"class": "form-control"}),
             "compare_mode": forms.Select(attrs={"class": "form-select"}),
+            "checker_code": forms.Textarea(
+                attrs={
+                    "rows": 10,
+                    "class": "form-control font-monospace",
+                    "placeholder": "Nhập mã nguồn checker tại đây...\n\nĐối với Python/C++, checker sẽ nhận 3 đối số dòng lệnh:\n1. Đường dẫn file input (stdin)\n2. Đường dẫn file output của user (actual output)\n3. Đường dẫn file output mẫu (expected output)\n\nTrả về exit code 0 nếu chấp nhận (AC), trả về exit code 1 hoặc 2 nếu sai (WA).",
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -485,7 +506,8 @@ class CodingExerciseForm(forms.ModelForm):
         )
 
         starter_map = self.instance.starter_code_map if self.instance.pk else {}
-        language_configs = getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {})
+        from .services.code_runner import _merged_configs
+        language_configs = _merged_configs()
         for language_key, config in language_configs.items():
             field_name = f"starter_code_{language_key}"
             self.fields[field_name] = forms.CharField(
@@ -517,17 +539,20 @@ class CodingExerciseForm(forms.ModelForm):
                 "allowed_languages", "Cần chọn ít nhất một ngôn ngữ khi bật bài tập code."
             )
         if cleaned_data.get("compare_mode") == "custom_checker":
-            self.add_error(
-                "compare_mode",
-                "Chế độ Custom Checker chưa được hỗ trợ cấu hình đầy đủ từ form này.",
-            )
+            checker_code = cleaned_data.get("checker_code")
+            checker_language = cleaned_data.get("checker_language")
+            if not checker_code:
+                self.add_error("checker_code", "Vui lòng nhập mã nguồn checker.")
+            if not checker_language:
+                self.add_error("checker_language", "Vui lòng chọn ngôn ngữ checker.")
         return cleaned_data
 
     def save(self, commit=True):
         """Persist starter codes as a JSON map."""
         instance = super().save(commit=False)
         starter_map = {}
-        for language_key in getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}):
+        from .services.code_runner import _merged_configs
+        for language_key in _merged_configs():
             starter_value = self.cleaned_data.get(f"starter_code_{language_key}", "")
             if starter_value:
                 starter_map[language_key] = starter_value
@@ -556,29 +581,52 @@ class CodingTestCaseForm(forms.ModelForm):
             "score",
             "subtask_id",
         )
+        labels = {
+            "name": "Tên testcase",
+            "input_text": "Dữ liệu đầu vào (Input text)",
+            "expected_output_text": "Dữ liệu đầu ra mong đợi (Expected Output text)",
+            "input_file": "Tệp dữ liệu đầu vào (Input file)",
+            "expected_output_file": "Tệp dữ liệu đầu ra mong đợi (Output file)",
+            "is_sample": "Là testcase mẫu (Sample testcase)",
+            "order": "Thứ tự thực hiện (Order)",
+            "score": "Điểm số (Score)",
+            "subtask_id": "ID nhóm bài phụ (Subtask ID)",
+        }
+        help_texts = {
+            "name": "Tên định danh cho testcase (Ví dụ: sample-1, tc-01).",
+            "input_text": "Nội dung đầu vào dạng văn bản. Để trống nếu bạn tải tệp lên.",
+            "expected_output_text": "Nội dung đầu ra kỳ vọng dạng văn bản. Để trống nếu bạn tải tệp lên.",
+            "input_file": "Tải lên tệp input (.inp, .in, .txt). Sẽ được ưu tiên hơn phần văn bản nếu nhập cả hai.",
+            "expected_output_file": "Tải lên tệp output/expected (.out, .ans, .txt). Sẽ được ưu tiên hơn phần văn bản nếu nhập cả hai.",
+            "is_sample": "Tích chọn nếu muốn hiển thị công khai testcase này làm mẫu ví dụ trên bài viết.",
+            "order": "Thứ tự sắp xếp và đánh giá của testcase (số nhỏ chạy trước).",
+            "score": "Số điểm đạt được khi vượt qua testcase này.",
+            "subtask_id": "ID nhóm chấm bài phụ. Các testcase có cùng ID sẽ gom lại thành 1 subtask chấm điểm theo cụm.",
+        }
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "sample-1"}
+                attrs={"class": "form-control", "placeholder": "Ví dụ: sample-1, test-01"}
             ),
             "input_text": forms.Textarea(
                 attrs={
                     "rows": 6,
                     "class": "form-control font-monospace",
-                    "placeholder": "Nhap input raw neu khong upload file",
+                    "placeholder": "Nhập dữ liệu đầu vào trực tiếp tại đây nếu không upload file...",
                 }
             ),
             "expected_output_text": forms.Textarea(
                 attrs={
                     "rows": 6,
                     "class": "form-control font-monospace",
-                    "placeholder": "Nhap output raw neu khong upload file",
+                    "placeholder": "Nhập dữ liệu mong đợi đầu ra trực tiếp tại đây nếu không upload file...",
                 }
             ),
             "input_file": forms.FileInput(attrs={"class": "form-control"}),
             "expected_output_file": forms.FileInput(attrs={"class": "form-control"}),
             "is_sample": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "order": forms.NumberInput(attrs={"class": "form-control"}),
-            "score": forms.NumberInput(attrs={"class": "form-control"}),
+            "order": forms.NumberInput(attrs={"class": "form-control", "placeholder": "Ví dụ: 1"}),
+            "score": forms.NumberInput(attrs={"class": "form-control", "placeholder": "Ví dụ: 10"}),
+            "subtask_id": forms.NumberInput(attrs={"class": "form-control", "placeholder": "Ví dụ: 1"}),
         }
 
     def clean(self):
@@ -596,6 +644,33 @@ class CodingTestCaseForm(forms.ModelForm):
         return cleaned_data
 
 
+class BaseChoiceFormSet(forms.models.BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+
+        completed_forms = 0
+        correct_count = 0
+        for form in self.forms:
+            if not form.cleaned_data or form.cleaned_data.get('DELETE'):
+                continue
+            completed_forms += 1
+            if form.cleaned_data.get('is_correct'):
+                correct_count += 1
+
+        has_file = bool(self.files and self.files.get("question_file"))
+        if completed_forms > 0:
+            if completed_forms < 2:
+                raise forms.ValidationError("Một câu hỏi cần có ít nhất 2 lựa chọn.")
+            if correct_count == 0:
+                raise forms.ValidationError("Cần chọn ít nhất một lựa chọn làm đáp án đúng.")
+            if correct_count > 1:
+                raise forms.ValidationError("Chỉ được chọn duy nhất một đáp án đúng.")
+        elif not has_file:
+            raise forms.ValidationError("Một câu hỏi cần có ít nhất 2 lựa chọn.")
+
+
 ChoiceFormSet = inlineformset_factory(
-    Question, Choice, form=ChoiceForm, extra=4, can_delete=True
+    Question, Choice, form=ChoiceForm, formset=BaseChoiceFormSet, extra=4, can_delete=True
 )

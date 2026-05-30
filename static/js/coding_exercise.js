@@ -60,7 +60,7 @@
 
         const parts = [];
         if (data.compile_output && data.status === "compile_error") {
-            parts.push(`<div class="mb-3"><strong>Lỗi biên dịch:</strong><pre class="bg-dark text-light p-3 rounded-3 mt-2 small shadow-inner">${escapeHtml(data.compile_output)}</pre></div>`);
+            parts.push(`<div class="mb-3"><strong>Lỗi biên dịch:</strong><pre class="bg-white text-dark border p-3 rounded-3 mt-2 small shadow-inner">${escapeHtml(data.compile_output)}</pre></div>`);
         }
         
         if (Array.isArray(data.results) && data.results.length) {

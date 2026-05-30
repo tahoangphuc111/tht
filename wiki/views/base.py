@@ -138,3 +138,12 @@ def mark_notification_read(request, pk):
     notification.is_read = True
     notification.save(update_fields=["is_read"])
     return JsonResponse({"success": True})
+
+
+@login_required
+def mark_all_notifications_read(request):
+    """AJAX view to mark all notifications as read for the current user."""
+    if request.method == "POST":
+        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False}, status=400)

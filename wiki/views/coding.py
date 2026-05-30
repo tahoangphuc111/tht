@@ -213,7 +213,7 @@ def run_code_view(request, article_pk):
             language,
             source_code,
             custom_input=custom_input,
-            sample_only=not bool(custom_input),
+            sample_only=True,
         )
         return JsonResponse(serialize_submission(submission))
     except json.JSONDecodeError:

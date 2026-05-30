@@ -150,3 +150,87 @@ class CodingExerciseTests(TestCase):
         self.assertTrue(data["success"])
         self.assertEqual(data["status"], "accepted")
         self.assertIn("cba", data["stdout_preview"])
+
+    def test_custom_checker_python_accepted(self):
+        """Submit code with a custom python checker that validates actual output is double the input."""
+        self.exercise.compare_mode = "custom_checker"
+        self.exercise.checker_language = "python"
+        self.exercise.checker_code = (
+            "import sys\n"
+            "with open(sys.argv[1]) as f: inp = f.read().strip()\n"
+            "with open(sys.argv[2]) as f: act = f.read().strip()\n"
+            "try:\n"
+            "    if int(act) == int(inp) * 2: sys.exit(0)\n"
+            "    else: sys.exit(1)\n"
+            "except Exception:\n"
+            "    sys.exit(1)\n"
+        )
+        self.exercise.save()
+
+        # Update testcase outputs to something else just to verify custom checker is called
+        self.exercise.testcases.all().delete()
+        CodingTestCase.objects.create(
+            exercise=self.exercise,
+            name="custom-test",
+            input_text="5\n",
+            expected_output_text="10\n",
+            is_sample=True,
+            order=1,
+        )
+
+        self.client.login(username="other", password="StrongPass123")
+        response = self.client.post(
+            reverse("wiki:submit-code", args=[self.article.pk]),
+            data=json.dumps(
+                {
+                    "language": "python",
+                    "source_code": "x = int(input())\nprint(x * 2)\n",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["status"], "accepted")
+
+    def test_run_code_does_not_count_as_submission(self):
+        """Verify that running code (either sample tests or custom input) does not record a real submission or affect leaderboard."""
+        from .models import CodingSubmission
+
+        self.client.login(username="other", password="StrongPass123")
+
+        # 1. Run code with custom input
+        response = self.client.post(
+            reverse("wiki:run-code", args=[self.article.pk]),
+            data=json.dumps(
+                {
+                    "language": "python",
+                    "source_code": "print(input())\n",
+                    "custom_input": "hello\n",
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Verify it created a trial run
+        latest_run = CodingSubmission.objects.filter(user=self.other_user).latest("id")
+        self.assertTrue(latest_run.is_sample_run)
+
+        # 2. Check Submission History View - should be empty
+        response = self.client.get(reverse("wiki:submissions-history"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["submissions"]), 0)
+
+        # 3. Check Leaderboard View - should not count toward scores
+        response = self.client.get(reverse("wiki:leaderboard"))
+        self.assertEqual(response.status_code, 200)
+        other_user_data = None
+        for u in response.context["users"]:
+            if u.username == self.other_user.username:
+                other_user_data = u
+                break
+        self.assertIsNotNone(other_user_data)
+        self.assertEqual(other_user_data.accepted_count, 0)
+        self.assertEqual(other_user_data.total_score, 0)
