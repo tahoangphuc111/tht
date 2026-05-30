@@ -23,8 +23,9 @@ from .models import (
 class ProfileAdmin(admin.ModelAdmin):
     """Admin interface for the Profile model."""
 
-    list_display = ("user", "display_name", "guide_seen")
+    list_display = ("user", "display_name", "guide_seen", "is_suspended")
     search_fields = ("user__username", "user__email", "display_name")
+    list_filter = ("is_suspended", "guide_seen")
 
 
 @admin.register(Category)

@@ -27,8 +27,13 @@ def save_article_revision(article, user, change_summary):
 
 def can_publish_articles(user):
     """Check if the user has permission to publish or edit articles."""
+    if not user.is_authenticated:
+        return False
+    profile, _ = Profile.objects.get_or_create(user=user)
+    if profile.is_suspended:
+        return False
     publisher_roles = ["admin", "editor", "contributor"]
-    return user.is_authenticated and (
+    return (
         user.is_superuser
         or user.groups.filter(name__in=publisher_roles).exists()
         or user.has_perm("wiki.add_article")

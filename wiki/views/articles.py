@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from ..models import Article, Category, ArticleRevision, Bookmark, UploadedFile
+from ..models import Article, Category, ArticleRevision, Bookmark, UploadedFile, Profile, Comment
 from ..forms import ArticleForm, CommentForm
 from ..services.code_runner import get_enabled_language_choices, get_language_config
 from ..utils import save_article_revision, can_publish_articles, can_manage_wiki
@@ -194,11 +194,45 @@ class ArticleDetailView(DetailView):
             or not request.user.has_perm("wiki.add_comment")
         ):
             return redirect(self.object.get_absolute_url())
+
+        # 1. Check suspension status
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        if profile.is_suspended:
+            messages.error(request, "Tài khoản của bạn đang bị khóa các chức năng tương tác.")
+            return redirect(self.object.get_absolute_url())
+
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.article = self.object
             comment.author = request.user
+
+            # 2. Rate-limiting (prevent rapid spam posting)
+            from django.utils import timezone
+            last_comment = Comment.objects.filter(author=request.user).order_by("-created_at").first()
+            if last_comment:
+                time_diff = (timezone.now() - last_comment.created_at).total_seconds()
+                if time_diff < 10:
+                    messages.error(request, "Bạn đang bình luận quá nhanh. Vui lòng đợi vài giây.")
+                    return redirect(self.object.get_absolute_url())
+
+            # 3. Spam filtering
+            import re
+            content_lower = comment.content.lower()
+            spam_keywords = ["cờ bạc", "cá độ", "casino", "nhà cái", "chơi bài", "viagra", "mua bán tài khoản", "kiếm tiền online"]
+            is_spam = any(keyword in content_lower for keyword in spam_keywords)
+
+            # Detect more than 2 links
+            links_count = len(re.findall(r'https?://', content_lower))
+            if links_count > 2:
+                is_spam = True
+
+            if is_spam:
+                comment.is_approved = False
+                comment.save()
+                messages.warning(request, "Bình luận của bạn chứa nội dung nghi ngờ là spam và đang được chờ kiểm duyệt.")
+                return redirect(self.object.get_absolute_url())
+
             comment.save()
             return redirect(self.object.get_absolute_url())
         return self.render_to_response(self.get_context_data(comment_form=form))
@@ -241,6 +275,10 @@ class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         article = self.get_object()
         user = self.request.user
+        if user.is_authenticated:
+            profile, _ = Profile.objects.get_or_create(user=user)
+            if profile.is_suspended:
+                return False
         return (user.is_superuser or user.has_perm("wiki.manage_all_articles")
                 or (article.author == user and user.has_perm("wiki.change_article")))
 

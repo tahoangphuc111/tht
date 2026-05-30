@@ -36,6 +36,10 @@ class Profile(models.Model):
         help_text="Ảnh đại diện người dùng (jpg, png, gif).",
     )
     guide_seen = models.BooleanField(default=False)
+    is_suspended = models.BooleanField(
+        default=False,
+        help_text="Bật để khóa quyền tương tác (bình luận, viết bài, vote) của người dùng.",
+    )
     is_profile_private = models.BooleanField(
         default=False,
         help_text="Bật để chỉ bạn và admin có thể xem đầy đủ hồ sơ này.",

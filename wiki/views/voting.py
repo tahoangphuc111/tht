@@ -28,6 +28,14 @@ def _handle_vote(request, model, target_field, target_obj, vote_attr):
             )
         return redirect(f"{settings.LOGIN_URL}?next={request.path}")
 
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    if profile.is_suspended:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {"success": False, "message": "Tài khoản của bạn đang bị khóa các chức năng tương tác."}, status=403
+            )
+        return redirect(target_obj.get_absolute_url() if hasattr(target_obj, "get_absolute_url") else "/")
+
     # Prevent self-voting on articles and comments
     if target_field == "article" and target_obj.author == request.user:
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
