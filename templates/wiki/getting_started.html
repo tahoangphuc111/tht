@@ -3,13 +3,17 @@
 {% block title %}Hướng dẫn sử dụng | CP Wiki{% endblock %}
 
 {% block content %}
-<div class="card border-0 shadow-sm app-card mb-5 overflow-hidden" data-aos="fade-up">
+<div class="card border-0 shadow-sm app-card guide-shell mb-5 overflow-hidden" data-aos="fade-up">
     <div class="card-body p-4 p-lg-5">
-        <div class="section-eyebrow mb-2 text-center text-md-start">Bắt đầu nhanh thôi nào! 🚀</div>
-        <h1 class="hero-title-sm mb-4 text-center text-md-start">Làm quen với góc nhỏ này nhé</h1>
+        <div class="guide-hero">
+            <div>
+                <div class="section-eyebrow mb-2">Bắt đầu nhanh</div>
+                <h1 class="hero-title-sm mb-2">Làm quen với CP Wiki</h1>
+                <p class="guide-hero__copy">Một nơi để đọc ghi chú, xem độ khó kiến thức bằng ớt, lưu bài hay và luyện lại bằng quiz hoặc Mini OJ.</p>
+            </div>
+        </div>
         
         <div class="row g-4 mt-2">
-            <!-- Step 1 -->
             <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
                 <div class="guide-step-card">
                     <div class="d-flex justify-content-between align-items-center">
@@ -80,7 +84,7 @@
                 <div class="guide-step-card">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="guide-step-card__icon-box guide-step-card__icon-box--butter">
-                            <i class="fa-solid fa-shield-cat"></i>
+                            <i class="fa-solid fa-shield-heart"></i>
                         </div>
                         <span class="guide-step-card__badge">4</span>
                     </div>
@@ -97,6 +101,47 @@
                         <div class="mock-user mock-user--mod">
                             <div class="mock-avatar"></div>
                             <div class="mock-badge"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wiki-reading-guide mt-5">
+            <div class="section-eyebrow mb-2">Cách xem wiki</div>
+            <h2 class="hero-title-sm mb-3">Đọc bài theo đúng nhịp học của bạn</h2>
+            <div class="row g-3">
+                <div class="col-lg-4">
+                    <div class="wiki-reading-guide__item wiki-reading-guide__item--topic">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <div>
+                            <h3>Chọn đúng chủ đề</h3>
+                            <p>Dùng chuyên mục, tag và ô tìm kiếm để lọc bài theo thuật toán, cấu trúc dữ liệu hoặc dạng bài bạn đang học.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="wiki-reading-guide__item wiki-reading-guide__item--difficulty">
+                        <i class="fa-solid fa-pepper-hot"></i>
+                        <div>
+                            <h3>Nhìn độ khó bằng ớt</h3>
+                            <p>Số trái ớt cạnh tên bài là độ khó kiến thức: 1 trái là nhẹ nhàng, càng nhiều ớt thì bài càng cần nền tảng và thời gian đọc kỹ hơn.</p>
+                            <div class="wiki-reading-guide__peppers" aria-label="Ví dụ thang độ khó từ 1 đến 5">
+                                <span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>
+                                <span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>
+                                <span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>
+                                <span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>
+                                <span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="wiki-reading-guide__item wiki-reading-guide__item--practice">
+                        <i class="fa-solid fa-list-check"></i>
+                        <div>
+                            <h3>Đọc rồi luyện lại</h3>
+                            <p>Trong trang bài viết, dùng mục lục để nhảy nhanh, làm quiz nếu có, và chạy Mini OJ khi bài kèm bài tập code.</p>
                         </div>
                     </div>
                 </div>

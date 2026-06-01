@@ -34,6 +34,11 @@ static/*
 static/js/*
 !static/js/coding_exercise.js
 !static/js/site.js
+!static/martor/
+static/martor/*
+!static/martor/css/
+static/martor/css/*
+!static/martor/css/martor-admin.min.css
 !static/scss/
 static/scss/*
 !static/scss/*.scss

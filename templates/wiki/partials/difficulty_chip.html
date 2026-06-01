@@ -1,0 +1,11 @@
+{% if article.difficulty %}
+    <span class="difficulty-chip difficulty-chip--level-{{ article.difficulty }}" title="Độ khó {{ article.difficulty }}/5" aria-label="Độ khó {{ article.difficulty }} trên 5">
+        <span class="difficulty-chip__icon" aria-hidden="true">
+            {% if article.difficulty >= 1 %}<span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>{% endif %}
+            {% if article.difficulty >= 2 %}<span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>{% endif %}
+            {% if article.difficulty >= 3 %}<span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>{% endif %}
+            {% if article.difficulty >= 4 %}<span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>{% endif %}
+            {% if article.difficulty >= 5 %}<span class="jalapeno-pepper is-active"><span class="jalapeno-pepper__stem"></span><span class="jalapeno-pepper__brow"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__eye"></span><span class="jalapeno-pepper__mouth"></span><span class="jalapeno-pepper__shine"></span></span>{% endif %}
+        </span>
+    </span>
+{% endif %}

@@ -78,6 +78,11 @@ class WikiFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "CP Wiki")
 
+    def test_home_page_does_not_show_article_content_preview(self):
+        response = self.client.get(reverse("wiki:home"))
+        self.assertContains(response, "Segment Tree")
+        self.assertNotContains(response, "Cau truc du lieu ho tro truy van nhanh.")
+
     def test_search_matches_article_content(self):
         """Test that searching finds articles by content."""
         response = self.client.get(reverse("wiki:article-list"), {"q": "truy van"})
@@ -204,6 +209,11 @@ class WikiFlowTests(TestCase):
 
         response = self.client.get(reverse("wiki:article-list"), {"author": "other"})
         self.assertNotContains(response, "Segment Tree")
+
+    def test_article_list_does_not_show_content_preview(self):
+        response = self.client.get(reverse("wiki:article-list"))
+        self.assertContains(response, "Segment Tree")
+        self.assertNotContains(response, "Cau truc du lieu ho tro truy van nhanh.")
 
     def test_article_list_can_sort_by_vote_score(self):
         """Test sorting articles by their net vote score."""

@@ -45,11 +45,12 @@ class ArticleAdmin(admin.ModelAdmin):
         "title",
         "category",
         "author",
+        "difficulty",
         "allow_comments",
         "created_at",
         "updated_at",
     )
-    list_filter = ("allow_comments", "category", "created_at", "updated_at")
+    list_filter = ("difficulty", "allow_comments", "category", "created_at", "updated_at")
     search_fields = ("title", "content", "author__username")
 
 

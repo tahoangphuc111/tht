@@ -142,9 +142,22 @@ const initArticleActions = () => {
 };
 
 const initVoteWebsocket = () => {
+    if (document.documentElement.dataset.voteWebsocket !== "enabled") {
+        return;
+    }
+    if (!("WebSocket" in window)) {
+        return;
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws/votes/`;
-    const socket = new WebSocket(wsUrl);
+    let socket;
+
+    try {
+        socket = new WebSocket(wsUrl);
+    } catch (err) {
+        return;
+    }
 
     socket.onmessage = (event) => {
         try {
@@ -169,8 +182,14 @@ const initVoteWebsocket = () => {
         }
     };
 
-    socket.onclose = () => {
-        setTimeout(initVoteWebsocket, 3000);
+    socket.onerror = () => {
+        socket.close();
+    };
+
+    socket.onclose = (event) => {
+        if (event.code !== 1006) {
+            setTimeout(initVoteWebsocket, 3000);
+        }
     };
 };
 

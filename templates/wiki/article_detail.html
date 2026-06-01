@@ -16,14 +16,14 @@
 
 {% block content %}
 
-<div class="row g-4">
-    <div class="col-12">
-        <article class="card border-0 shadow-lg app-card article-shell" id="article-shell">
-            <div class="card-body p-4 p-lg-5">
-        <div class="mb-5 border-bottom pb-4">
-            <div class="article-meta-row mb-3">
-                <span class="ui-badge ui-badge--primary">{{ article.category.name }}</span>
-                <div class="article-toolbar__group">
+<article class="article-layout" id="article-shell">
+    <header class="article-hero app-card">
+        <div class="article-hero__top">
+            <div class="article-card__badges">
+                    <span class="ui-badge ui-badge--primary">{{ article.category.name }}</span>
+                    {% include "wiki/partials/difficulty_chip.html" %}
+            </div>
+            <div class="article-toolbar__group">
                     {% if article.status == 'pending' and user.is_authenticated and user.is_superuser %}
                         <form method="post" action="{% url 'wiki:article-approve' article.pk %}" class="d-inline">
                             {% csrf_token %}
@@ -49,24 +49,23 @@
                             <a class="btn btn-sm btn-outline-danger rounded-pill px-3" href="{% url 'wiki:article-delete' article.pk %}" title="Xóa"><i class="fa-solid fa-trash"></i></a>
                         {% endif %}
                     {% endif %}
-                </div>
             </div>
+        </div>
             
-            <h1 class="hero-title mb-4">{{ article.title }}</h1>
+        <h1 class="hero-title article-hero__title">{{ article.title }}</h1>
             
-            {% if article.tags.exists %}
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    {% for tag in article.tags.all %}
-                        <a href="{% url 'wiki:article-list' %}?tag={{ tag.slug }}" class="pill-badge">
-                            <i class="fa-solid fa-tag me-1 opacity-50"></i>{{ tag.name }}
-                        </a>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        {% if article.tags.exists %}
+            <div class="article-hero__tags">
+                {% for tag in article.tags.all %}
+                    <a href="{% url 'wiki:article-list' %}?tag={{ tag.slug }}" class="pill-badge">
+                        <i class="fa-solid fa-tag me-1 opacity-50"></i>{{ tag.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-            <div class="d-flex align-items-center flex-wrap gap-4 mb-4">
-                <!-- User Info -->
-                <div class="author-info">
+        <div class="article-hero__meta">
+            <div class="author-info">
                     {% if article.author.profile.avatar %}
                         <img src="{{ article.author.profile.avatar.url }}" alt="{{ article.author.username }}">
                     {% else %}
@@ -78,12 +77,8 @@
                         <strong class="author-name"><a class="article-link" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a></strong>
                         <div class="author-date">{{ article.created_at|date:"d/m/Y" }} • <i class="fa-solid fa-mug-hot me-1 opacity-50"></i>{{ article.reading_time_minutes }} phút đọc</div>
                     </div>
-                </div>
-
-                <div class="vr opacity-10 d-none d-md-block" style="height: 30px;"></div>
-
-                <!-- Inline Action Bar -->
-                <div class="article-actions-bar d-flex align-items-center gap-2">
+            </div>
+            <div class="article-actions-bar">
                     <div class="vote-pill">
                         <form method="post" class="ajax-vote-form m-0" action="{% url 'wiki:article-vote' article.pk %}">
                             {% csrf_token %}
@@ -113,40 +108,43 @@
                         </button>
 
                     </div>
-                </div>
             </div>
-
-
         </div>
-        <div id="article-toc" class="mb-4 d-none">
-            <div class="ui-card p-4" style="border-radius: 20px; background: var(--bg-warm) !important; border-style: dashed;">
-                <h5 class="fw-bold mb-3"><i class="fa-solid fa-list-ul me-2"></i>Mục lục</h5>
+    </header>
+
+    <div class="article-body-grid">
+        <aside class="article-sidebar">
+            <div id="article-toc" class="article-toc d-none">
+                <h5 class="article-toc__title"><i class="fa-solid fa-list-ul me-2"></i>Mục lục</h5>
                 <nav id="toc-list" class="small"></nav>
             </div>
-        </div>
-        <div class="article-content markdown-body">{{ article.content|safe_markdown }}</div>
-        <div class="mt-4 article-section-note">
-            Cập nhật lần cuối: {{ article.updated_at|date:"d/m/Y H:i" }}
-        </div>
-        {% if article.attachments.exists %}
-            <div class="mt-4">
-                <h6>File đính kèm</h6>
-                <ul class="attachment-list">
-                {% for attachment in article.attachments.all %}
-                    <li class="attachment-item">
-                        <div>
-                            <a href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.file.name }}</a>
-                            <div class="article-section-note">Tải lên {{ attachment.created_at|date:"d/m/Y H:i" }}</div>
-                        </div>
-                        <a class="btn btn-sm btn-outline-primary px-3" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">Mở file</a>
-                    </li>
-                {% endfor %}
-                </ul>
+            <div class="article-sidebar__meta">
+                <div>Cập nhật</div>
+                <strong>{{ article.updated_at|date:"d/m/Y H:i" }}</strong>
             </div>
-        {% endif %}
+        </aside>
+
+        <div class="article-main app-card">
+            <div class="article-content markdown-body">{{ article.content|safe_markdown }}</div>
+            {% if article.attachments.exists %}
+                <section class="article-attachments">
+                    <h2 class="article-section-title">File đính kèm</h2>
+                    <ul class="attachment-list">
+                    {% for attachment in article.attachments.all %}
+                        <li class="attachment-item">
+                            <div>
+                                <a href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.file.name }}</a>
+                                <div class="article-section-note">Tải lên {{ attachment.created_at|date:"d/m/Y H:i" }}</div>
+                            </div>
+                            <a class="btn btn-sm btn-outline-primary px-3" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">Mở file</a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
 
         {% if quiz_questions %}
-        <div class="mt-5 border-top pt-5" id="quiz-section">
+        <section class="article-quiz-section" id="quiz-section">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <div class="section-eyebrow mb-1">Kiểm tra kiến thức</div>
@@ -202,7 +200,7 @@
                     <div id="quiz-result-score" class="fs-5"></div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -264,7 +262,7 @@
                             if (selectedInput) {
                                 const wrapper = selectedInput.closest('.choice-wrapper');
                                 wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
-                                wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đúng rùi</span>';
+                                wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng rùi nè</span>';
                             }
                         } else {
                             if (selectedInput) {
@@ -278,7 +276,7 @@
                                     const wrapper = correctInput.closest('.choice-wrapper');
                                     wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
                                     wrapper.classList.add('fw-bold');
-                                    wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng rùi nè</span>';
+                                    wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng nè</span>';
                                 }
                             }
                         }
@@ -302,10 +300,9 @@
         });
         </script>
         {% endif %}
+        </div>
     </div>
-        </article>
-    </div>
-</div>
+</article>
 
 
 {% if coding_exercise %}
@@ -615,6 +612,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 minimumResultsForSearch: Infinity
             });
         });
+    }
+
     // ToC Generator
     const articleContent = document.querySelector('.article-content');
     const tocContainer = document.getElementById('article-toc');

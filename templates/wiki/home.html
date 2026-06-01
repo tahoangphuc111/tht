@@ -73,6 +73,7 @@
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center gap-3 mb-3">
                                 <a href="{{ featured_article.category.get_absolute_url }}" class="category-badge-square">{{ featured_article.category.name }}</a>
+                                {% with article=featured_article %}{% include "wiki/partials/difficulty_chip.html" %}{% endwith %}
                                 <span class="text-secondary small d-flex align-items-center gap-1">
                                     <i class="fa-solid fa-clock opacity-50"></i> {{ featured_article.updated_at|date:"d/m/Y" }}
                                 </span>
@@ -94,8 +95,6 @@
                                     <i class="fa-solid fa-book-open"></i> {{ featured_article.reading_time_minutes }} phút
                                 </span>
                             </div>
-
-                            <p class="text-secondary mb-0 d-none d-md-block">{{ featured_article.content|striptags|truncatechars:120 }}</p>
                         </div>
 
                         <a href="{{ featured_article.get_absolute_url }}" class="read-next-circle">
@@ -142,6 +141,7 @@
                                 <a href="{{ article.get_absolute_url }}" class="item-title text-decoration-none fw-bold text-dark d-block mb-1">{{ article.title }}</a>
                                 <div class="item-meta small">
                                     <span class="article-tag me-2"><i class="fa-solid fa-folder me-1"></i>{{ article.category.name }}</span>
+                                    {% include "wiki/partials/difficulty_chip.html" %}
                                     <i class="fa-solid fa-user me-1"></i>{{ article.author.username }}
                                     <span class="mx-1">•</span>
                                     <i class="fa-solid fa-clock me-1"></i>{{ article.created_at|date:"d/m" }}

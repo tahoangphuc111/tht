@@ -109,10 +109,23 @@ class Article(models.Model):
         ("rejected", "Bị từ chối"),
         ("needs_edit", "Yêu cầu sửa đổi"),
     )
+    DIFFICULTY_CHOICES = (
+        (1, "Dịu"),
+        (2, "Cay nhẹ"),
+        (3, "Cay vừa"),
+        (4, "Cay mạnh"),
+        (5, "Siêu cay"),
+    )
 
     title = models.CharField(max_length=220)
     slug = models.SlugField(max_length=240, blank=True, db_index=True)
     content = MartorField()
+    difficulty = models.PositiveSmallIntegerField(
+        choices=DIFFICULTY_CHOICES,
+        null=True,
+        blank=True,
+        db_index=True,
+    )
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="pending", db_index=True
     )

@@ -191,17 +191,115 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            if (typeof renderMathInElement === 'function') {
-                renderMathInElement(document.body, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '$', right: '$', display: false},
-                        {left: '\\(', right: '\\)', display: false},
-                        {left: '\\[', right: '\\]', display: true}
-                    ],
-                    throwOnError: false
+            const mathSelector = '.article-content, .markdown-body, .martor-preview';
+            const mathOptions = {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            };
+            let isRenderingMath = false;
+            let renderFrame = null;
+
+            const normalizeDisplayMath = (element) => {
+                if (!element || !element.innerHTML) {
+                    return;
+                }
+                const html = element.innerHTML;
+                const normalized = html.replace(/\$\$([\s\S]*?)\$\$/g, function(match, body) {
+                    if (!/<br\s*\/?>|<\/?p[\s>]/i.test(body)) {
+                        return match;
+                    }
+                    const text = body
+                        .replace(/<br\s*\/?>/gi, '\n')
+                        .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
+                        .replace(/<\/?p[^>]*>/gi, '\n')
+                        .replace(/&nbsp;/gi, ' ');
+                    return '$$' + text + '$$';
                 });
-            }
+                if (normalized !== html) {
+                    element.innerHTML = normalized;
+                }
+            };
+
+            const getMathTargets = (root) => {
+                const targets = [];
+                if (root.nodeType === 1 && root.matches(mathSelector)) {
+                    targets.push(root);
+                }
+                root.querySelectorAll(mathSelector).forEach(function(element) {
+                    if (!targets.includes(element)) {
+                        targets.push(element);
+                    }
+                });
+                return targets;
+            };
+
+            const renderMath = (root) => {
+                if (typeof renderMathInElement !== 'function') {
+                    return;
+                }
+                const targets = getMathTargets(root || document.body);
+                isRenderingMath = true;
+                try {
+                    targets.forEach(function(element) {
+                        normalizeDisplayMath(element);
+                        renderMathInElement(element, mathOptions);
+                    });
+                } finally {
+                    isRenderingMath = false;
+                }
+            };
+
+            const scheduleMathRender = (root) => {
+                if (isRenderingMath) {
+                    return;
+                }
+                if (renderFrame) {
+                    cancelAnimationFrame(renderFrame);
+                }
+                renderFrame = requestAnimationFrame(function() {
+                    renderFrame = null;
+                    renderMath(root || document.body);
+                });
+            };
+
+            const attachPreviewObserver = (preview) => {
+                if (preview.dataset.mathObserverAttached) {
+                    return;
+                }
+                preview.dataset.mathObserverAttached = 'true';
+                const previewObserver = new MutationObserver(function() {
+                    scheduleMathRender(preview);
+                });
+                previewObserver.observe(preview, { childList: true, subtree: true, characterData: true });
+            };
+
+            document.querySelectorAll('.martor-preview').forEach(attachPreviewObserver);
+            renderMath(document.body);
+
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType !== 1) {
+                            return;
+                        }
+                        if (node.matches('.martor-preview')) {
+                            attachPreviewObserver(node);
+                            scheduleMathRender(node);
+                        } else {
+                            node.querySelectorAll('.martor-preview').forEach(function(preview) {
+                                attachPreviewObserver(preview);
+                                scheduleMathRender(preview);
+                            });
+                        }
+                    });
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -209,15 +307,13 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
     <script>
-        // AOS Initialization - optimized
         AOS.init({
             duration: 600,
             once: true,
             offset: 50,
-            disable: 'mobile' // Save CPU on mobile devices
+            disable: 'mobile'
         });
 
-        // NProgress for page transitions
         window.onbeforeunload = function() {
             NProgress.start();
         };

@@ -46,7 +46,7 @@ class ArticleListView(ListView):
     def get_queryset(self):
         user = self.request.user
         can_manage = can_manage_wiki(user)
-        qs = Article.objects.select_related("author", "category").annotate(
+        qs = Article.objects.select_related("author", "category").prefetch_related("tags").annotate(
             comment_count=Count("comments", distinct=True),
             vote_balance=(
                 Count("article_votes", filter=Q(article_votes__value=1), distinct=True)
@@ -262,7 +262,7 @@ class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         attachments = self.request.FILES.getlist("attachments")
         if not _validate_article_attachments(form, attachments):
             return self.form_invalid(form)
-        article_fields = ["title", "slug", "content", "category", "tags", "allow_comments"]
+        article_fields = ["title", "slug", "content", "category", "tags", "difficulty", "allow_comments"]
         if not attachments and not any(f in form.changed_data for f in article_fields):
             messages.info(self.request, "Không có thay đổi nào được thực hiện.")
             return redirect(self.get_success_url())

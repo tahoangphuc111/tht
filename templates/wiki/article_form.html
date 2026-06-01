@@ -100,6 +100,29 @@
                         {% endfor %}
                     </div>
 
+                    <div class="mb-4">
+                        <div class="form-label fw-bold small mb-2">Độ khó kiến thức</div>
+                        <div class="difficulty-rating difficulty-rating--value-{{ form.difficulty.value|default:'0' }}" role="radiogroup" aria-label="Độ khó kiến thức">
+                            {% for choice in form.difficulty %}
+                                <input class="difficulty-rating__input" type="radio" name="{{ form.difficulty.html_name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}>
+                                <label class="difficulty-rating__pepper" for="{{ choice.id_for_label }}" title="{{ choice.data.value }}/5" aria-label="Độ khó {{ choice.data.value }} trên 5">
+                                    <span class="jalapeno-pepper" aria-hidden="true">
+                                        <span class="jalapeno-pepper__stem"></span>
+                                        <span class="jalapeno-pepper__brow"></span>
+                                        <span class="jalapeno-pepper__eye"></span>
+                                        <span class="jalapeno-pepper__eye"></span>
+                                        <span class="jalapeno-pepper__mouth"></span>
+                                        <span class="jalapeno-pepper__shine"></span>
+                                        <span class="difficulty-rating__tick"><i class="fa-solid fa-check"></i></span>
+                                    </span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.difficulty.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
                     <div class="mb-2 form-check article-form-check py-2">
                         {{ form.allow_comments }}
                         <label class="form-check-label fw-bold small ms-2" for="{{ form.allow_comments.id_for_label }}">Cho phép thảo luận</label>
@@ -116,7 +139,7 @@
                     <div class="section-eyebrow mb-1">Tài liệu</div>
                     <h3 class="h5 mb-4">Tệp đính kèm</h3>
                     <div class="mb-2">
-                        <input type="file" name="attachments" id="id_attachments" class="form-control" multiple>
+                        <input type="file" name="attachments" id="id_attachments" class="form-control file-input-compact" multiple>
                         <div class="form-text mt-2"><i class="fa-solid fa-circle-info me-1"></i>Hỗ trợ pdf, docx, png, jpg (tối đa 15MB/file).</div>
                     </div>
                 </div>

@@ -106,10 +106,11 @@ class CategoryForm(forms.ModelForm):
 class ArticleForm(forms.ModelForm):
     change_summary = forms.CharField(max_length=255, required=False, widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Tóm tắt các thay đổi của bạn (không bắt buộc)..."}))
     content = MartorFormField(widget=MartorWidget(attrs={"class": "form-control", "placeholder": "# Tiêu đề ghi chú\n\nMô tả ý tưởng, độ phức tạp, ví dụ code..."}))
+    difficulty = forms.TypedChoiceField(choices=Article.DIFFICULTY_CHOICES, coerce=lambda value: int(value) if value else None, empty_value=None, required=False, widget=forms.RadioSelect(attrs={"class": "difficulty-radio"}))
 
     class Meta:
         model = Article
-        fields = ("title", "slug", "category", "tags", "status", "allow_comments", "content", "change_summary")
+        fields = ("title", "slug", "category", "tags", "difficulty", "status", "allow_comments", "content", "change_summary")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -39,25 +39,27 @@ textarea:not(.martor) {
 
 input[type="file"] {
   @extend %input-base;
-  padding: 0.35rem;
-  border-radius: 999px;
+  min-height: auto;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-sm);
   line-height: 1.5;
   cursor: pointer;
-  display: flex;
-  align-items: center;
+  overflow: hidden;
+  white-space: normal;
 
   &::file-selector-button {
     background: var(--brand-soft);
     color: var(--brand);
     border: none;
-    padding: 0.4rem 1.25rem;
-    border-radius: 999px;
-    margin-right: 1.25rem;
+    padding: 0.38rem 0.8rem;
+    border-radius: 12px;
+    margin-right: 0.65rem;
     font-weight: 700;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-family: var(--font-sans);
     transition: all 0.25s var(--ease-spring);
     cursor: pointer;
+    max-width: 8.5rem;
   }
 
   &:hover::file-selector-button {
@@ -65,6 +67,11 @@ input[type="file"] {
     color: #fff;
     transform: translateX(2px);
   }
+}
+
+.file-input-compact {
+  font-size: 0.8rem !important;
+  line-height: 1.35 !important;
 }
 
 .form-label {

@@ -22,9 +22,6 @@
                         <h2 class="h4 mb-3">
                             <a href="{{ article.get_absolute_url }}" class="article-link fw-bold">{{ article.title }}</a>
                         </h2>
-                        <p class="text-secondary mb-4 line-clamp-2">
-                            {{ article.content|truncatewords:40|striptags }}
-                        </p>
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-2">
                                 <div class="author-avatar-sm bg-light text-primary fw-bold d-flex align-items-center justify-content-center rounded-circle" style="width: 24px; height: 24px; font-size: 0.7rem;">
