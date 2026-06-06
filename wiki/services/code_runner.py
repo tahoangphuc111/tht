@@ -26,12 +26,24 @@ class CodeRunnerError(Exception):
 
 
 def _merged_configs():
+    if not getattr(settings, "TESTING", False):
+        from django.core.cache import cache
+        cache_key = "language_runtime_configs"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
     base = dict(getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}))
     try:
         for rt in LanguageRuntime.objects.filter(enabled=True):
             base[rt.key] = rt.to_config()
     except Exception:
         logger.exception("Failed to load LanguageRuntime configs from DB")
+
+    if not getattr(settings, "TESTING", False):
+        from django.core.cache import cache
+        cache_key = "language_runtime_configs"
+        cache.set(cache_key, base, 60)
     return base
 
 

@@ -130,7 +130,7 @@
 
 <div class="row g-4 mt-2">
     <div class="col-lg-7" data-aos="fade-up">
-        <div class="card border-0 shadow-sm ui-card h-100">
+        <div class="card border-0 shadow-sm ui-card">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Bài viết mới nhất</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-newspaper text-info me-2"></i>Bài viết mới lên sóng</h2>
@@ -156,7 +156,7 @@
         </div>
     </div>
     <div class="col-lg-5" data-aos="fade-up" data-aos-delay="100">
-        <div class="card border-0 shadow-sm ui-card h-100">
+        <div class="card border-0 shadow-sm ui-card mb-4">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Thảo luận gần đây</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-comments text-success me-2"></i>Bình luận mới nhận</h2>
@@ -172,6 +172,32 @@
                     {% empty %}
                         <div class="empty-state">Hiện tại chưa có bình luận mới nào.</div>
                     {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng Anh Hùng (Leaderboard Preview) -->
+        <div class="card border-0 shadow-sm ui-card">
+            <div class="card-body p-4">
+                <div class="ui-eyebrow mb-1">Vinh danh</div>
+                <h2 class="h4 mb-4"><i class="fa-solid fa-trophy text-warning me-2"></i>Bảng Anh Hùng</h2>
+                <div class="sidebar-stack">
+                    {% for u in top_users %}
+                        <div class="sidebar-link-item p-3 mb-2 rounded-3 border border-light transition-all hover-float d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold {% if forloop.counter <= 3 %}text-primary fs-5{% else %}text-muted{% endif %}" style="width: 24px;">#{{ forloop.counter }}</span>
+                                <a class="article-link text-decoration-none fw-bold text-dark" href="{% url 'wiki:public-profile' u.username %}">
+                                    {{ u.profile.display_name|default:u.username }}
+                                </a>
+                            </div>
+                            <span class="badge bg-warning text-dark fw-bold">{{ u.total_score }} điểm</span>
+                        </div>
+                    {% empty %}
+                        <div class="empty-state">Chưa có dữ liệu bảng xếp hạng.</div>
+                    {% endfor %}
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'wiki:leaderboard' %}" class="small text-decoration-none fw-bold text-primary">Xem bảng xếp hạng đầy đủ &rarr;</a>
                 </div>
             </div>
         </div>
