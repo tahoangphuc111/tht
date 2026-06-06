@@ -534,7 +534,7 @@ class WikiFlowTests(TestCase):
         question = Question.objects.create(article=self.article, content="Test question", order=1)
         Choice.objects.create(question=question, content="Choice A", is_correct=True)
         Choice.objects.create(question=question, content="Choice B", is_correct=False)
-        
+
         response = self.client.get(reverse("wiki:quiz-take", args=[self.article.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test question")
@@ -796,6 +796,7 @@ class UserRoleTests(TestCase):
             reverse("wiki:assign-role", args=[self.student.username]),
             {"role": "teacher"},
         )
+        self.assertEqual(response.status_code, 302)
         self.student.profile.refresh_from_db()
         self.assertEqual(self.student.profile.role, "teacher")
 
@@ -806,6 +807,7 @@ class UserRoleTests(TestCase):
             reverse("wiki:assign-role", args=[self.student.username]),
             {"role": "moderator"},
         )
+        self.assertEqual(response.status_code, 302)
         self.student.profile.refresh_from_db()
         self.assertEqual(self.student.profile.role, "student")  # remains student
 
