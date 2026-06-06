@@ -143,10 +143,7 @@ def _load_languages(base_dir):
     with open(json_path, "r", encoding="utf-8") as fh:
         raw = json.load(fh)
 
-    if sys.platform == "win32":
-        venv_py = base_dir / "venv" / "Scripts" / "python.exe"
-    else:
-        venv_py = base_dir / "venv" / "bin" / "python"
+    venv_py = base_dir / "venv" / "bin" / "python"
     runtime_vars = {
         "source_path", "executable_path", "workdir",
         "project_path", "build_dir", "dll_path", "source_name",
