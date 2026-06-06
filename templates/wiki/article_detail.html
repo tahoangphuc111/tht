@@ -3,7 +3,7 @@
 
 {% block title %}{{ article.title }} | CP Wiki{% endblock %}
 {% block extra_head %}
-{{ comment_form.media }}
+{% include "wiki/partials/martor_media.html" %}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 <style>
@@ -24,7 +24,7 @@
                     {% include "wiki/partials/difficulty_chip.html" %}
             </div>
             <div class="article-toolbar__group">
-                    {% if article.status == 'pending' and user.is_authenticated and user.is_superuser %}
+                    {% if article.status == 'pending' and user.is_authenticated and user.profile.can_manage_wiki %}
                         <form method="post" action="{% url 'wiki:article-approve' article.pk %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 me-1">Duyệt</button>
@@ -144,161 +144,20 @@
             {% endif %}
 
         {% if quiz_questions %}
-        <section class="article-quiz-section" id="quiz-section">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <div class="section-eyebrow mb-1">Kiểm tra kiến thức</div>
-                    <h3 class="h4 mb-0">Bài tập trắc nghiệm</h3>
-                </div>
-                <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-2">
-                    {{ quiz_questions|length }} câu hỏi
-                </div>
-            </div>
-            <div id="quiz-container">
-            {% for question in quiz_questions %}
-                <div class="card border-0 shadow-sm app-card mb-4 question-card overflow-hidden" id="question-{{ question.pk }}">
-                    <div class="card-body p-4 p-md-5">
-                        <div class="d-flex align-items-center gap-3 mb-4">
-                            <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-2 fw-bold">
-                                Câu {{ forloop.counter }}
-                            </div>
-                        </div>
-                        
-                        <div class="markdown-body mb-4" style="font-size: 1.1rem; color: var(--ink);">
-                            {{ question.content|safe_markdown }}
-                        </div>
-
-                        <div class="row g-3 options-list">
-                        {% for choice in question.choices.all %}
-                            <div class="col-md-6">
-                                <div class="choice-wrapper p-3 rounded-4 border bg-light transition-all cursor-pointer d-flex align-items-center gap-3 h-100" style="cursor: pointer;">
-                                    <div class="form-check m-0 p-0 d-flex align-items-center">
-                                        <input class="form-check-input quiz-choice mt-0" type="radio" name="question_{{ question.pk }}" id="choice_{{ choice.pk }}" value="{{ choice.pk }}" style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
-                                    </div>
-                                    <label class="form-check-label w-100 m-0" for="choice_{{ choice.pk }}" style="cursor: pointer; font-weight: 500;">
-                                        {{ choice.content }}
-                                    </label>
-                                </div>
-                            </div>
-                        {% endfor %}
-                        </div>
-                        
-                        <div class="explanation-box mt-4 p-4 rounded-4 d-none" id="explanation-{{ question.pk }}"></div>
-                    </div>
-                </div>
-            {% endfor %}
-            </div>
-            <div class="d-flex justify-content-center mt-5">
-                <button class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-glow" id="submit-quiz-btn" data-url="{% url 'wiki:submit-quiz' article.pk %}">
-                    <i class="fa-solid fa-paper-plane me-2"></i>Nộp bài kiểm tra
-                </button>
-            </div>
-            
-            <div id="quiz-result-shell" class="d-none mt-4 text-center">
-                <div class="p-4 rounded-4 bg-primary-soft text-primary">
-                    <h4 class="mb-2 fw-bold" id="quiz-result-title">Kết quả</h4>
-                    <div id="quiz-result-score" class="fs-5"></div>
+        <section class="article-quiz-section mb-5" id="quiz-section">
+            <div class="card border-0 shadow-sm app-card overflow-hidden text-center p-4 p-md-5">
+                <div class="card-body">
+                    <div class="section-eyebrow mb-2">Kiểm tra kiến thức</div>
+                    <h3 class="h4 mb-3 fw-bold">Bài tập trắc nghiệm</h3>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 500px;">
+                        Bài viết này có kèm theo bài tập trắc nghiệm gồm <strong>{{ quiz_questions|length }} câu hỏi</strong> để bạn củng cố kiến thức vừa học.
+                    </p>
+                    <a href="{% url 'wiki:quiz-take' article.pk %}" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-glow">
+                        <i class="fa-solid fa-graduation-cap me-2"></i>Làm trắc nghiệm ngay
+                    </a>
                 </div>
             </div>
         </section>
-
-        <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const submitBtn = document.getElementById("submit-quiz-btn");
-            if (!submitBtn) return;
-
-            submitBtn.addEventListener("click", function () {
-                const url = submitBtn.getAttribute("data-url");
-                const inputs = document.querySelectorAll(".quiz-choice:checked");
-                const answers = {};
-                
-                inputs.forEach(input => {
-                    const qId = input.name.split('_')[1];
-                    answers[qId] = input.value;
-                });
-
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Đang chấm...";
-
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-                    },
-                    body: JSON.stringify({ answers: answers })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    submitBtn.style.display = 'none';
-                    if (!data.success) {
-                        alert(data.message);
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = "Nộp bài kiểm tra";
-                        return;
-                    }
-                    
-                    const resultShell = document.getElementById("quiz-result-shell");
-                    const scoreDiv = document.getElementById("quiz-result-score");
-                    
-                    resultShell.classList.remove("d-none");
-                    scoreDiv.innerText = `Bạn đã trả lời đúng ${data.correct_count} trên tổng số ${data.total_questions} câu hỏi.`;
-                    
-                    const results = data.results;
-                    for (const [qId, result] of Object.entries(results)) {
-                        const questionCard = document.getElementById(`question-${qId}`);
-                        const selectedInput = document.querySelector(`input[name="question_${qId}"]:checked`);
-                        const allInputs = document.querySelectorAll(`input[name="question_${qId}"]`);
-                        
-                        allInputs.forEach(i => i.disabled = true);
-                        
-                        const wrappers = questionCard.querySelectorAll('.choice-wrapper');
-                        wrappers.forEach(w => {
-                            w.style.cursor = 'default';
-                            w.classList.remove('bg-light', 'border-primary');
-                        });
-
-                        if (result.is_correct) {
-                            if (selectedInput) {
-                                const wrapper = selectedInput.closest('.choice-wrapper');
-                                wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
-                                wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng rùi nè</span>';
-                            }
-                        } else {
-                            if (selectedInput) {
-                                const wrapper = selectedInput.closest('.choice-wrapper');
-                                wrapper.classList.add('bg-danger-soft', 'border-danger', 'text-danger');
-                                wrapper.querySelector('label').innerHTML += ' <span class="badge bg-danger rounded-pill ms-2">Sai rùi</span>';
-                            }
-                            if (result.correct_choice_id) {
-                                const correctInput = document.getElementById(`choice_${result.correct_choice_id}`);
-                                if (correctInput) {
-                                    const wrapper = correctInput.closest('.choice-wrapper');
-                                    wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
-                                    wrapper.classList.add('fw-bold');
-                                    wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng nè</span>';
-                                }
-                            }
-                        }
-                        
-                        if (result.explanation) {
-                            const expBox = document.getElementById(`explanation-${qId}`);
-                            expBox.classList.remove('d-none');
-                            expBox.classList.add(result.is_correct ? 'bg-success-soft' : 'bg-warning-soft', 'border-start', 'border-4', result.is_correct ? 'border-success' : 'border-warning');
-                            expBox.innerHTML = `<div class="section-eyebrow mb-2">Giải thích</div><div class="small text-dark">${result.explanation}</div>`;
-                        }
-                    }
-                    resultShell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Có lỗi xảy ra khi nộp bài.");
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Nộp bài kiểm tra";
-                });
-            });
-        });
-        </script>
         {% endif %}
         </div>
     </div>
@@ -429,7 +288,9 @@
                 <article class="comment-item border-bottom pb-4 mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                            <strong class="comment-author text-dark fs-5">{{ comment.author.username }}</strong>
+                            <strong class="comment-author text-dark fs-5">
+                                <a class="article-link" href="{% url 'wiki:public-profile' comment.author.username %}">{{ comment.author.username }}</a>
+                            </strong>
                             <span class="text-secondary small ms-2">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
                         </div>
                         <div class="vote-pill">
@@ -484,6 +345,7 @@
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% include "wiki/partials/martor_js.html" %}
 {% if coding_exercise and user.is_authenticated %}
 {{ coding_frontend_config|json_script:"coding-exercise-config" }}
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>

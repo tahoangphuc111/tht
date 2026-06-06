@@ -26,12 +26,24 @@ class CodeRunnerError(Exception):
 
 
 def _merged_configs():
+    if not getattr(settings, "TESTING", False):
+        from django.core.cache import cache
+        cache_key = "language_runtime_configs"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
     base = dict(getattr(settings, "CODE_EXECUTION_LANGUAGE_CONFIGS", {}))
     try:
         for rt in LanguageRuntime.objects.filter(enabled=True):
             base[rt.key] = rt.to_config()
     except Exception:
         logger.exception("Failed to load LanguageRuntime configs from DB")
+
+    if not getattr(settings, "TESTING", False):
+        from django.core.cache import cache
+        cache_key = "language_runtime_configs"
+        cache.set(cache_key, base, 60)
     return base
 
 
@@ -250,7 +262,7 @@ def _write_source(job_dir, language, source_code, language_config):
 
 
 def _build_preexec_fn(memory_limit_mb):
-    if os.name == "nt" or sys.platform == "darwin" or not memory_limit_mb:
+    if sys.platform == "darwin" or not memory_limit_mb:
         return None
     try:
         import resource
@@ -320,9 +332,7 @@ def _compile_source(job_dir, language, language_config, replacements):
         _render_command(compile_command, replacements),
         job_dir,
         input_data="",
-        timeout_ms=max(
-            1000, getattr(settings, "CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS", 2000)
-        ),
+        timeout_ms=getattr(settings, "CODE_EXECUTION_COMPILE_TIME_LIMIT_MS", 10000),
         memory_limit_mb=max(
             256,
             replacements.get("memory_limit_mb", 0),
@@ -402,6 +412,8 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
     if custom_input and len(custom_input.encode("utf-8")) > max_input_bytes:
         raise CodeRunnerError("Input tùy chỉnh vượt quá giới hạn cho phép.")
 
+    is_sample = sample_only or bool(custom_input)
+
     submission = CodingSubmission.objects.create(
         exercise=exercise,
         user=user,
@@ -409,16 +421,20 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
         source_code=source_code,
         status="running",
         custom_input=custom_input,
-        is_sample_run=sample_only or bool(custom_input),
+        is_sample_run=is_sample,
     )
 
-    # Import ở đây để tránh circular import
-    from ..tasks import execute_code_task
-
-    execute_code_task.delay(submission.pk)
-
-    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+    if is_sample:
+        # Run synchronously for trial/sample runs to save Celery worker resources
+        _execute_submission(submission)
         submission.refresh_from_db()
+    else:
+        # Import ở đây để tránh circular import
+        from ..tasks import execute_code_task
+        execute_code_task.delay(submission.pk)
+
+        if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+            submission.refresh_from_db()
 
     return submission
 

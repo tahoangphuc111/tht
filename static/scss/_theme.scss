@@ -58,8 +58,8 @@
 
   --glass: saturate(180%) blur(20px);
 
-  --font-sans: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Baloo 2", "Fredoka", "Patrick Hand", "Pangolin", "Itim", "Mali", sans-serif;
+  --font-sans: "Patrick Hand", "Balsamiq Sans", "Pangolin", "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Patrick Hand", "Baloo 2", "Fredoka", "Pangolin", "Itim", "Mali", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
 
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -271,14 +271,8 @@ a {
   transition: color 0.2s var(--ease);
 }
 
-@media (prefers-color-scheme: dark) {
-  h1, .h1, .hero-title,
-  h2, .h2,
-  h3, .h3,
-  h4, .h4,
-  h5, .h5,
-  h6, .h6,
-  .hero-title-sm {
-    color: #000 !important;
-  }
+.badge-icon:hover img,
+.pill-badge:hover {
+  display: inline-block;
+  animation: wiggle 0.3s ease-in-out infinite !important;
 }

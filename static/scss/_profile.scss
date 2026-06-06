@@ -160,9 +160,9 @@
 .badge-icon {
   width: 48px;
   height: 48px;
-  background: var(--brand-soft) !important;
+  background: var(--brand-soft);
   color: var(--brand) !important;
-  border: 2px solid var(--line-strong) !important;
+  border: 2px solid var(--line-strong);
   box-shadow: 2px 2px 0 var(--line-strong);
   border-radius: 12px;
   font-size: 1.25rem;
@@ -174,14 +174,14 @@
   &:hover {
     transform: translateY(-2px) scale(1.08) rotate(3deg);
     box-shadow: 4px 4px 0 var(--line-strong);
-    background: var(--brand) !important;
+    background: var(--brand);
     color: white !important;
   }
 }
 
 .badge-icon--admin {
-  background: var(--warning-soft) !important;
+  background: var(--warning-soft);
   color: #ff9500 !important;
-  border: 2px solid var(--line-strong) !important;
+  border: 2px solid var(--line-strong);
   animation: pulse-glow 2s infinite ease-in-out;
 }

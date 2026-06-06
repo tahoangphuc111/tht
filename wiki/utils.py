@@ -33,9 +33,17 @@ def can_publish_articles(user):
 
 
 def can_manage_wiki(user):
-    return user.is_authenticated and (
-        user.is_superuser or user.has_perm("wiki.manage_all_articles")
-    )
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser or user.has_perm("wiki.manage_all_articles"):
+        return True
+    try:
+        profile = getattr(user, "profile", None)
+        if profile and profile.role in ["teacher", "moderator"]:
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def get_profile_name(user):
@@ -93,10 +101,14 @@ def build_profile_stats(user, viewer=None):
         coding_submissions = CodingSubmission.objects.filter(
             user=user, created_at__date__gte=start_date, is_sample_run=False
         )
+        seen_submissions = set()
         for sub in coding_submissions:
             s_day = timezone.localtime(sub.created_at).date()
             if s_day >= start_date:
-                contribution_posts[s_day] += 1
+                key = (s_day, sub.exercise_id)
+                if key not in seen_submissions:
+                    seen_submissions.add(key)
+                    contribution_edits[s_day] += 1
     except ImportError:
         pass
 
@@ -118,6 +130,30 @@ def build_profile_stats(user, viewer=None):
         )
         curr += timedelta(days=1)
 
+    completed_quizzes = []
+    if can_view:
+        from .models import Question, UserAnswer, Article
+        # Fetch articles that have questions where user has answered at least one
+        attempted_articles = Article.objects.filter(
+            questions__user_answers__user=user
+        ).distinct().prefetch_related('questions')
+
+        for art in attempted_articles:
+            total_questions = art.questions.count()
+            if total_questions > 0:
+                user_answers = UserAnswer.objects.filter(user=user, question__article=art).select_related('selected_choice')
+                correct_answers = sum(1 for ua in user_answers if ua.selected_choice.is_correct)
+                latest_answer = max(ua.created_at for ua in user_answers) if user_answers else None
+                completed_quizzes.append({
+                    "article": art,
+                    "correct_answers": correct_answers,
+                    "total_questions": total_questions,
+                    "score_percent": int(correct_answers * 100 / total_questions),
+                    "date_completed": latest_answer,
+                })
+        # Sort by date completed descending
+        completed_quizzes.sort(key=lambda x: x["date_completed"] or timezone.now(), reverse=True)
+
     return {
         "profile": profile,
         "profile_user": user,
@@ -134,7 +170,7 @@ def build_profile_stats(user, viewer=None):
         "chart_posts": [sum(d["posts"] for d in contribution_days[i : i + 14]) for i in range(0, len(contribution_days), 14)],
         "chart_edits": [sum(d["edits"] for d in contribution_days[i : i + 14]) for i in range(0, len(contribution_days), 14)],
         "user_vote_score": profile.vote_score,
-        "role_names": list(set([g.name for g in user.groups.all()] + (["admin"] if user.is_superuser else []))) or ["user"],
+        "role_names": list(set([g.name for g in user.groups.all()] + (["admin"] if user.is_superuser else []) + ([profile.get_role_display()] if profile else []))) or ["user"],
         "edited_articles_count": ArticleRevision.objects.filter(author=user)
         .values("article")
         .distinct()
@@ -146,4 +182,5 @@ def build_profile_stats(user, viewer=None):
         "upload_count": user.uploaded_files.count(),
         "public_email": user.email if profile.show_email_publicly and can_view else "",
         "author_articles_url": f"/articles/?author={user.username}",
+        "completed_quizzes": completed_quizzes,
     }

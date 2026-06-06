@@ -17,6 +17,9 @@ from ..utils import can_publish_articles
 
 def home_view(request):
     """Homepage view showing featured, latest and top items."""
+    from django.contrib.auth import get_user_model
+    from django.db.models import Q
+    User = get_user_model()
     visible_articles = Article.objects.filter(status="published")
     featured = (
         visible_articles.select_related("author", "category")
@@ -25,6 +28,11 @@ def home_view(request):
         .first()
     )
 
+    top_users = User.objects.select_related("profile").annotate(
+        accepted_count=Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True),
+        total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True) * 5 + Count('quiz_answers', filter=Q(quiz_answers__selected_choice__is_correct=True), distinct=True) * 2
+    ).order_by('-total_score', '-accepted_count')[:3]
+
     context = {
         "featured_article": featured,
         "latest_articles": visible_articles.select_related(
@@ -32,14 +40,15 @@ def home_view(request):
         ).order_by("-created_at")[:4],
         "recent_comments": Comment.objects.select_related("author", "article")
         .filter(is_approved=True)
-        .order_by("-created_at")[:5],
+        .order_by("-created_at")[:3],
         "top_categories": Category.objects.annotate(
             article_total=Count("articles")
-        ).order_by("-article_total")[:6],
+        ).order_by("-article_total")[:4],
         "total_articles": visible_articles.count(),
         "total_comments": Comment.objects.filter(is_approved=True).count(),
         "open_comment_articles": visible_articles.filter(allow_comments=True).count(),
         "can_publish": can_publish_articles(request.user),
+        "top_users": top_users,
     }
     return render(request, "wiki/home.html", context)
 
@@ -101,7 +110,7 @@ def toggle_bookmark_view(request, pk):
 @login_required
 def saved_articles_view(request):
     """View returning a user's bookmarked articles as JSON."""
-    bookmarks = Bookmark.objects.filter(user=request.user).select_related("article")
+    bookmarks = Bookmark.objects.filter(user=request.user).select_related("article", "article__category")
     data = [
         {
             "id": b.article.id,

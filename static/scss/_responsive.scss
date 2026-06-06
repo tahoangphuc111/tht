@@ -132,7 +132,7 @@
   transition: all 0.3s var(--ease) !important;
 }
 
-.article-content img {
+.article-content img, .markdown-body img {
   max-width: 100%;
   height: auto;
   object-fit: contain;

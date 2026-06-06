@@ -133,7 +133,7 @@
                             {% endfor %}
                         </div>
                     {% endif %}
-                    {% if article.status == 'pending' and user.is_authenticated and user.is_superuser %}
+                    {% if article.status == 'pending' and user.is_authenticated and user.profile.can_manage_wiki %}
                         <div class="d-flex flex-wrap gap-2 mt-4">
                             <form method="post" action="{% url 'wiki:article-approve' article.pk %}" class="m-0">
                                 {% csrf_token %}

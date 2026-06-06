@@ -526,6 +526,27 @@ class WikiFlowTests(TestCase):
             2,
         )
 
+    def test_quiz_take_view_renders_correctly(self):
+        """Test that quiz_take_view renders questions when user is authenticated."""
+        from .models import Choice
+        self.client.login(username="author", password="StrongPass123")
+        # Create a question with a correct choice
+        question = Question.objects.create(article=self.article, content="Test question", order=1)
+        Choice.objects.create(question=question, content="Choice A", is_correct=True)
+        Choice.objects.create(question=question, content="Choice B", is_correct=False)
+
+        response = self.client.get(reverse("wiki:quiz-take", args=[self.article.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Test question")
+        self.assertContains(response, "Choice A")
+
+    def test_quiz_take_view_redirects_if_no_questions(self):
+        """Test that quiz_take_view redirects if there are no quiz questions."""
+        self.client.login(username="author", password="StrongPass123")
+        response = self.client.get(reverse("wiki:quiz-take", args=[self.article.pk]))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("wiki:article-detail", args=[self.article.pk, self.article.slug]))
+
     def test_profile_page_has_required_context(self):
         """Profile page should receive the data its template depends on."""
         self.client.login(username="author", password="StrongPass123")
@@ -731,3 +752,106 @@ class WikiFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         formset = response.context["choice_formset"]
         self.assertIn("Chỉ được chọn duy nhất một đáp án đúng.", formset.non_form_errors())
+
+
+class UserRoleTests(TestCase):
+    """Tests for user roles assignment and permissions."""
+
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username="admin_user",
+            password="StrongPass123",
+            email="admin@example.com",
+        )
+        self.student = User.objects.create_user(
+            username="student_user",
+            password="StrongPass123",
+        )
+        self.teacher = User.objects.create_user(
+            username="teacher_user",
+            password="StrongPass123",
+        )
+        self.moderator = User.objects.create_user(
+            username="moderator_user",
+            password="StrongPass123",
+        )
+        self.category = Category.objects.create(
+            name="Test Category",
+            slug="test-category",
+        )
+        # Create a pending article
+        self.article = Article.objects.create(
+            title="Pending Article",
+            slug="pending-article",
+            content="Some draft content",
+            category=self.category,
+            author=self.student,
+            status="pending",
+        )
+
+    def test_admin_can_assign_roles(self):
+        """Test that superusers can change role of any user."""
+        self.client.login(username="admin_user", password="StrongPass123")
+        response = self.client.post(
+            reverse("wiki:assign-role", args=[self.student.username]),
+            {"role": "teacher"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.student.profile.refresh_from_db()
+        self.assertEqual(self.student.profile.role, "teacher")
+
+    def test_non_admin_cannot_assign_roles(self):
+        """Test that regular users cannot change roles."""
+        self.client.login(username="teacher_user", password="StrongPass123")
+        response = self.client.post(
+            reverse("wiki:assign-role", args=[self.student.username]),
+            {"role": "moderator"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.student.profile.refresh_from_db()
+        self.assertEqual(self.student.profile.role, "student")  # remains student
+
+    def test_role_permissions_for_article_moderation(self):
+        """Test that teacher and moderator can approve/reject/request changes, but student cannot."""
+        # 1. Assign teacher role
+        self.teacher.profile.role = "teacher"
+        self.teacher.profile.save()
+
+        # 2. Assign moderator role
+        self.moderator.profile.role = "moderator"
+        self.moderator.profile.save()
+
+        # Student try to approve
+        self.client.login(username="student_user", password="StrongPass123")
+        response = self.client.post(reverse("wiki:article-approve", args=[self.article.pk]))
+        self.assertEqual(response.status_code, 403)
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.status, "pending")
+
+        # Teacher try to approve
+        self.client.login(username="teacher_user", password="StrongPass123")
+        response = self.client.post(reverse("wiki:article-approve", args=[self.article.pk]))
+        self.assertEqual(response.status_code, 302)
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.status, "published")
+
+        # Reset to pending for next checks
+        self.article.status = "pending"
+        self.article.save()
+
+        # Moderator try to request changes
+        self.client.login(username="moderator_user", password="StrongPass123")
+        response = self.client.post(reverse("wiki:article-request-changes", args=[self.article.pk]))
+        self.assertEqual(response.status_code, 302)
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.status, "needs_edit")
+
+    def test_teachers_and_moderators_cannot_access_admin_site(self):
+        """Test that teacher and moderator roles do not grant access to Django admin."""
+        self.teacher.profile.role = "teacher"
+        self.teacher.profile.save()
+        self.client.login(username="teacher_user", password="StrongPass123")
+
+        # Accessing Django admin page should redirect to login or deny access since is_staff is False
+        response = self.client.get("/admin/")
+        self.assertNotEqual(response.status_code, 200)  # Should not load the dashboard

@@ -13,7 +13,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["python3", "python", "py"],
         "version_cmd": ["{bin}", "--version"],
         "install": {
-            "windows": "winget install Python.Python.3",
             "linux": "sudo apt install python3",
             "macos": "brew install python3",
         },
@@ -23,7 +22,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["g++"],
         "version_cmd": ["{bin}", "--version"],
         "install": {
-            "windows": "winget install MSYS2.MSYS2",
             "linux": "sudo apt install g++",
             "macos": "xcode-select --install",
         },
@@ -33,7 +31,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["gcc"],
         "version_cmd": ["{bin}", "--version"],
         "install": {
-            "windows": "winget install MSYS2.MSYS2",
             "linux": "sudo apt install gcc",
             "macos": "xcode-select --install",
         },
@@ -44,7 +41,6 @@ LANGUAGE_REGISTRY = {
         "extra_binaries": ["javac"],
         "version_cmd": ["{bin}", "-version"],
         "install": {
-            "windows": "winget install EclipseAdoptium.Temurin.17.JDK",
             "linux": "sudo apt install openjdk-17-jdk",
             "macos": "brew install openjdk@17",
         },
@@ -54,7 +50,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["node"],
         "version_cmd": ["{bin}", "--version"],
         "install": {
-            "windows": "winget install OpenJS.NodeJS.LTS",
             "linux": "sudo apt install nodejs npm",
             "macos": "brew install node",
         },
@@ -64,7 +59,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["go"],
         "version_cmd": ["{bin}", "version"],
         "install": {
-            "windows": "winget install GoLang.Go",
             "linux": "sudo apt install golang-go",
             "macos": "brew install go",
         },
@@ -74,7 +68,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["rustc"],
         "version_cmd": ["{bin}", "--version"],
         "install": {
-            "windows": "winget install Rustlang.Rustup",
             "linux": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh",
             "macos": "brew install rustup && rustup-init",
         },
@@ -84,7 +77,6 @@ LANGUAGE_REGISTRY = {
         "binaries": ["dotnet"],
         "version_cmd": ["{bin}", "--version"],
         "install": {
-            "windows": "winget install Microsoft.DotNet.SDK.8",
             "linux": "sudo apt install dotnet-sdk-8.0",
             "macos": "brew install dotnet-sdk",
         },
@@ -95,7 +87,6 @@ LANGUAGE_REGISTRY = {
         "version_cmd": ["{bin}", "--version"],
         "optional": True,
         "install": {
-            "windows": "winget install RubyInstallerTeam.Ruby.3.2",
             "linux": "sudo apt install ruby",
             "macos": "brew install ruby",
         },
@@ -106,7 +97,6 @@ LANGUAGE_REGISTRY = {
         "version_cmd": ["{bin}", "--version"],
         "optional": True,
         "install": {
-            "windows": "winget install PHP.PHP.8.3",
             "linux": "sudo apt install php-cli",
             "macos": "brew install php",
         },
@@ -118,7 +108,6 @@ LANGUAGE_REGISTRY = {
         "version_cmd": ["{bin}", "-version"],
         "optional": True,
         "install": {
-            "windows": "winget install JetBrains.Kotlin.Compiler",
             "linux": "sudo snap install kotlin --classic",
             "macos": "brew install kotlin",
         },
@@ -129,7 +118,6 @@ LANGUAGE_REGISTRY = {
         "version_cmd": ["{bin}", "-v"],
         "optional": True,
         "install": {
-            "windows": "choco install lua",
             "linux": "sudo apt install lua5.4",
             "macos": "brew install lua",
         },
@@ -140,7 +128,6 @@ LANGUAGE_REGISTRY = {
         "version_cmd": ["{bin}", "--version"],
         "optional": True,
         "install": {
-            "windows": "winget install StrawberryPerl.StrawberryPerl",
             "linux": "sudo apt install perl",
             "macos": "brew install perl",
         },
@@ -151,7 +138,6 @@ LANGUAGE_REGISTRY = {
         "version_cmd": ["{bin}", "--version"],
         "optional": True,
         "install": {
-            "windows": "winget install RProject.R",
             "linux": "sudo apt install r-base",
             "macos": "brew install r",
         },
@@ -172,7 +158,7 @@ def detect_os():
         return "macos"
     if s == "linux":
         return "linux"
-    return "windows"
+    return "unknown"
 
 
 def get_version(version_cmd, binary_path):

@@ -11,11 +11,6 @@ cp wiki is a knowledge base platform designed for the competitive programming co
 
 ### 0 install prerequisites
 
-**windows**
-- [python 3.10+](https://www.python.org/downloads/windows/) (ensure "add python to path" is checked)
-- [nodejs](https://nodejs.org/en/download/)
-- [git](https://git-scm.com/download/win)
-
 **linux (ubuntu)**
 ```bash
 sudo apt update
@@ -37,12 +32,6 @@ cd tht
 
 ### 2 set up a virtual environment
 
-**windows powershell**
-```powershell
-python -m venv venv
-.\venv\Scripts\activate
-```
-
 **linux / macos terminal**
 ```bash
 python3 -m venv venv
@@ -57,13 +46,6 @@ sudo apt-get update
 sudo apt-get install -y libcairo2-dev pkg-config redis-server
 sudo service redis-server start
 ```
-
-**windows**
-Run Redis via Docker (recommended):
-```powershell
-docker run -d -p 6379:6379 redis
-```
-Or use WSL to install `redis-server` as shown in the Linux section.
 
 **python & node**
 ```bash
@@ -133,11 +115,6 @@ source files are located in `static/scss` to compile them to css
 npm run build:css
 ```
 
-**windows cmd/ps**
-```powershell
-.\scripts\build_styles.bat
-```
-
 **linux / macos terminal**
 ```bash
 chmod +x scripts/build_styles.sh
@@ -154,11 +131,7 @@ python manage.py runserver
 ### celery worker (for mini oj)
 in a separate terminal, start the celery worker to process code submissions:
 ```bash
-# linux / macos
 celery -A config worker -l info -P gevent
-
-# windows powershell
-.\venv\Scripts\celery.exe -A config worker -l info -P gevent
 ```
 
 ### asgi for websockets

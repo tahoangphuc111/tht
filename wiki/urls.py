@@ -38,13 +38,7 @@ urlpatterns = [
     path("comment/<int:pk>/vote/", voting.vote_comment, name="comment-vote"),
     path("user/<str:username>/vote/", voting.vote_user, name="user-vote"),
 
-    path("article/<int:pk>/<slug:slug>/", articles.ArticleDetailView.as_view(), name="article-detail"),
-
-    path("categories/", categories.CategoryListView.as_view(), name="category-list"),
-    path("category/create/", categories.CategoryCreateView.as_view(), name="category-create"),
-    path("category/<int:pk>/edit/", categories.CategoryUpdateView.as_view(), name="category-edit"),
-    path("category/<int:pk>/delete/", categories.CategoryDeleteView.as_view(), name="category-delete"),
-
+    path("article/<int:article_pk>/quiz/", quiz.quiz_take_view, name="quiz-take"),
     path("article/<int:article_pk>/quiz/manage/", quiz.article_quiz_manage_view, name="article-quiz-manage"),
     path("article/<int:article_pk>/quiz/submit/", quiz.submit_quiz_view, name="submit-quiz"),
     path("article/<int:article_pk>/quiz/upload/", quiz.upload_quiz_file_view, name="upload-quiz-file"),
@@ -60,9 +54,17 @@ urlpatterns = [
     path("article/<int:article_pk>/coding/submit/", coding.submit_code_view, name="submit-code"),
     path("submission/<int:submission_pk>/status/", coding.submission_status_view, name="submission-status"),
 
+    path("article/<int:pk>/<slug:slug>/", articles.ArticleDetailView.as_view(), name="article-detail"),
+
+    path("categories/", categories.CategoryListView.as_view(), name="category-list"),
+    path("category/create/", categories.CategoryCreateView.as_view(), name="category-create"),
+    path("category/<int:pk>/edit/", categories.CategoryUpdateView.as_view(), name="category-edit"),
+    path("category/<int:pk>/delete/", categories.CategoryDeleteView.as_view(), name="category-delete"),
+
     path("upload-files/", files.upload_file_view, name="upload-files"),
 
     path("users/", users.UserListView.as_view(), name="user-list"),
+    path("user/<str:username>/assign-role/", users.assign_role_view, name="assign-role"),
     path("leaderboard/", users.LeaderboardView.as_view(), name="leaderboard"),
     path("profile/", users.profile_view, name="profile"),
     path("profile/edit/", users.profile_edit_view, name="profile-edit"),

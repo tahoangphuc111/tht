@@ -46,7 +46,9 @@
                                 <td class="py-3 fw-medium">
                                     <a href="{{ submission.exercise.article.get_absolute_url }}" class="text-decoration-none text-dark">{{ submission.exercise.article.title }}</a>
                                 </td>
-                                <td class="py-3 text-muted">@{{ submission.user.username }}</td>
+                                <td class="py-3 text-muted">
+                                    <a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' submission.user.username %}">@{{ submission.user.username }}</a>
+                                </td>
                                 <td class="py-3 text-muted">{{ submission.language }}</td>
                                 <td class="py-3 text-muted">{{ submission.runtime_ms }} ms</td>
                                 <td class="py-3 text-end fw-semibold">{{ submission.score }}</td>

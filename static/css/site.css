@@ -55,8 +55,8 @@
   --radius-lg: 32px;
   --radius-xl: 40px;
   --glass: saturate(180%) blur(20px);
-  --font-sans: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Baloo 2", "Fredoka", "Patrick Hand", "Pangolin", "Itim", "Mali", sans-serif;
+  --font-sans: "Patrick Hand", "Balsamiq Sans", "Pangolin", "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Patrick Hand", "Baloo 2", "Fredoka", "Pangolin", "Itim", "Mali", sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "SF Mono", monospace;
   --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -317,17 +317,12 @@ a {
   transition: color 0.2s var(--ease);
 }
 
-@media (prefers-color-scheme: dark) {
-  h1, .h1, .hero-title,
-  h2, .h2,
-  h3, .h3,
-  h4, .h4,
-  h5, .h5,
-  h6, .h6,
-  .hero-title-sm {
-    color: #000 !important;
-  }
+.badge-icon:hover img,
+.pill-badge:hover {
+  display: inline-block;
+  animation: wiggle 0.3s ease-in-out infinite !important;
 }
+
 .ui-card, .guide-step-card, .ui-card--glass, .ui-card--strong {
   background: var(--panel) !important;
   border: 3px solid var(--line-strong) !important;
@@ -682,7 +677,7 @@ a {
 
 .btn {
   border: 2.5px solid var(--line-strong) !important;
-  border-radius: 999px !important;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px !important;
   font-weight: 700 !important;
   padding: 0.75rem 1.8rem !important;
   box-shadow: 0 5px 0px var(--line-strong) !important;
@@ -739,7 +734,6 @@ a {
 
 .kawaii-icon {
   display: inline-block;
-  animation: float-gentle 3s ease-in-out infinite;
   filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.1));
 }
 
@@ -1374,16 +1368,13 @@ a {
   margin-top: 0.15rem;
 }
 
-.article-content, .main-martor .martor-preview {
+.article-content, .main-martor .martor-preview, .markdown-body {
   max-width: 74ch;
   font-size: 1.05rem;
   line-height: 1.85;
   color: var(--ink);
 }
-.article-content > h1:first-child, .main-martor .martor-preview > h1:first-child {
-  display: none;
-}
-.article-content h1, .main-martor .martor-preview h1, .article-content h2, .main-martor .martor-preview h2, .article-content h3, .main-martor .martor-preview h3, .article-content h4, .main-martor .martor-preview h4 {
+.article-content h1, .main-martor .martor-preview h1, .article-content h2, .main-martor .martor-preview h2, .article-content h3, .main-martor .martor-preview h3, .article-content h4, .main-martor .martor-preview h4, .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
   color: var(--ink);
   font-weight: 700;
   margin-top: 2.5rem;
@@ -1391,19 +1382,19 @@ a {
   letter-spacing: -0.025em;
   line-height: 1.3;
 }
-.article-content h1, .main-martor .martor-preview h1 {
+.article-content h1, .main-martor .martor-preview h1, .markdown-body h1 {
   font-size: 1.6rem;
 }
-.article-content h2, .main-martor .martor-preview h2 {
+.article-content h2, .main-martor .martor-preview h2, .markdown-body h2 {
   font-size: 1.35rem;
 }
-.article-content h3, .main-martor .martor-preview h3 {
+.article-content h3, .main-martor .martor-preview h3, .markdown-body h3 {
   font-size: 1.15rem;
 }
-.article-content p, .main-martor .martor-preview p {
+.article-content p, .main-martor .martor-preview p, .markdown-body p {
   margin-bottom: 1.25rem;
 }
-.article-content pre, .main-martor .martor-preview pre {
+.article-content pre, .main-martor .martor-preview pre, .markdown-body pre {
   background: #1a1b26 !important;
   color: #c0caf5;
   border-radius: var(--radius-sm);
@@ -1416,13 +1407,13 @@ a {
   box-shadow: var(--shadow-lg);
   position: relative;
 }
-.article-content pre code, .main-martor .martor-preview pre code {
+.article-content pre code, .main-martor .martor-preview pre code, .markdown-body pre code {
   background: none;
   color: inherit;
   padding: 0;
   font-size: inherit;
 }
-.article-content code, .main-martor .martor-preview code {
+.article-content code, .main-martor .martor-preview code, .markdown-body code {
   background: var(--brand-soft);
   color: var(--brand-dark);
   padding: 0.15rem 0.45rem;
@@ -1430,7 +1421,7 @@ a {
   font-size: 0.88em;
   font-family: var(--font-mono);
 }
-.article-content blockquote, .main-martor .martor-preview blockquote {
+.article-content blockquote, .main-martor .martor-preview blockquote, .markdown-body blockquote {
   border: 2px solid var(--line-strong);
   border-left: 6px solid var(--brand);
   box-shadow: 2px 2px 0 var(--line-strong);
@@ -1440,31 +1431,31 @@ a {
   border-radius: var(--radius-xs);
   color: var(--ink-light);
 }
-.article-content img, .main-martor .martor-preview img {
+.article-content img, .main-martor .martor-preview img, .markdown-body img {
   max-width: 100%;
   height: auto;
   border-radius: var(--radius);
   margin: 1rem 0;
   box-shadow: var(--shadow);
 }
-.article-content ul, .main-martor .martor-preview ul, .article-content ol, .main-martor .martor-preview ol {
+.article-content ul, .main-martor .martor-preview ul, .article-content ol, .main-martor .martor-preview ol, .markdown-body ul, .markdown-body ol {
   padding-left: 1.5rem;
   margin-bottom: 1.25rem;
 }
-.article-content ul li, .main-martor .martor-preview ul li, .article-content ol li, .main-martor .martor-preview ol li {
+.article-content ul li, .main-martor .martor-preview ul li, .article-content ol li, .main-martor .martor-preview ol li, .markdown-body ul li, .markdown-body ol li {
   margin-bottom: 0.35rem;
 }
-.article-content a, .main-martor .martor-preview a {
+.article-content a, .main-martor .martor-preview a, .markdown-body a {
   color: var(--brand);
   text-decoration: none;
   border-bottom: 1px solid var(--brand-soft);
   transition: all 0.2s var(--ease);
 }
-.article-content a:hover, .main-martor .martor-preview a:hover {
+.article-content a:hover, .main-martor .martor-preview a:hover, .markdown-body a:hover {
   border-color: var(--brand);
   color: var(--brand-dark);
 }
-.article-content table, .main-martor .martor-preview table {
+.article-content table, .main-martor .martor-preview table, .markdown-body table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -1478,14 +1469,14 @@ a {
   line-height: 1.55;
   font-variant-numeric: tabular-nums;
 }
-.article-content table th, .main-martor .martor-preview table th, .article-content table td, .main-martor .martor-preview table td {
+.article-content table th, .main-martor .martor-preview table th, .article-content table td, .main-martor .martor-preview table td, .markdown-body table th, .markdown-body table td {
   padding: 0.85rem 1rem;
   border: 0;
   border-bottom: 1.5px solid var(--line);
   text-align: left;
   vertical-align: middle;
 }
-.article-content table th, .main-martor .martor-preview table th {
+.article-content table th, .main-martor .martor-preview table th, .markdown-body table th {
   background: linear-gradient(180deg, var(--accent-butter), var(--bg-soft));
   color: var(--ink);
   font-size: 0.78rem;
@@ -1495,35 +1486,36 @@ a {
   border-bottom: 2px solid var(--line-strong);
   white-space: nowrap;
 }
-.article-content table td, .main-martor .martor-preview table td {
+.article-content table td, .main-martor .martor-preview table td, .markdown-body table td {
   color: var(--ink-light);
   background: rgba(255, 255, 255, 0.62);
 }
-.article-content table tbody tr:nth-child(even) td, .main-martor .martor-preview table tbody tr:nth-child(even) td {
+.article-content table tbody tr:nth-child(even) td, .main-martor .martor-preview table tbody tr:nth-child(even) td, .markdown-body table tbody tr:nth-child(even) td {
   background: rgba(255, 248, 243, 0.9);
 }
-.article-content table tbody tr:hover td, .main-martor .martor-preview table tbody tr:hover td {
+.article-content table tbody tr:hover td, .main-martor .martor-preview table tbody tr:hover td, .markdown-body table tbody tr:hover td {
   background: var(--brand-soft);
   color: var(--ink);
 }
-.article-content table tr:last-child td, .main-martor .martor-preview table tr:last-child td {
+.article-content table tr:last-child td, .main-martor .martor-preview table tr:last-child td, .markdown-body table tr:last-child td {
   border-bottom: 0;
 }
 .article-content table th:not(:last-child), .main-martor .martor-preview table th:not(:last-child),
 .article-content table td:not(:last-child),
-.main-martor .martor-preview table td:not(:last-child) {
+.main-martor .martor-preview table td:not(:last-child), .markdown-body table th:not(:last-child),
+.markdown-body table td:not(:last-child) {
   border-right: 1px solid var(--line);
 }
-.article-content table code, .main-martor .martor-preview table code {
+.article-content table code, .main-martor .martor-preview table code, .markdown-body table code {
   border: 1px solid rgba(224, 92, 113, 0.18);
   box-shadow: none;
   white-space: nowrap;
 }
-.article-content table a, .main-martor .martor-preview table a {
+.article-content table a, .main-martor .martor-preview table a, .markdown-body table a {
   font-weight: 700;
 }
 @media (max-width: 768px) {
-  .article-content table, .main-martor .martor-preview table {
+  .article-content table, .main-martor .martor-preview table, .markdown-body table {
     display: block;
     max-width: 100%;
     overflow-x: auto;
@@ -1531,9 +1523,14 @@ a {
   }
   .article-content table th, .main-martor .martor-preview table th,
   .article-content table td,
-  .main-martor .martor-preview table td {
+  .main-martor .martor-preview table td, .markdown-body table th,
+  .markdown-body table td {
     min-width: 8rem;
   }
+}
+
+.article-content > h1:first-child, .main-martor .martor-preview > h1:first-child {
+  display: none;
 }
 
 .article-attachments,
@@ -1635,7 +1632,7 @@ a {
   .article-sidebar__meta {
     display: none;
   }
-  .article-content, .main-martor .martor-preview {
+  .article-content, .main-martor .martor-preview, .markdown-body {
     max-width: none;
   }
 }
@@ -2340,9 +2337,9 @@ textarea.font-monospace:focus {
 .badge-icon {
   width: 48px;
   height: 48px;
-  background: var(--brand-soft) !important;
+  background: var(--brand-soft);
   color: var(--brand) !important;
-  border: 2px solid var(--line-strong) !important;
+  border: 2px solid var(--line-strong);
   box-shadow: 2px 2px 0 var(--line-strong);
   border-radius: 12px;
   font-size: 1.25rem;
@@ -2354,14 +2351,14 @@ textarea.font-monospace:focus {
 .badge-icon:hover {
   transform: translateY(-2px) scale(1.08) rotate(3deg);
   box-shadow: 4px 4px 0 var(--line-strong);
-  background: var(--brand) !important;
+  background: var(--brand);
   color: white !important;
 }
 
 .badge-icon--admin {
-  background: var(--warning-soft) !important;
+  background: var(--warning-soft);
   color: #ff9500 !important;
-  border: 2px solid var(--line-strong) !important;
+  border: 2px solid var(--line-strong);
   animation: pulse-glow 2s infinite ease-in-out;
 }
 
@@ -2475,7 +2472,7 @@ textarea.font-monospace:focus {
   transition: all 0.3s var(--ease) !important;
 }
 
-.article-content img {
+.article-content img, .markdown-body img {
   max-width: 100%;
   height: auto;
   -o-object-fit: contain;

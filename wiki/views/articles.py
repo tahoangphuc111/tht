@@ -324,7 +324,7 @@ class ArticleRevisionDetailView(DetailView):
 
 @login_required
 def my_articles_view(request):
-    articles = Article.objects.filter(author=request.user).order_by("-updated_at")
+    articles = Article.objects.filter(author=request.user).select_related("category").order_by("-updated_at")
     return render(request, "wiki/my_articles.html", {"articles": articles})
 
 

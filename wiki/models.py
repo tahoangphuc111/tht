@@ -48,12 +48,27 @@ class Profile(models.Model):
         default=False,
         help_text="Cho phép hiển thị email trên hồ sơ công khai.",
     )
+    ROLE_CHOICES = [
+        ("student", "Học sinh"),
+        ("teacher", "Giáo viên"),
+        ("moderator", "Người kiểm duyệt"),
+    ]
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default="student",
+        help_text="Vai trò của người dùng trên hệ thống.",
+    )
 
     def __str__(self):
         return self.display_name or self.user.get_username()
 
     def get_absolute_url(self):
         return reverse("wiki:public-profile", kwargs={"username": self.user.username})
+
+    @property
+    def can_manage_wiki(self):
+        return self.role in ["teacher", "moderator"] or self.user.is_superuser
 
     @property
     def get_avatar_url(self):
