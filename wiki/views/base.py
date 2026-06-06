@@ -101,7 +101,7 @@ def toggle_bookmark_view(request, pk):
 @login_required
 def saved_articles_view(request):
     """View returning a user's bookmarked articles as JSON."""
-    bookmarks = Bookmark.objects.filter(user=request.user).select_related("article")
+    bookmarks = Bookmark.objects.filter(user=request.user).select_related("article", "article__category")
     data = [
         {
             "id": b.article.id,

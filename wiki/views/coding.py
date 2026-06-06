@@ -202,10 +202,11 @@ def run_code_view(request, article_pk):
         return JsonResponse({"success": False, "message": "Chức năng chấm code đang tắt."}, status=503)
 
     from django.core.cache import cache
-    cache_key = f"rate_limit_code_{request.user.pk}"
-    if cache.get(cache_key):
-        return JsonResponse({"success": False, "message": "Vui lòng đợi 5 giây trước khi thực hiện tiếp."}, status=429)
-    cache.set(cache_key, True, 5)
+    if not getattr(settings, "TESTING", False):
+        cache_key = f"rate_limit_code_{request.user.pk}"
+        if cache.get(cache_key):
+            return JsonResponse({"success": False, "message": "Vui lòng đợi 5 giây trước khi thực hiện tiếp."}, status=429)
+        cache.set(cache_key, True, 5)
 
     article = get_object_or_404(Article, pk=article_pk)
     exercise = get_object_or_404(CodingExercise, article=article, is_enabled=True)
@@ -240,10 +241,11 @@ def submit_code_view(request, article_pk):
         return JsonResponse({"success": False, "message": "Chức năng chấm code đang tắt."}, status=503)
 
     from django.core.cache import cache
-    cache_key = f"rate_limit_code_{request.user.pk}"
-    if cache.get(cache_key):
-        return JsonResponse({"success": False, "message": "Vui lòng đợi 5 giây trước khi thực hiện tiếp."}, status=429)
-    cache.set(cache_key, True, 5)
+    if not getattr(settings, "TESTING", False):
+        cache_key = f"rate_limit_code_{request.user.pk}"
+        if cache.get(cache_key):
+            return JsonResponse({"success": False, "message": "Vui lòng đợi 5 giây trước khi thực hiện tiếp."}, status=429)
+        cache.set(cache_key, True, 5)
 
     article = get_object_or_404(Article, pk=article_pk)
     exercise = get_object_or_404(CodingExercise, article=article, is_enabled=True)

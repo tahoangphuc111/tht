@@ -42,7 +42,7 @@ def submit_quiz_view(request, article_pk):
         if article.status != "published" and article.author != request.user and not request.user.is_superuser:
             return JsonResponse({"success": False, "message": "Unauthorized"}, status=403)
 
-        questions = article.questions.all()
+        questions = article.questions.all().prefetch_related("choices")
         correct_count = 0
         results = {}
 
@@ -52,7 +52,9 @@ def submit_quiz_view(request, article_pk):
         with transaction.atomic():
             for question in questions:
                 ans_id = answers.get(str(question.pk))
-                correct_choice = question.choices.filter(is_correct=True).first()
+                # Look up correct choice in-memory (using prefetched choices)
+                choices_list = list(question.choices.all())
+                correct_choice = next((c for c in choices_list if c.is_correct), None)
                 is_correct = (
                     str(correct_choice.pk) == str(ans_id)
                     if correct_choice and ans_id
@@ -62,7 +64,8 @@ def submit_quiz_view(request, article_pk):
                     correct_count += 1
 
                 if ans_id:
-                    selected_choice = question.choices.filter(pk=ans_id).first()
+                    # Look up selected choice in-memory (using prefetched choices)
+                    selected_choice = next((c for c in choices_list if str(c.pk) == str(ans_id)), None)
                     if selected_choice:
                         UserAnswer.objects.update_or_create(
                             user=request.user,

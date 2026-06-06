@@ -107,7 +107,7 @@ class LeaderboardView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return User.objects.annotate(
+        return User.objects.select_related("profile").annotate(
             accepted_count=Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True),
             total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True) * 5 + Count('quiz_answers', filter=Q(quiz_answers__selected_choice__is_correct=True), distinct=True) * 2
         ).order_by('-total_score', '-accepted_count')

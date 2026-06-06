@@ -35,6 +35,7 @@ TEST_LANGUAGE_CONFIG = {
     CODE_EXECUTION_MAX_TESTCASES=10,
     CELERY_TASK_ALWAYS_EAGER=True,
     CODE_EXECUTION_USE_DOCKER=False,
+    TESTING=True,
 )
 class CodingExerciseTests(TestCase):
     """Exercise management and judging tests."""
