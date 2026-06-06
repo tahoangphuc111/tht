@@ -36,7 +36,9 @@
                             
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-secondary">Người nộp:</span>
-                                <span class="fw-bold">@{{ submission.user.username }}</span>
+                                <span class="fw-bold">
+                                    <a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' submission.user.username %}">@{{ submission.user.username }}</a>
+                                </span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-secondary">Bài tập:</span>

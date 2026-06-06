@@ -46,21 +46,40 @@ def submit_quiz_view(request, article_pk):
         correct_count = 0
         results = {}
 
-        for question in questions:
-            ans_id = answers.get(str(question.pk))
-            correct_choice = question.choices.filter(is_correct=True).first()
-            is_correct = (
-                str(correct_choice.pk) == str(ans_id)
-                if correct_choice and ans_id
-                else False
-            )
-            if is_correct:
-                correct_count += 1
-            results[question.pk] = {
-                "is_correct": is_correct,
-                "explanation": question.explanation,
-                "correct_choice_id": (correct_choice.pk if correct_choice else None),
-            }
+        from ..models import UserAnswer
+        from ..signals import check_badges
+
+        with transaction.atomic():
+            for question in questions:
+                ans_id = answers.get(str(question.pk))
+                correct_choice = question.choices.filter(is_correct=True).first()
+                is_correct = (
+                    str(correct_choice.pk) == str(ans_id)
+                    if correct_choice and ans_id
+                    else False
+                )
+                if is_correct:
+                    correct_count += 1
+
+                if ans_id:
+                    selected_choice = question.choices.filter(pk=ans_id).first()
+                    if selected_choice:
+                        UserAnswer.objects.update_or_create(
+                            user=request.user,
+                            question=question,
+                            defaults={"selected_choice": selected_choice}
+                        )
+
+                from martor.utils import markdownify
+                results[question.pk] = {
+                    "is_correct": is_correct,
+                    "explanation": markdownify(question.explanation) if question.explanation else "",
+                    "correct_choice_id": (correct_choice.pk if correct_choice else None),
+                }
+
+        # Check and award badges after saving answers
+        check_badges(request.user)
+
         return JsonResponse(
             {
                 "success": True,
@@ -359,3 +378,25 @@ class QuestionDeleteView(LoginRequiredMixin, QuizAuthorRequiredMixin, DeleteView
 
     def get_success_url(self):
         return reverse("wiki:article-quiz-manage", kwargs={"article_pk": self.object.article.pk})
+
+
+@login_required
+def quiz_take_view(request, article_pk):
+    """View for taking the quiz of an article."""
+    from django.db.models import Count, Q
+    article = get_object_or_404(Article, pk=article_pk)
+    if article.status != "published" and article.author != request.user and not request.user.is_superuser:
+        return redirect("wiki:home")
+
+    quiz_questions = article.questions.prefetch_related("choices").annotate(
+        correct_count=Count("choices", filter=Q(choices__is_correct=True))
+    ).filter(correct_count__gt=0)
+
+    if not quiz_questions.exists():
+        messages.error(request, "Bài viết này chưa có câu hỏi trắc nghiệm.")
+        return redirect("wiki:article-detail", pk=article.pk, slug=article.slug)
+
+    return render(request, "wiki/quiz_take.html", {
+        "article": article,
+        "quiz_questions": quiz_questions,
+    })

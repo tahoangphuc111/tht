@@ -142,7 +142,7 @@
                                 <div class="item-meta small">
                                     <span class="article-tag me-2"><i class="fa-solid fa-folder me-1"></i>{{ article.category.name }}</span>
                                     {% include "wiki/partials/difficulty_chip.html" %}
-                                    <i class="fa-solid fa-user me-1"></i>{{ article.author.username }}
+                                    <i class="fa-solid fa-user me-1"></i><a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' article.author.username %}">{{ article.author.username }}</a>
                                     <span class="mx-1">•</span>
                                     <i class="fa-solid fa-clock me-1"></i>{{ article.created_at|date:"d/m" }}
                                 </div>

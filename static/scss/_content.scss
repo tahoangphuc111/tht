@@ -82,15 +82,11 @@
   }
 }
 
-.article-content {
+.article-content, .markdown-body {
   max-width: 74ch;
   font-size: 1.05rem;
   line-height: 1.85;
   color: var(--ink);
-
-  > h1:first-child {
-    display: none;
-  }
 
   h1, h2, h3, h4 {
     color: var(--ink);
@@ -257,6 +253,12 @@
   }
 }
 
+.article-content {
+  > h1:first-child {
+    display: none;
+  }
+}
+
 .article-attachments,
 .article-quiz-section {
   margin-top: 2.25rem;
@@ -362,7 +364,7 @@
     display: none;
   }
 
-  .article-content {
+  .article-content, .markdown-body {
     max-width: none;
   }
 }

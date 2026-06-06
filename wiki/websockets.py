@@ -21,10 +21,7 @@ async def _send_message(send_callable, text):
                 connected_websockets.discard(item)
 
 
-def broadcast_vote_update(payload):
-    message = {"type": "vote_update", "payload": payload}
-    text_data = json.dumps(message)
-
+def _broadcast_text(text_data):
     for item in list(connected_websockets):
         if isinstance(item, tuple):
             send_callable, loop = item
@@ -44,3 +41,21 @@ def broadcast_vote_update(payload):
                     new_loop.run_until_complete(_send_message(send_callable, text_data))
                 finally:
                     new_loop.close()
+
+
+def broadcast_vote_update(payload):
+    message = {"type": "vote_update", "payload": payload}
+    _broadcast_text(json.dumps(message))
+
+
+def broadcast_badge_award(user_id, badge_name, badge_desc, badge_icon_url):
+    message = {
+        "type": "badge_award",
+        "payload": {
+            "user_id": user_id,
+            "badge_name": badge_name,
+            "badge_desc": badge_desc,
+            "badge_icon_url": badge_icon_url,
+        }
+    }
+    _broadcast_text(json.dumps(message))

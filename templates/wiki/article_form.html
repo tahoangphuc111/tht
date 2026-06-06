@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
 {% block title %}{% if form.instance.pk %}Sửa bài viết{% else %}Tạo bài viết{% endif %} | CP Wiki{% endblock %}
-{% block extra_head %}{{ form.media }}{% endblock %}
+{% block extra_head %}
+{% include "wiki/partials/martor_media.html" %}
+{% endblock %}
 
 {% block content %}
 <form method="post" enctype="multipart/form-data" class="mb-5">
@@ -168,4 +170,9 @@
         </div>
     </div>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% include "wiki/partials/martor_js.html" %}
 {% endblock %}

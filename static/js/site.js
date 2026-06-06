@@ -40,12 +40,12 @@ const toggleBookmark = async (id) => {
             method: 'POST',
             headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
         });
-        
+
         if (r.status === 401 || r.status === 403) {
             window.location.href = '/login/?next=' + window.location.pathname;
             return;
         }
-        
+
         const d = await r.json();
         if (d.is_bookmarked !== undefined) {
             const btns = document.querySelectorAll(`.article-save-toggle[data-article-id="${id}"]`);
@@ -84,7 +84,7 @@ const initAjaxVotes = () => {
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
                 body: new FormData(f)
             });
-            
+
             if (r.status === 401 || r.status === 403) {
                 window.location.href = '/login/?next=' + window.location.pathname;
                 return;
@@ -94,7 +94,7 @@ const initAjaxVotes = () => {
             if (contentType && contentType.includes('application/json')) {
                 const d = await r.json();
                 if (!d.success) throw new Error(d.message || "Thao tác không thành công.");
-                
+
                 const scoreEl = document.getElementById('article-score');
                 if (scoreEl && d.article_score !== undefined) scoreEl.textContent = d.article_score;
                 const cScoreEl = document.getElementById(`comment-${d.comment_pk}-score`);
@@ -120,7 +120,7 @@ const initArticleActions = () => {
             toggleBookmark(sBtn.dataset.articleId);
         };
     });
-    
+
     document.querySelectorAll(".article-focus-toggle").forEach(fBtn => {
         fBtn.onclick = (e) => {
             e.preventDefault();
@@ -128,7 +128,7 @@ const initArticleActions = () => {
             const icon = fBtn.querySelector('i');
             if (icon) icon.className = active ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
             fBtn.classList.toggle("text-primary", active);
-            
+
             // Sync other focus buttons if any
             document.querySelectorAll(".article-focus-toggle").forEach(other => {
                 if (other !== fBtn) {
@@ -176,6 +176,21 @@ const initVoteWebsocket = () => {
                     const el = document.getElementById(`user-${p.target_user_pk}-score`);
                     if (el) el.textContent = p.target_user_score;
                 }
+            } else if (data.type === 'badge_award' && data.payload) {
+                const p = data.payload;
+                const currentUserId = document.documentElement.dataset.userId;
+                if (currentUserId && String(currentUserId) === String(p.user_id)) {
+                    Swal.fire({
+                        title: 'Nhận được Huy hiệu mới!',
+                        text: `Chúc mừng bạn đã đạt huy hiệu "${p.badge_name}": ${p.badge_desc}`,
+                        imageUrl: p.badge_icon_url,
+                        imageWidth: 90,
+                        imageHeight: 90,
+                        imageAlt: p.badge_name,
+                        confirmButtonText: 'Tuyệt vời!',
+                        confirmButtonColor: '#f39f86',
+                    });
+                }
             }
         } catch (err) {
             console.error("Error parsing websocket message:", err);
@@ -191,63 +206,86 @@ const initVoteWebsocket = () => {
             setTimeout(initVoteWebsocket, 3000);
         }
     };
-};
+    const initSquigglevision = () => {
+        const map = document.querySelector('#crayon-effect feTurbulence');
+        if (!map) return;
+        setInterval(() => {
+            const baseFreq = 0.035 + Math.random() * 0.01;
+            map.setAttribute('baseFrequency', baseFreq.toFixed(3));
+        }, 180);
+    };
 
-document.addEventListener("DOMContentLoaded", () => {
-    initAjaxVotes();
-    initArticleActions();
-    fetchSaved();
-    initVoteWebsocket();
-
-    document.querySelectorAll(".saved-articles-trigger").forEach(b => b.onclick = fetchSaved);
-    document.querySelectorAll(".article-copy-link").forEach(btn => {
-        btn.onclick = async () => {
-            const url = btn.dataset.copyUrl;
-            if (!url) return;
-            try {
-                await navigator.clipboard.writeText(url);
-                Swal.fire({ icon: 'success', title: 'Đã sao chép', timer: 1200, showConfirmButton: false });
-            } catch (err) {
-                console.error("Error copying link:", err);
-            }
-        };
-    });
-
-    document.addEventListener("keydown", (e) => {
-        // Skip if typing in an input, textarea, or select
-        const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) || e.target.isContentEditable;
-        if (isTyping && e.key !== "Escape") return;
-
-        // Skip if modifier keys are pressed (except for Escape)
-        if ((e.ctrlKey || e.metaKey || e.altKey) && e.key !== "Escape") return;
-
-        const key = e.key.toLowerCase();
+    const initSearchFocus = () => {
+        const input = document.querySelector('.search-input');
+        const navbar = document.querySelector('.app-navbar');
+        if (!input || !navbar) return;
         
-        if (key === "s") {
-            const btn = document.querySelector(".article-save-toggle");
-            if (btn) {
-                e.preventDefault();
-                btn.click();
+        input.addEventListener('focus', () => {
+            navbar.classList.add('search-active');
+        });
+        
+        input.addEventListener('blur', () => {
+            navbar.classList.remove('search-active');
+        });
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initAjaxVotes();
+        initArticleActions();
+        fetchSaved();
+        initVoteWebsocket();
+        initSquigglevision();
+        initSearchFocus();
+
+        document.querySelectorAll(".saved-articles-trigger").forEach(b => b.onclick = fetchSaved);
+        document.querySelectorAll(".article-copy-link").forEach(btn => {
+            btn.onclick = async () => {
+                const url = btn.dataset.copyUrl;
+                if (!url) return;
+                try {
+                    await navigator.clipboard.writeText(url);
+                    Swal.fire({ icon: 'success', title: 'Đã sao chép', timer: 1200, showConfirmButton: false });
+                } catch (err) {
+                    console.error("Error copying link:", err);
+                }
+            };
+        });
+
+        document.addEventListener("keydown", (e) => {
+            // Skip if typing in an input, textarea, or select
+            const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) || e.target.isContentEditable;
+            if (isTyping && e.key !== "Escape") return;
+
+            // Skip if modifier keys are pressed (except for Escape)
+            if ((e.ctrlKey || e.metaKey || e.altKey) && e.key !== "Escape") return;
+
+            const key = e.key.toLowerCase();
+
+            if (key === "s") {
+                const btn = document.querySelector(".article-save-toggle");
+                if (btn) {
+                    e.preventDefault();
+                    btn.click();
+                }
+            } else if (key === "f") {
+                const btn = document.querySelector(".article-focus-toggle");
+                if (btn) {
+                    e.preventDefault();
+                    btn.click();
+                }
+            } else if (e.key === "/") {
+                // Priority: search input with ID id_q, then class search-input
+                const searchInput = document.querySelector("#id_q") || document.querySelector(".search-input");
+                if (searchInput) {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            } else if (e.key === "Escape") {
+                if (document.body.classList.contains("is-focus-mode")) {
+                    document.querySelector(".article-focus-toggle")?.click();
+                } else if (isTyping) {
+                    e.target.blur();
+                }
             }
-        } else if (key === "f") {
-            const btn = document.querySelector(".article-focus-toggle");
-            if (btn) {
-                e.preventDefault();
-                btn.click();
-            }
-        } else if (e.key === "/") {
-            // Priority: search input with ID id_q, then class search-input
-            const searchInput = document.querySelector("#id_q") || document.querySelector(".search-input");
-            if (searchInput) {
-                e.preventDefault();
-                searchInput.focus();
-            }
-        } else if (e.key === "Escape") {
-            if (document.body.classList.contains("is-focus-mode")) {
-                document.querySelector(".article-focus-toggle")?.click();
-            } else if (isTyping) {
-                e.target.blur();
-            }
-        }
+        });
     });
-});

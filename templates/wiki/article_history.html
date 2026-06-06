@@ -29,7 +29,7 @@
                         <td>{{ revision.created_at|date:"d/m/Y H:i" }}</td>
                         <td>
                             {% if revision.author %}
-                                {{ revision.author.username }}
+                                <a class="article-link text-decoration-none" href="{% url 'wiki:public-profile' revision.author.username %}">{{ revision.author.username }}</a>
                             {% else %}
                                 <span class="text-muted italic">Ẩn danh</span>
                             {% endif %}

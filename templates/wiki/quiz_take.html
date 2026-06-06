@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+{% load martortags %}
+
+{% block title %}Trắc nghiệm: {{ article.title }} | CP Wiki{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Back button and title -->
+            <div class="mb-4">
+                <a href="{% url 'wiki:article-detail' article.pk article.slug %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-3">
+                    <i class="fa-solid fa-arrow-left me-2"></i>Quay lại bài viết
+                </a>
+                <div class="section-eyebrow mb-1">Kiểm tra kiến thức</div>
+                <h1 class="hero-title-sm mb-2" style="font-size: 1.8rem;">Trắc nghiệm: {{ article.title }}</h1>
+                <p class="text-muted small">
+                    Bài viết bởi <strong>{{ article.author.username }}</strong> &bull; {{ quiz_questions|length }} câu hỏi
+                </p>
+            </div>
+
+            <!-- Quiz form -->
+            <form id="quiz-form" onsubmit="return false;">
+                {% csrf_token %}
+                <div id="quiz-container">
+                    {% for question in quiz_questions %}
+                        <div class="card border-0 shadow-sm app-card mb-4 question-card overflow-hidden" id="question-{{ question.pk }}">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-2 fw-bold">
+                                        Câu {{ forloop.counter }}
+                                    </div>
+                                </div>
+                                
+                                <div class="markdown-body mb-4" style="font-size: 1.1rem; color: var(--ink);">
+                                    {{ question.content|safe_markdown }}
+                                </div>
+
+                                <div class="row g-3 options-list">
+                                {% for choice in question.choices.all %}
+                                    <div class="col-md-6">
+                                        <div class="choice-wrapper p-3 rounded-4 border bg-light transition-all cursor-pointer d-flex align-items-center gap-3 h-100" style="cursor: pointer;" onclick="document.getElementById('choice_{{ choice.pk }}').click();">
+                                            <div class="form-check m-0 p-0 d-flex align-items-center">
+                                                <input class="form-check-input quiz-choice mt-0" type="radio" name="question_{{ question.pk }}" id="choice_{{ choice.pk }}" value="{{ choice.pk }}" style="width: 1.25rem; height: 1.25rem; cursor: pointer;" onclick="event.stopPropagation();">
+                                            </div>
+                                            <label class="form-check-label w-100 m-0" for="choice_{{ choice.pk }}" style="cursor: pointer; font-weight: 500;" onclick="event.stopPropagation();">
+                                                {{ choice.content }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                </div>
+                                
+                                <div class="explanation-box mt-4 p-4 rounded-4 d-none" id="explanation-{{ question.pk }}"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-center mt-5">
+                    <button class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-glow" id="submit-quiz-btn" data-url="{% url 'wiki:submit-quiz' article.pk %}">
+                        <i class="fa-solid fa-paper-plane me-2"></i>Nộp bài kiểm tra
+                    </button>
+                </div>
+            </form>
+
+            <div id="quiz-result-shell" class="d-none mt-4 text-center">
+                <div class="p-4 rounded-4 bg-primary-soft text-primary">
+                    <h4 class="mb-2 fw-bold" id="quiz-result-title">Kết quả</h4>
+                    <div id="quiz-result-score" class="fs-5 mb-3"></div>
+                    <a href="{% url 'wiki:article-detail' article.pk article.slug %}" class="btn btn-primary rounded-pill px-4">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Quay lại bài viết
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Styling the choice wrapper interactions
+    const wrappers = document.querySelectorAll('.choice-wrapper');
+    wrappers.forEach(w => {
+        const input = w.querySelector('.quiz-choice');
+        if (input) {
+            input.addEventListener('change', () => {
+                // Remove primary border from other choices of the same question
+                const name = input.getAttribute('name');
+                document.querySelectorAll(`input[name="${name}"]`).forEach(otherInput => {
+                    const otherWrapper = otherInput.closest('.choice-wrapper');
+                    if (otherWrapper) {
+                        otherWrapper.classList.remove('border-primary', 'bg-primary-soft');
+                        otherWrapper.classList.add('bg-light');
+                    }
+                });
+                if (input.checked) {
+                    w.classList.add('border-primary', 'bg-primary-soft');
+                    w.classList.remove('bg-light');
+                }
+            });
+        }
+    });
+
+    const submitBtn = document.getElementById("submit-quiz-btn");
+    if (!submitBtn) return;
+
+    submitBtn.addEventListener("click", function () {
+        const url = submitBtn.getAttribute("data-url");
+        const inputs = document.querySelectorAll(".quiz-choice:checked");
+        const answers = {};
+        
+        inputs.forEach(input => {
+            const qId = input.name.split('_')[1];
+            answers[qId] = input.value;
+        });
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Đang chấm...";
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            },
+            body: JSON.stringify({ answers: answers })
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitBtn.style.display = 'none';
+            if (!data.success) {
+                alert(data.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Nộp bài kiểm tra";
+                return;
+            }
+            
+            const resultShell = document.getElementById("quiz-result-shell");
+            const scoreDiv = document.getElementById("quiz-result-score");
+            
+            resultShell.classList.remove("d-none");
+            scoreDiv.innerText = `Bạn đã trả lời đúng ${data.correct_count} trên tổng số ${data.total_questions} câu hỏi.`;
+            
+            const results = data.results;
+            for (const [qId, result] of Object.entries(results)) {
+                const questionCard = document.getElementById(`question-${qId}`);
+                if (!questionCard) continue;
+                
+                const selectedInput = document.querySelector(`input[name="question_${qId}"]:checked`);
+                const allInputs = document.querySelectorAll(`input[name="question_${qId}"]`);
+                
+                allInputs.forEach(i => i.disabled = true);
+                
+                const wrappers = questionCard.querySelectorAll('.choice-wrapper');
+                wrappers.forEach(w => {
+                    w.style.cursor = 'default';
+                    w.onclick = null; // Disable click trigger
+                    w.classList.remove('bg-light', 'border-primary', 'bg-primary-soft');
+                });
+
+                if (result.is_correct) {
+                    if (selectedInput) {
+                        const wrapper = selectedInput.closest('.choice-wrapper');
+                        wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
+                        wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng rùi nè</span>';
+                    }
+                } else {
+                    if (selectedInput) {
+                        const wrapper = selectedInput.closest('.choice-wrapper');
+                        wrapper.classList.add('bg-danger-soft', 'border-danger', 'text-danger');
+                        wrapper.querySelector('label').innerHTML += ' <span class="badge bg-danger rounded-pill ms-2">Sai rùi</span>';
+                    }
+                    if (result.correct_choice_id) {
+                        const correctInput = document.getElementById(`choice_${result.correct_choice_id}`);
+                        if (correctInput) {
+                            const wrapper = correctInput.closest('.choice-wrapper');
+                            wrapper.classList.add('bg-success-soft', 'border-success', 'text-success');
+                            wrapper.classList.add('fw-bold');
+                            wrapper.querySelector('label').innerHTML += ' <span class="badge bg-success rounded-pill ms-2">Đáp án đúng nè</span>';
+                        }
+                    }
+                }
+                
+                if (result.explanation) {
+                    const expBox = document.getElementById(`explanation-${qId}`);
+                    if (expBox) {
+                        expBox.classList.remove('d-none');
+                        expBox.classList.add(result.is_correct ? 'bg-success-soft' : 'bg-warning-soft', 'border-start', 'border-4', result.is_correct ? 'border-success' : 'border-warning');
+                        expBox.innerHTML = `<div class="section-eyebrow mb-2">Giải thích</div><div class="small text-dark markdown-body">${result.explanation}</div>`;
+                        // Re-trigger math rendering on the explanation box if KaTeX/MathJax is available
+                        if (window.renderMathInElement) {
+                            window.renderMathInElement(expBox);
+                        }
+                    }
+                }
+            }
+            resultShell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Có lỗi xảy ra khi nộp bài.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Nộp bài kiểm tra";
+        });
+    });
+});
+</script>
+{% endblock %}

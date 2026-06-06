@@ -320,9 +320,7 @@ def _compile_source(job_dir, language, language_config, replacements):
         _render_command(compile_command, replacements),
         job_dir,
         input_data="",
-        timeout_ms=max(
-            1000, getattr(settings, "CODE_EXECUTION_DEFAULT_TIME_LIMIT_MS", 2000)
-        ),
+        timeout_ms=getattr(settings, "CODE_EXECUTION_COMPILE_TIME_LIMIT_MS", 10000),
         memory_limit_mb=max(
             256,
             replacements.get("memory_limit_mb", 0),

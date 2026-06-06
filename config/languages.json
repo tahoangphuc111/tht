@@ -8,13 +8,22 @@
     "binaries": ["python3", "python", "py"],
     "starter": "def solve() -> None:\n    data = input().strip()\n    print(data)\n\nif __name__ == '__main__':\n    solve()\n"
   },
+  "pypy": {
+    "label": "PyPy 3",
+    "monaco": "python",
+    "source": "main.py",
+    "compile": [],
+    "run": ["{pypy3}", "{source_path}"],
+    "binaries": ["pypy3", "pypy"],
+    "starter": "def solve() -> None:\n    data = input().strip()\n    print(data)\n\nif __name__ == '__main__':\n    solve()\n"
+  },
   "cpp": {
     "label": "C++17",
     "monaco": "cpp",
     "source": "main.cpp",
-    "compile": ["{g++}", "-O2", "-std=c++17", "{source_path}", "-o", "{executable_path}"],
+    "compile": ["{g++-15}", "-O2", "-std=c++17", "{source_path}", "-o", "{executable_path}"],
     "run": ["{executable_path}"],
-    "binaries": ["g++"],
+    "binaries": ["g++-15", "g++"],
     "starter": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    string s;\n    if (getline(cin, s)) cout << s << '\\n';\n    return 0;\n}\n"
   },
   "c": {

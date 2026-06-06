@@ -109,5 +109,29 @@ class LeaderboardView(ListView):
     def get_queryset(self):
         return User.objects.annotate(
             accepted_count=Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True),
-            total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True) * 5
+            total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True) * 5 + Count('quiz_answers', filter=Q(quiz_answers__selected_choice__is_correct=True), distinct=True) * 2
         ).order_by('-total_score', '-accepted_count')
+
+
+@login_required
+def assign_role_view(request, username):
+    """View to allow superusers to assign roles to any user."""
+    if not request.user.is_superuser:
+        messages.error(request, "Bạn không có quyền thực hiện hành động này.")
+        return redirect("wiki:home")
+
+    user = get_object_or_404(User, username=username)
+    if request.method == "POST":
+        role = request.POST.get("role")
+        if role in ["student", "teacher", "moderator"]:
+            profile, _ = Profile.objects.get_or_create(user=user)
+            profile.role = role
+            profile.save()
+            messages.success(request, f"Đã cập nhật vai trò của {user.username} thành {profile.get_role_display()}.")
+        else:
+            messages.error(request, "Vai trò không hợp lệ.")
+
+    referrer = request.META.get('HTTP_REFERER')
+    if referrer:
+        return redirect(referrer)
+    return redirect("wiki:user-list")

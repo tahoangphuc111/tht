@@ -23,12 +23,12 @@
                             <a href="{{ article.get_absolute_url }}" class="article-link fw-bold">{{ article.title }}</a>
                         </h2>
                         <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-2">
+                            <a class="d-flex align-items-center gap-2 text-decoration-none" href="{% url 'wiki:public-profile' article.author.username %}">
                                 <div class="author-avatar-sm bg-light text-primary fw-bold d-flex align-items-center justify-content-center rounded-circle" style="width: 24px; height: 24px; font-size: 0.7rem;">
                                     {{ article.author.username.0|upper }}
                                 </div>
                                 <span class="small text-dark fw-medium">{{ article.author.username }}</span>
-                            </div>
+                            </a>
                             <a href="{{ article.get_absolute_url }}" class="btn btn-sm btn-dark rounded-pill px-3">Đọc tiếp</a>
                         </div>
                     </article>

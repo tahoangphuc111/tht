@@ -7,7 +7,7 @@
 <div class="alert alert-warning border-0 shadow-sm d-flex justify-content-between align-items-center mb-4">
     <div>
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        Bạn đang xem bản lưu ngày <strong>{{ revision.created_at|date:"d/m/Y H:i" }}</strong> thực hiện bởi <strong>{{ revision.author.username|default:"Ẩn danh" }}</strong>.
+        Bạn đang xem bản lưu ngày <strong>{{ revision.created_at|date:"d/m/Y H:i" }}</strong> thực hiện bởi <strong>{% if revision.author %}<a href="{% url 'wiki:public-profile' revision.author.username %}">{{ revision.author.username }}</a>{% else %}Ẩn danh{% endif %}</strong>.
         {% if revision.change_summary %}<br><small class="text-dark">Mô tả: {{ revision.change_summary }}</small>{% endif %}
     </div>
     <div class="d-flex gap-2">

@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}{% if form.instance.pk %}Sửa câu hỏi{% else %}Thêm câu hỏi{% endif %} | CP Wiki{% endblock %}
-{% block extra_head %}{{ form.media }}{% endblock %}
+{% block extra_head %}
+{% include "wiki/partials/martor_media.html" %}
+{% endblock %}
 
 {% block content %}
 <div class="row form-shell">
@@ -84,4 +86,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+{% include "wiki/partials/martor_js.html" %}
 {% endblock %}
