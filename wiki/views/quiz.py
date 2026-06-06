@@ -50,6 +50,14 @@ def submit_quiz_view(request, article_pk):
         from ..signals import check_badges
 
         with transaction.atomic():
+            # Prefetch existing answers to avoid database queries in the loop
+            existing_answers = {
+                ua.question_id: ua
+                for ua in UserAnswer.objects.filter(user=request.user, question__in=questions)
+            }
+            answers_to_create = []
+            answers_to_update = []
+
             for question in questions:
                 ans_id = answers.get(str(question.pk))
                 # Look up correct choice in-memory (using prefetched choices)
@@ -67,11 +75,15 @@ def submit_quiz_view(request, article_pk):
                     # Look up selected choice in-memory (using prefetched choices)
                     selected_choice = next((c for c in choices_list if str(c.pk) == str(ans_id)), None)
                     if selected_choice:
-                        UserAnswer.objects.update_or_create(
-                            user=request.user,
-                            question=question,
-                            defaults={"selected_choice": selected_choice}
-                        )
+                        ua = existing_answers.get(question.pk)
+                        if ua:
+                            if ua.selected_choice_id != selected_choice.pk:
+                                ua.selected_choice = selected_choice
+                                answers_to_update.append(ua)
+                        else:
+                            answers_to_create.append(
+                                UserAnswer(user=request.user, question=question, selected_choice=selected_choice)
+                            )
 
                 from martor.utils import markdownify
                 results[question.pk] = {
@@ -79,6 +91,11 @@ def submit_quiz_view(request, article_pk):
                     "explanation": markdownify(question.explanation) if question.explanation else "",
                     "correct_choice_id": (correct_choice.pk if correct_choice else None),
                 }
+
+            if answers_to_create:
+                UserAnswer.objects.bulk_create(answers_to_create)
+            if answers_to_update:
+                UserAnswer.objects.bulk_update(answers_to_update, ["selected_choice"])
 
         # Check and award badges after saving answers
         check_badges(request.user)
