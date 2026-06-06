@@ -31,7 +31,7 @@ def home_view(request):
     top_users = User.objects.select_related("profile").annotate(
         accepted_count=Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True),
         total_score=Count('articles', distinct=True) * 10 + Count('coding_submissions__exercise', filter=Q(coding_submissions__status='accepted', coding_submissions__is_sample_run=False), distinct=True) * 5 + Count('quiz_answers', filter=Q(quiz_answers__selected_choice__is_correct=True), distinct=True) * 2
-    ).order_by('-total_score', '-accepted_count')[:5]
+    ).order_by('-total_score', '-accepted_count')[:3]
 
     context = {
         "featured_article": featured,
@@ -40,10 +40,10 @@ def home_view(request):
         ).order_by("-created_at")[:4],
         "recent_comments": Comment.objects.select_related("author", "article")
         .filter(is_approved=True)
-        .order_by("-created_at")[:5],
+        .order_by("-created_at")[:3],
         "top_categories": Category.objects.annotate(
             article_total=Count("articles")
-        ).order_by("-article_total")[:6],
+        ).order_by("-article_total")[:4],
         "total_articles": visible_articles.count(),
         "total_comments": Comment.objects.filter(is_approved=True).count(),
         "open_comment_articles": visible_articles.filter(allow_comments=True).count(),

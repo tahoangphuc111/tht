@@ -55,8 +55,10 @@
 </section>
 
 <div class="row g-4">
+    <!-- Left Column: Main content -->
     <div class="col-lg-8" data-aos="fade-right">
-        <div class="card border-0 shadow-sm ui-card h-100">
+        <!-- Featured Article -->
+        <div class="card border-0 shadow-sm ui-card mb-4">
             <div class="card-body p-4 p-lg-5">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
                     <div>
@@ -107,31 +109,10 @@
                 {% endif %}
             </div>
         </div>
-    </div>
-    <div class="col-lg-4" data-aos="fade-left">
-        <div class="card border-0 shadow-sm ui-card h-100">
-            <div class="card-body p-4">
-                <div class="ui-eyebrow mb-1">Danh mục nổi bật</div>
-                <h2 class="h4 mb-4"><i class="fa-solid fa-tags text-primary me-2"></i>Chuyên mục yêu thích</h2>
-                <div class="sidebar-stack">
-                    {% for category in top_categories %}
-                        <a class="sidebar-link-item ui-card p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-center" href="{{ category.get_absolute_url }}">
-                            <span class="fw-semibold">{{ category.name }}</span>
-                            <span class="ui-badge ui-badge--primary">{{ category.article_total }}</span>
-                        </a>
-                    {% empty %}
-                        <div class="empty-state">Hiện tại chưa có chuyên mục nào được tạo.</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row g-4 mt-2">
-    <div class="col-lg-7" data-aos="fade-up">
+        <!-- Latest Articles -->
         <div class="card border-0 shadow-sm ui-card">
-            <div class="card-body p-4">
+            <div class="card-body p-4 p-lg-5">
                 <div class="ui-eyebrow mb-1">Bài viết mới nhất</div>
                 <h2 class="h4 mb-4"><i class="fa-solid fa-newspaper text-info me-2"></i>Bài viết mới lên sóng</h2>
                 <div class="sidebar-stack">
@@ -155,7 +136,28 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-5" data-aos="fade-up" data-aos-delay="100">
+
+    <!-- Right Column: Sidebar -->
+    <div class="col-lg-4" data-aos="fade-left">
+        <!-- Chuyên mục yêu thích -->
+        <div class="card border-0 shadow-sm ui-card mb-4">
+            <div class="card-body p-4">
+                <div class="ui-eyebrow mb-1">Danh mục nổi bật</div>
+                <h2 class="h4 mb-4"><i class="fa-solid fa-tags text-primary me-2"></i>Chuyên mục yêu thích</h2>
+                <div class="sidebar-stack">
+                    {% for category in top_categories %}
+                        <a class="sidebar-link-item ui-card p-3 mb-2 text-decoration-none d-flex justify-content-between align-items-center" href="{{ category.get_absolute_url }}">
+                            <span class="fw-semibold">{{ category.name }}</span>
+                            <span class="ui-badge ui-badge--primary">{{ category.article_total }}</span>
+                        </a>
+                    {% empty %}
+                        <div class="empty-state">Hiện tại chưa có chuyên mục nào được tạo.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Thảo luận gần đây -->
         <div class="card border-0 shadow-sm ui-card mb-4">
             <div class="card-body p-4">
                 <div class="ui-eyebrow mb-1">Thảo luận gần đây</div>
