@@ -412,6 +412,8 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
     if custom_input and len(custom_input.encode("utf-8")) > max_input_bytes:
         raise CodeRunnerError("Input tùy chỉnh vượt quá giới hạn cho phép.")
 
+    is_sample = sample_only or bool(custom_input)
+
     submission = CodingSubmission.objects.create(
         exercise=exercise,
         user=user,
@@ -419,16 +421,20 @@ def execute_code(exercise, user, language, source_code, *, custom_input="", samp
         source_code=source_code,
         status="running",
         custom_input=custom_input,
-        is_sample_run=sample_only or bool(custom_input),
+        is_sample_run=is_sample,
     )
 
-    # Import ở đây để tránh circular import
-    from ..tasks import execute_code_task
-
-    execute_code_task.delay(submission.pk)
-
-    if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+    if is_sample:
+        # Run synchronously for trial/sample runs to save Celery worker resources
+        _execute_submission(submission)
         submission.refresh_from_db()
+    else:
+        # Import ở đây để tránh circular import
+        from ..tasks import execute_code_task
+        execute_code_task.delay(submission.pk)
+
+        if getattr(settings, "CELERY_TASK_ALWAYS_EAGER", False):
+            submission.refresh_from_db()
 
     return submission
 
